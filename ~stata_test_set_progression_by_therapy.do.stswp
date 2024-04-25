@@ -71,7 +71,7 @@
   stset progression_days if therapy_type==0, failure(progression_12)
  stci if therapy_type==0, by(progressed_prediction) rmean 
  stcox progressed_prediction if therapy_type==0
- sts graph if therapy_type==0 , by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Diagnosis Date  (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+ sts graph if therapy_type==0 , by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Doublet Chemotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Diagnosis Date  (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "chemo_only_test_set.png", replace
  
  global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan"

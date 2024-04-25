@@ -1,22 +1,16 @@
 import numpy as np
 import pandas as pd
 import sys
-from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, LSTM, Bidirectional, Input, ReLU
-from keras.layers import  BatchNormalization, Embedding, Concatenate, LeakyReLU
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping, ReduceLROnPlateau, CSVLogger
-from keras import regularizers
-from datetime import date, timedelta
+from keras import layers, callbacks, regularizers
+from datetime import date
 import time
 from sklearn.utils import shuffle
 import copy
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, accuracy_score
-from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
@@ -25,7 +19,7 @@ import xgboost as xgb
 
 dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
-
+no_progression_date = date(2022, 1, 1)
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf'):
 
     # Initialize GridSearchCV
@@ -74,6 +68,9 @@ def update_last_note(patientID, dictionary, new_date):
             new_date = date.fromisoformat(new_date)
         except:
             new_date = convert_date_to_iso(new_date)
+    if new_date == no_progression_date:
+        return dictionary
+
     if patientID not in dictionary:
         dictionary[patientID] = new_date
         return dictionary
@@ -286,11 +283,8 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 if __name__ == '__main__':
     min_time, lr, dir = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3])
-    tx_required, include_therapy_info, from_dx, skip_absent, only_io_mono = int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8])
-    exclude_diagnoses = int(sys.argv[9])
-    new_therapy = int(sys.argv[10])
+    tx_required, only_io_mono, exclude_diagnoses = int(sys.argv[4]),  int(sys.argv[5]), int(sys.argv[6])
     patientID_to_censor_date = dict()
-    last_date_recorded = date(2021, 10, 31)
 
     if dir == 0:
         dir_path = dir_path1
@@ -301,12 +295,12 @@ if __name__ == '__main__':
     patientID_to_advanced_diagnosis_date = dict()
 
     for i in range(len(diagnosis_dates['PatientID'])):
-        patient_ID, diag_date  = diagnosis_dates['PatientID'][i], diagnosis_dates['AdvancedDiagnosisDate'][i]
+        patient_ID, adv_diag_date = diagnosis_dates['PatientID'][i], diagnosis_dates['AdvancedDiagnosisDate'][i]
 
         try:
-            final_date = date.fromisoformat(diag_date)
-            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, final_date)
-            patientID_to_advanced_diagnosis_date[patient_ID] = final_date
+            adv_dx_date_cleaned = date.fromisoformat(adv_diag_date)
+            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, adv_dx_date_cleaned)
+            patientID_to_advanced_diagnosis_date[patient_ID] = adv_dx_date_cleaned
         except:
             continue
 
@@ -894,13 +888,9 @@ if __name__ == '__main__':
 
     for patientID in patientID_to_advanced_diagnosis_date:
         x_demos = patientIDs_demos[patientID]
-
-        age_diagnosis_stats = [0, 0]
-
-        if patientID in patientID_to_advanced_diagnosis_date:
-            diagnosis_year = patientID_to_advanced_diagnosis_date[patientID].year
-            age_at_diagnosis = diagnosis_year - x_demos[0]
-            age_diagnosis_stats = [diagnosis_year, age_at_diagnosis]
+        adv_diagnosis_year = patientID_to_advanced_diagnosis_date[patientID].year
+        age_at_adv_diagnosis = adv_diagnosis_year - x_demos[0]
+        age_diagnosis_stats = [adv_diagnosis_year, age_at_adv_diagnosis]
 
         insurance_patient = [0, 0, 0, 0, 0, 0, 0, 0]
         if patientID in patientID_to_insurance:
@@ -969,6 +959,7 @@ if __name__ == '__main__':
         secondary_chemo_drug = 0
         other_first_line_therapy = 0
         days_from_dx_to_tx = 0
+        no_first_line = 0
 
         if patientID in patientID_to_therapyline:
             diagnosis_date = patientID_to_advanced_diagnosis_date[patientID]
@@ -978,8 +969,8 @@ if __name__ == '__main__':
             for i in range(len(all_therapies_used)):
                 (therapy_line, therapy_name, end_date, start_date) = all_therapies_used[i]
 
-                # Only examine first-line therapies that had at least one dose given after advanced diagnosis date
-                if end_date >= diagnosis_date and therapy_line == 1:
+                # Only examine first-line therapies
+                if therapy_line == 1:
                     patientID_to_first_line_start_date[patientID] = start_date
                     if start_date < diagnosis_date:
                         patientID_to_advanced_diagnosis_date[patientID] = start_date
@@ -1052,16 +1043,15 @@ if __name__ == '__main__':
                     AST_date_new = AST_date
                     if AST_date_new <= start_date and AST_val > 0:
                         AST_final = AST_val
-
-        if new_therapy:
-            therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
         else:
-            therapy_info = [io_mono, combo_therapy, first_line_chemo, other_first_line_therapy, io_mono_used]
+            no_first_line = 1
+
+        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, no_first_line]
 
         lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
 
-        x_demos_no_diagnoses = np.concatenate((current_contraindications_for_patient, lab_value_avgs,
+        x_demos_no_diagnoses = np.concatenate(([days_from_dx_to_tx],current_contraindications_for_patient, lab_value_avgs,
                                 age_diagnosis_stats, x_demos, insurance_patient, x_practice, cancer_vec, ecog_,
                                                all_biomarkers, therapy_info))
         len_static = len(x_demos_no_diagnoses)
@@ -1085,7 +1075,6 @@ if __name__ == '__main__':
     pd1s_progression_dict = dict()
     patientID_to_progression = dict()
     location = 0
-    no_progression_date = date(2030, 1, 1)
 
     for i in range(len(progressions['PatientID'])):
 
@@ -1116,6 +1105,9 @@ if __name__ == '__main__':
         else:
             progression_positive_clinical = 0
 
+        if progression_date_final < diagnosis_date:
+            continue
+
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
 
@@ -1126,8 +1118,8 @@ if __name__ == '__main__':
                 patientID_to_progression[patient_ID] = no_progression_date
 
         elif patient_ID in patientID_to_progression and progression_bool:
-            orig = patientID_to_progression[patient_ID]
-            if orig == no_progression_date or (no_progression_date > orig > progression_date_final):
+            orig_date = patientID_to_progression[patient_ID]
+            if orig_date > progression_date_final:
                 patientID_to_progression[patient_ID] = progression_date_final
         else:
             continue
@@ -1146,17 +1138,13 @@ if __name__ == '__main__':
 
         if patientID in patientID_to_progression:
             progression_date = patientID_to_progression[patientID]
-            progression = (progression_date - adv_dx_date).days
+
             if time_to_censor < min_time and progression_date == no_progression_date:
                 continue
-
-        elif patientID not in patientID_to_progression:
-            if skip_absent:
-                continue
-            if time_to_censor < min_time:
-                continue
+            elif time_to_censor >= min_time and progression_date == no_progression_date:
+                progression = time_to_censor
             else:
-                progression = 0
+                progression = (progression_date - adv_dx_date).days
         else:
             continue
 
@@ -1194,24 +1182,9 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = "prog_orig_try_" + str(lr) + "_" + str(min_time) + '_'
+    file_name_extender = "progression_" + str(lr) + "_" + str(min_time) + '_'
 
     if tx_required==1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
-    if include_therapy_info==1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
-    if from_dx==1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
-    if skip_absent==1:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1222,11 +1195,6 @@ if __name__ == '__main__':
         file_name_extender += "0"
 
     if exclude_diagnoses:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
-    if new_therapy:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1256,13 +1224,8 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    if include_therapy_info == 0:
-        X_static_train = X_static_train[:, 22:]
-        X_static_test = X_static_test[:, 22:]
-    else:
-        X_static_train = X_static_train[:, 10:]
-        X_static_test = X_static_test[:, 10:]
-
+    X_static_train = X_static_train[:, 11:]
+    X_static_test = X_static_test[:, 11:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -1377,23 +1340,23 @@ if __name__ == '__main__':
     EPOCHS = 500
     BATCH_SIZE = 64
 
-    csv_logger = CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
+    csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
     opt = keras.optimizers.Adam(learning_rate=lr)
     checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
-    model_checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
+    model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
 
     learning_units = 1
 
-    stat = Input(shape=(X_static_train.shape[1], ))
-    stat = Flatten()(stat)
-    stat_dynam_drop = Dropout(0.2)(stat)
-    x6 = Dense(3000, activation='relu')(stat_dynam_drop)
-    x7 = BatchNormalization()(x6)
-    x8 = Dropout(0.2)(x7)
-    out = Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
+    stat = layers.Input(shape=(X_static_train.shape[1], ))
+    stat = layers.Flatten()(stat)
+    stat_dynam_drop = layers.Dropout(0.2)(stat)
+    x6 = layers.Dense(3000, activation='relu')(stat_dynam_drop)
+    x7 = layers.BatchNormalization()(x6)
+    x8 = layers.Dropout(0.2)(x7)
+    out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
     model = keras.Model(inputs= stat, outputs=out)
-    early_stopping = EarlyStopping(monitor='val_auroc', mode='max', patience=10)
-    reduce_lr = ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
+    early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=10)
+    reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
     model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
                 keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
                 keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
