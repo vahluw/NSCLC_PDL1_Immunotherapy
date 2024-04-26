@@ -283,7 +283,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 if __name__ == '__main__':
     min_time, lr, dir = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3])
-    tx_required, only_io_mono, exclude_diagnoses = int(sys.argv[4]),  int(sys.argv[5]), int(sys.argv[6])
+    exclude_diagnoses, skip_absent = int(sys.argv[4]),  int(sys.argv[5])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -345,14 +345,17 @@ if __name__ == '__main__':
         start_date_final = date.today()
         try:
             start_date_final = date.fromisoformat(start_date)
+            patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, start_date_final)
         except:
             try:
                 end_date_final = date.fromisoformat(end_date)
+                patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, end_date_final)
             except:
                 continue
 
         try:
             end_date_final = date.fromisoformat(end_date)
+            patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, end_date_final)
         except:
             end_date_final = date.today()
 
@@ -374,7 +377,7 @@ if __name__ == '__main__':
             insuranceID = 0
 
         all_insurances = [0, 0, 0, 0, 0, 0, 0, 0]
-        patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, end_date_final)
+
         if diagnosis_date >= start_date_final and diagnosis_date <= end_date_final:
             all_insurances[insuranceID] = 1
 
@@ -1146,7 +1149,12 @@ if __name__ == '__main__':
             else:
                 progression = (progression_date - adv_dx_date).days
         else:
-            continue
+            if skip_absent:
+                continue
+            elif time_to_censor >= min_time:
+                progression = time_to_censor
+            else:
+                continue
 
         X_static.append(vals)
         y.append([int(min_time >= progression > 0), progression, time_to_censor])
@@ -1184,17 +1192,12 @@ if __name__ == '__main__':
 
     file_name_extender = "progression_" + str(lr) + "_" + str(min_time) + '_'
 
-    if tx_required==1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
-    if only_io_mono == 1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
     if exclude_diagnoses:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
+    if skip_absent:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1236,12 +1239,17 @@ if __name__ == '__main__':
 
     ####XGBoost
     xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
+    num_ones = np.sum(y_train_final) * 1.0
+    num_zeros = len(y_train_final) - num_ones
+    pos_wt = num_zeros/num_ones
+    print(pos_wt)
     params_xgb = {
         'min_child_weight': [1, 5, 10],
         'gamma': [0.5, 1, 1.5, 2.0],
         'max_depth': [5, 10, 15, 25],
         'learning_rate': [0.05, 0.1, 0.2, 1.0],
         'n_estimators': [200, 300, 400],
+        'scale_pos_weight': [1, pos_wt]
         }
     perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='xgb')
 
