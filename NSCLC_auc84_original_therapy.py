@@ -8,7 +8,7 @@ from datetime import date
 import time
 from sklearn.utils import shuffle
 import copy
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, accuracy_score
 from sklearn.svm import SVC
@@ -16,6 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from decimal import Decimal
 import xgboost as xgb
+#from sklearn.utils.class_weight import compute_sample_weight
 
 dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
@@ -282,8 +283,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3])
-    exclude_diagnoses, skip_absent = int(sys.argv[4]),  int(sys.argv[5])
+    min_time, lr, dir, exclude_diagnoses = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -1057,6 +1057,7 @@ if __name__ == '__main__':
         x_demos_no_diagnoses = np.concatenate(([days_from_dx_to_tx],current_contraindications_for_patient, lab_value_avgs,
                                 age_diagnosis_stats, x_demos, insurance_patient, x_practice, cancer_vec, ecog_,
                                                all_biomarkers, therapy_info))
+
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
 
@@ -1149,12 +1150,7 @@ if __name__ == '__main__':
             else:
                 progression = (progression_date - adv_dx_date).days
         else:
-            if skip_absent:
-                continue
-            elif time_to_censor >= min_time:
-                progression = time_to_censor
-            else:
-                continue
+           continue
 
         X_static.append(vals)
         y.append([int(min_time >= progression > 0), progression, time_to_censor])
@@ -1197,11 +1193,6 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
-    if skip_absent:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
 
@@ -1237,6 +1228,36 @@ if __name__ == '__main__':
     train_class_weights = {i:train_class_weights[i] for i in range(2)}
     print(train_class_weights)
 
+    ###### HGB
+    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 20, 30]
+    hgb_clf = HistGradientBoostingClassifier(random_state=0, class_weight=train_class_weights, categorical_features=categorical_indices)
+    params_hgb = {
+        'learning_rate': [0.1, 0.05],
+        'l2_regularization': [0, 0.001, 0.01],
+        'max_features': [1.0, 0.5, 0.7],
+        'min_samples_leaf': [20, 40, 60],
+        "max_depth": [2, 5, None]
+        }
+
+    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='hgb')
+
+    headers =  ["diag_year", "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state", "other_no_insurance",
+                    "workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
+                    "commercial_health_plan", "practice_ID", "practice_type", "physician_ID", "histology",
+                "stage", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
+                  "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "other_therapy",
+                    "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "no_first_line"]
+    X_static_train_df = pd.DataFrame(data=X_static_train)
+    X_static_train_df.columns = headers
+    X_static_test_df = pd.DataFrame(data=X_static_test)
+    X_static_test_df.columns = headers
+    X_static_train_df_encoded = pd.get_dummies(X_static_train_df, columns=["gender", "race", "state", "practice_ID", "practice_type", "physician_ID", "histology",
+                "stage", "smoking_status"])
+    X_static_test_df_encoded = pd.get_dummies(X_static_test_df, columns=["gender", "race", "state", "practice_ID", "practice_type", "physician_ID", "histology",
+                "stage", "smoking_status"])
+    X_static_train = X_static_train_df_encoded.values
+    X_static_test = X_static_test_df_encoded.values
+
     ####XGBoost
     xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
     num_ones = np.sum(y_train_final) * 1.0
@@ -1260,21 +1281,28 @@ if __name__ == '__main__':
             'loss': ['log_loss', 'exponential'],
             'learning_rate': [0.1, 0.05],
             'n_estimators': [200, 300],
-            'max_features': ["sqrt"],
+            'max_features': ["sqrt", None],
             "criterion": ["friedman_mse",  "squared_error"],
-            "max_depth": [5]
+            'subsample': [0.5, 0.75, 0.25],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 5],
+            "max_depth": [2, 5, None]
             }
     else:
         params_gb = {
             'loss': ['log_loss', 'exponential'],
             'learning_rate': [0.1, 0.05],
             'n_estimators': [200, 300],
-            'max_features': [None],
+            'max_features': ["sqrt", None],
+            'subsample': [0.5, 0.75, 0.25],
             "criterion": ["friedman_mse",  "squared_error"],
-            "max_depth": [5, None]
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 5],
+            "max_depth": [2, 5, None]
             }
 
     perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='gb')
+
 
     ##### RF
     rf_clf = RandomForestClassifier(random_state=0)
@@ -1295,7 +1323,7 @@ if __name__ == '__main__':
             'criterion': ["entropy", "log_loss"],
             'min_samples_leaf': [1, 2],
             'class_weight': ["balanced", None],
-            'max_features': [None]
+            'max_features': [None, "sqrt"]
             }
 
     perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
@@ -1326,11 +1354,11 @@ if __name__ == '__main__':
     perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
 
     ###########  SVC
-    svc_clf = SVC(class_weight=train_class_weights, random_state=0, probability=True)
+    svc_clf = SVC(class_weight=train_class_weights, random_state=0, probability=True, shrinking=True)
     params_svc = {
-        'C': [0.1, 1.0],
-        'gamma': [1.0, 0.1],
-        'kernel': ['linear'], #no 'rbf'
+        'C': [1.0],
+        'gamma': ['scale', 'auto'],
+        'kernel': ['linear', 'rbf']
         }
     perform_grid_search(params_svc, svc_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='svc')
 
