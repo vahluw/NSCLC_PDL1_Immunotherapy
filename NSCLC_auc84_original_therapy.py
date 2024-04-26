@@ -283,6 +283,8 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
+    c = np.array([[2, 2], [3, 1]])
+    d = pd.DataFrame(data=c)
     min_time, lr, dir, exclude_diagnoses = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     patientID_to_censor_date = dict()
 
@@ -1248,13 +1250,9 @@ if __name__ == '__main__':
                   "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "other_therapy",
                     "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "no_first_line"]
     X_static_train_df = pd.DataFrame(data=X_static_train)
-    X_static_train_df.columns = headers
     X_static_test_df = pd.DataFrame(data=X_static_test)
-    X_static_test_df.columns = headers
-    X_static_train_df_encoded = pd.get_dummies(X_static_train_df, columns=["gender", "race", "state", "practice_ID", "practice_type", "physician_ID", "histology",
-                "stage", "smoking_status"])
-    X_static_test_df_encoded = pd.get_dummies(X_static_test_df, columns=["gender", "race", "state", "practice_ID", "practice_type", "physician_ID", "histology",
-                "stage", "smoking_status"])
+    X_static_train_df_encoded = pd.get_dummies(X_static_train_df, columns=[3, 4, 6, 15, 16, 17, 18, 19, 20, 30])
+    X_static_test_df_encoded = pd.get_dummies(X_static_test_df, columns=[3, 4, 6, 15, 16, 17, 18, 19, 20, 30])
     X_static_train = X_static_train_df_encoded.values
     X_static_test = X_static_test_df_encoded.values
 
