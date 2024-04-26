@@ -1,5 +1,5 @@
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given days_from_dx_to_tx"
+ global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -7,7 +7,7 @@
  set scheme cleanplots
 
   
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/all_data.csv", clear 
+ import delimited "all_data.csv", clear 
  sum age_at_diagnosis
  tab gender
  tab race
@@ -25,27 +25,27 @@
  /* Propensity score matching with all DAG factors --> but this time, kaplan-meier curves show days from treatment initiation until progression*/
  ****************************
 
- global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given days_from_dx_to_tx"
+ global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
  
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
- import delimited /Users/vahluw/Documents/NSCLC_PDL1/all_data.csv, clear 
+ import delimited all_data.csv, clear 
  replace progression_12 = 0 if progression_days == 0
  replace progression_days = 365 if progression_days == 0 | progression_days>365
  
- gen therapy_type = 11
+ gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
  replace therapy_type = 1 if io_mono == 1
  replace therapy_type = 2 if combo_therapy == 1
  replace therapy_type = 3 if secondary_chemo_drug == 1
- replace therapy_type = 4 if other_therapy == 1
- replace therapy_type = 5 if alk_drug == 1
- replace therapy_type = 6 if egfr_drug == 1
- replace therapy_type = 7 if braf_drug == 1
- replace therapy_type = 8 if ros1_drug == 1
- replace therapy_type = 9 if ras_drug == 1
- replace therapy_type = 10 if other_first_line_therapy == 1
+ replace therapy_type = 4 if alk_drug == 1
+ replace therapy_type = 5 if egfr_drug == 1
+ replace therapy_type = 6 if braf_drug == 1
+ replace therapy_type = 7 if ros1_drug == 1
+ replace therapy_type = 8 if ras_drug == 1
+ replace therapy_type = 9 if other_first_line_therapy == 1
+ replace therapy_type = 10 if no_first_line == 1
  
   stset progression_days, failure(progression_12)
  stci, by(therapy_type) rmean
@@ -57,18 +57,24 @@
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
- drop if therapy_type>=2
- //drop if therapy_type>=5 & therapy_type <=9
+ drop if therapy_type>2
+
  
    stset progression_days, failure(progression_12)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time (Days)") ytitle("Proportion at Risk") legend(order(1 "Other Therapy" 2 "First-Line IO Monotherapy" 3 "Combination Therapy" 4 "Platinum Chemotherapy"  5 "Secondary Chemotherapy Drug")) 
- graph export "prog_survival_without_mutations_pre_match.png", replace
+ sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time (Days)") ytitle("Proportion at Risk") legend(order(1 "Other Therapy" 2 "First-Line IO Monotherapy" 3 "Combination Therapy")) 
+ graph export "prog_survival_without_mutations_pre_match_combo.png", replace
  sts test therapy_type, logrank
+ drop if therapy_type==2
  
-
- drop if stage ==1 | stage ==18
+ 
+   stset progression_days, failure(progression_12)
+ stci, by(therapy_type) rmean
+ stcox therapy_type
+ sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time (Days)") ytitle("Proportion at Risk") legend(order(1 "Other Therapy" 2 "First-Line IO Monotherapy")) 
+ graph export "prog_survival_without_mutations_pre_match_no_combo.png", replace
+ sts test therapy_type, logrank
  
 
  stset progression_days, failure(progression_12)
