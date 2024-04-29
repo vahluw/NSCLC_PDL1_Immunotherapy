@@ -7,33 +7,35 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_curve
 
-new_therapy = 1
-
-all_dataset = np.array(np.load('whole_dataset_progression_0.005_365_01.npy'))
-test_dataset = np.array(np.load('test_set_progression_0.005_365_01.npy'))
-#gb_preds = np.expand_dims(np.array(np.load('y_pred_gb_0.81_0110111.npy')), axis=1)
+all_dataset = np.array(np.load('whole_dataset_prog_orig_try_0.005_365_00.npy'))
+test_dataset = np.array(np.load('test_set_prog_orig_try_0.005_365_00.npy'))
+hgb_preds = np.expand_dims(np.array(np.load('y_pred_prog_orig_try_0.005_365_00_hgb_0.76_prog_orig_try_0.005_365_00.npy')), axis=1)
 #xgb_preds = np.expand_dims(np.array(np.load('y_pred_xgb_0.81_0110111.npy')), axis=1)
 #rf_preds = np.expand_dims(np.array(np.load('y_pred_rf_0.80_0110111.npy')), axis=1)
 #knn_preds = np.expand_dims(np.array(np.load('y_pred_knn_0.73_0110111.npy')), axis=1)
 #logistic_preds = np.expand_dims(np.array(np.load('y_pred_logistic_0.63_0110111.npy')), axis=1)
-all_test_data = test_dataset #np.concatenate((test_dataset, gb_preds, xgb_preds, rf_preds, knn_preds, logistic_preds), axis=1)
-if new_therapy == 1:
-    headers_test_set = ["days_from_dx_to_tx", "contra1", "contra2", "contra3", "contra4", "contra5", "contra6", "bilirubin", "creatinine", "AST", "ALT", "diag_year",
-                    "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state", "other_no_insurance",
-                    "workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
-                    "commercial_health_plan", "practice_ID", "practice_type", "physician_ID", "histology",
+#all_test_data = test_dataset #np.concatenate((test_dataset, gb_preds, xgb_preds, rf_preds, knn_preds, logistic_preds), axis=1)
+'''
+        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
+
+        lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
+
+        x_demos_no_diagnoses = np.concatenate((current_contraindications_for_patient, lab_value_avgs,
+                                age_diagnosis_stats, [x_demos[1]], insurance_patient, x_practice, cancer_vec, ecog_,
+                                               all_biomarkers, therapy_info))
+                                               '''
+all_test_data = np.concatenate((test_dataset, hgb_preds), axis=1)
+headers_test_set = ["days_from_dx_to_tx", "contra1", "contra2", "contra3", "contra4", "contra5", "contra6",
+                        "bilirubin", "creatinine", "AST", "ALT",
+                        "diag_year", "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state",
+                        "other_no_insurance","workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
+                    "commercial_health_plan", "practice_type",  "histology",
                 "stage", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
                   "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "other_therapy",
                     "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "no_first_line",
-                    "progression_12",  "progression_days", "censor_days"]#, "gb_preds", "xgb_preds", "rf_preds", "knn_preds", "logistic_preds"]
-else:
-    headers_test_set = ["contra1", "contra2", "contra3", "contra4", "contra5", "contra6", "bilirubin", "diag_year", "AST", "ALT", "diag_year",
-                    "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state", "other_no_insurance",
-                    "workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
-                    "commercial_health_plan", "practice_ID", "practice_type", "physician_ID", "histology",
-                "stage", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
-                   "io_mono", "combo_therapy", "chemo",  "other_therapy", "io_mono_used",
-                    "progression_12",  "progression_days", "censor_days", "gb_preds", "xgb_preds", "rf_preds", "knn_preds", "logistic_preds"]
+                    "progression_12",  "progression_days", "censor_days", "hgb_preds"]
+
 
 
 data = pd.DataFrame(data=all_test_data)
@@ -41,14 +43,14 @@ data = pd.DataFrame(data=all_test_data)
 data.columns = headers_test_set
 data.to_csv('test_set.csv')
 
-'''
-fpr, tpr, thresholds = roc_curve(data['progression_12'], gb_preds)
+
+fpr, tpr, thresholds = roc_curve(data['progression_12'], hgb_preds)
 # get the best threshold
 J = tpr - fpr
 ix = np.argmax(J)
 best_thresh = thresholds[ix]
 print('Best Threshold For Temporal =%f' % (best_thresh))
-'''
+
 in_test_set = []
 test_dataset_list = test_dataset.tolist()
 
