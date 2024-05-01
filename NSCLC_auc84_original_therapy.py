@@ -22,18 +22,22 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from decimal import Decimal
 import xgboost as xgb
+from sklearn.utils import class_weight
 
 no_progression_date = date(2022, 1, 1)
 dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 
-def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf'):
+def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
 
     # Initialize GridSearchCV
-    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='roc_auc', n_jobs=None)
+    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=10, scoring='roc_auc', n_jobs=None)
 
     # Perform grid search
-    grid_search.fit(X_train, y_train)
+    if type=='xgb':
+        grid_search.fit(X_train, y_train, sample_weight=weights)
+    else:
+        grid_search.fit(X_train, y_train)
 
     # Best parameters
     best_params = grid_search.best_params_
@@ -1061,13 +1065,14 @@ if __name__ == '__main__':
                         AST_final = AST_val
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy]
 
         lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
 
-        x_demos_no_diagnoses = np.concatenate((current_contraindications_for_patient, lab_value_avgs,
+        x_demos_no_diagnoses =np.concatenate(([days_from_dx_to_tx, x_practice[0], x_practice[2]], current_contraindications_for_patient, lab_value_avgs,
                                 age_diagnosis_stats, x_demos, insurance_patient, [x_practice[1]], cancer_vec, ecog_,
                                                all_biomarkers, therapy_info))
+
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
 
@@ -1202,7 +1207,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = "_" + str(lr) + "_" + str(min_time) + '_'
+    file_name_extender = str(lr) + "_" + str(min_time) + '_'
 
     if skip_absent == 1:
         file_name_extender += "1"
@@ -1239,9 +1244,8 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    X_static_train = X_static_train[:, 10:]
-    X_static_test = X_static_test[:, 10:]
-
+    X_static_train = X_static_train[:, 13:]
+    X_static_test = X_static_test[:, 13:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -1251,16 +1255,18 @@ if __name__ == '__main__':
     print(train_class_weights)
 
     ###### HGB
-    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 20, 30]
+    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 28]
     hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
     params_hgb = {
-        'learning_rate': [0.1, 0.05],
-        'l2_regularization': [0, 0.001, 0.01],
-        'min_samples_leaf': [20, 40, 60],
-        "max_depth": [2, 5, None]
+        'learning_rate': [0.1, 0.05, 0.2, 0.01],
+        'l2_regularization': [0, 0.001, 0.01, 0.1],
+        'min_samples_leaf': [20, 40, 60, 100],
+        "max_depth": [2, 5, None],
+        'class_weight': ['balanced', None]
         }
 
-    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='hgb')
+    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
+                        y_test_final, file_name_extender, type='hgb')
 
     ####XGBoost
     xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
@@ -1271,7 +1277,9 @@ if __name__ == '__main__':
         'learning_rate': [0.05, 0.1, 0.2, 1.0],
         'n_estimators': [200, 300, 400],
         }
-    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='xgb')
+    classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
+    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                        file_name_extender,  type='xgb', weights=classes_weights)
 
     ###### GB
     gb_clf = GradientBoostingClassifier(random_state=0)
@@ -1279,7 +1287,7 @@ if __name__ == '__main__':
         params_gb = {
             'loss': ['log_loss', 'exponential'],
             'learning_rate': [0.1, 0.05],
-            'n_estimators': [200, 300],
+            'n_estimators': [200, 300, 400],
             'max_features': ["sqrt"],
             "criterion": ["friedman_mse",  "squared_error"],
             "max_depth": [5]
@@ -1288,13 +1296,14 @@ if __name__ == '__main__':
         params_gb = {
             'loss': ['log_loss', 'exponential'],
             'learning_rate': [0.1, 0.05],
-            'n_estimators': [200, 300],
+            'n_estimators': [200, 300, 400],
             'max_features': [None],
             "criterion": ["friedman_mse",  "squared_error"],
             "max_depth": [5, None]
             }
 
-    perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='gb')
+    perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
+                        file_name_extender, type='gb')
 
     ##### RF
     rf_clf = RandomForestClassifier(random_state=0)
@@ -1345,3 +1354,45 @@ if __name__ == '__main__':
         }
     perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
 
+    X_train_static_mean = X_static_train.mean()
+    X_train_static_std = X_static_train.std()
+    X_test_static_mean = X_static_test.mean()
+    X_test_static_std = X_static_test.std()
+    X_static_train = (X_static_train - X_train_static_mean)/X_train_static_std
+    X_static_test = (X_static_test - X_test_static_mean)/X_test_static_std
+
+    EPOCHS = 500
+    BATCH_SIZE = 64
+
+    csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
+    opt = keras.optimizers.Adam(learning_rate=lr)
+    checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
+    model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
+
+    learning_units = 1
+
+    stat = layers.Input(shape=(X_static_train.shape[1], ))
+    stat = layers.Flatten()(stat)
+    stat_dynam_drop = layers.Dropout(0.2)(stat)
+    x6 = layers.Dense(3000, activation='relu')(stat_dynam_drop)
+    x7 = layers.BatchNormalization()(x6)
+    x8 = layers.Dropout(0.2)(x7)
+    out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
+    model = keras.Model(inputs= stat, outputs=out)
+    early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=20)
+    reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
+    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
+                keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
+                keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
+                keras.metrics.TrueNegatives(),'binary_accuracy','mse', 'mae'])
+    print(model.summary())
+
+    history = model.fit(X_static_train, y_train_final, batch_size=BATCH_SIZE, epochs=EPOCHS,
+                        callbacks=[model_checkpoint, early_stopping, reduce_lr, csv_logger], validation_split=0.13,
+                        verbose=0, class_weight=train_class_weights)
+
+    model.load_weights(checkpoint_name)
+    y_pred = model.predict(X_static_test)
+    np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
+    print("Performing testing: ")
+    res = model.evaluate(X_static_test, y_test_final, verbose=2)

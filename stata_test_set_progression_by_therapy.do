@@ -7,10 +7,10 @@
 
   
  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set.csv", clear 
- rocreg progression_12 gb_preds, bseed(0)
- gen threshold = 0.37
+ rocreg progression_12 hgb_preds, bseed(0)
+ gen threshold = 0.536048
  
- gen prog_pred = gb_preds
+ gen prog_pred = hgb_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
 
  replace diag_year = 2024 - diag_year

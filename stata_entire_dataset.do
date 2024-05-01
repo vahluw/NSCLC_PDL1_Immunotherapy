@@ -34,7 +34,7 @@
  replace progression_12 = 0 if progression_days == 0
  replace progression_days = 365 if progression_days == 0 | progression_days>365
  
- gen therapy_type = -1
+ gen therapy_type = 10
  replace therapy_type = 0 if first_line_chemo == 1
  replace therapy_type = 1 if io_mono == 1
  replace therapy_type = 2 if combo_therapy == 1
@@ -45,7 +45,7 @@
  replace therapy_type = 7 if ros1_drug == 1
  replace therapy_type = 8 if ras_drug == 1
  replace therapy_type = 9 if other_first_line_therapy == 1
- replace therapy_type = 10 if no_first_line == 1
+
  
   stset progression_days, failure(progression_12)
  stci, by(therapy_type) rmean
@@ -84,8 +84,12 @@
 graph export "propensity_pre_match_hist.png", replace
  sts test therapy_type, logrank
  
- logit therapy_type ${indiv_covar}
- predict yhat
+logit therapy_type ${indiv_covar}
+predict yhat
+drop if yhat < 0.00001
+drop if stage == 1 | stage == 18
+teffects ipwra (progression_12 ${indiv_covar}) (therapy_type ${indiv_covar})
+teffects ipw (progression_12 ) (therapy_type ${indiv_covar})
  
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
