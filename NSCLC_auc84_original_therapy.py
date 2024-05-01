@@ -31,7 +31,7 @@ dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
 
     # Initialize GridSearchCV
-    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=10, scoring='roc_auc', n_jobs=None)
+    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='roc_auc', n_jobs=None)
 
     # Perform grid search
     if type=='xgb':
@@ -297,7 +297,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, skip_absent, exclude_diagnoses = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])
+    min_time, lr, dir, exclude_diagnoses = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -990,7 +990,7 @@ if __name__ == '__main__':
                 (therapy_line, therapy_name, end_date, start_date) = all_therapies_used[i]
 
                 # Only examine first-line therapies that had at least one dose given after advanced diagnosis date
-                if end_date >= diagnosis_date and therapy_line == 1:
+                if therapy_line == 1:
                     patientID_to_first_line_start_date[patientID] = start_date
                     if start_date < diagnosis_date:
                         patientID_to_advanced_diagnosis_date[patientID] = start_date
@@ -1063,15 +1063,16 @@ if __name__ == '__main__':
                     AST_date_new = AST_date
                     if AST_date_new <= start_date and AST_val > 0:
                         AST_final = AST_val
-        else:
+
+        if patientID not in patientID_to_first_line_start_date:
             continue
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy]
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
 
         lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
 
-        x_demos_no_diagnoses =np.concatenate(([days_from_dx_to_tx, x_practice[0], x_practice[2]], current_contraindications_for_patient, lab_value_avgs,
+        x_demos_no_diagnoses =np.concatenate(([x_practice[0], x_practice[2]], current_contraindications_for_patient, lab_value_avgs,
                                 age_diagnosis_stats, x_demos, insurance_patient, [x_practice[1]], cancer_vec, ecog_,
                                                all_biomarkers, therapy_info))
 
@@ -1166,12 +1167,7 @@ if __name__ == '__main__':
                 continue
 
         else:
-            if skip_absent:
-                continue
-            if time_to_censor < min_time:
-                continue
-            else:
-                progression = 0
+            continue
 
         X_static.append(vals)
         y.append([int(min_time >= progression > 0), progression, time_to_censor])
@@ -1209,12 +1205,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(min_time) + "_" + str(lr) + "_" + str(min_time) + '_'
-
-    if skip_absent == 1:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
+    file_name_extender = str(min_time) + "_" + str(lr) + '_'
 
     if exclude_diagnoses:
         file_name_extender += "1"
@@ -1246,8 +1237,8 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    X_static_train = X_static_train[:, 13:]
-    X_static_test = X_static_test[:, 13:]
+    X_static_train = X_static_train[:, 12:]
+    X_static_test = X_static_test[:, 12:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
