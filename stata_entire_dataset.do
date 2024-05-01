@@ -159,8 +159,7 @@ graph export "propensity_post_match_hist.png", replace
   
   /////////////////////////////
 /*  Instrumental variables */
- global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
-
+ global indiv_covar "i.race i.ecog i.histology i.stage pdl1 i.practice_type diag_year age_at_diagnosis  pdl1_given"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -229,7 +228,11 @@ gen over_threshold = 0
 replace over_threshold = 1 if pdl1>=0.5
 gen insured = 0
 replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan ==1
-rdrandinf progression_12 pdl1, cutoff(0.5) fuzzy(first_line) kernel(triangular) covariates(practice_type diag_year age_at_diagnosis insured ecog) 
+drop if alk==1
+drop if egfr==1
+drop if ros1==1
+rdrandinf progression_12 pdl1, cutoff(0.5) fuzzy(first_line itt) covariates(practice_type diag_year age_at_diagnosis insured ecog histology stage race) wl(0.4) wr(0.6) seed(0)
+rdrandinf progression_12 pdl1, cutoff(0.5) fuzzy(first_line tsls) covariates(practice_type diag_year age_at_diagnosis insured ecog histology stage race) wl(0.4) wr(0.6) seed(0) firststage
 rddensity pdl1, c(0.5) // check sorting/bunching assumption
 
 
