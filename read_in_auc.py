@@ -22,7 +22,7 @@ headers_test_set = [ "practiceID", "physicianID", "contra1", "contra2", "contra3
                         "other_no_insurance","workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
                     "commercial_health_plan", "practice_type",  "histology",
                 "stage", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
-                  "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "other_therapy",
+                  "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug",
                     "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "days_from_dx_to_tx",
                     "progression_12",  "progression_days", "censor_days"]#, "hgb_preds"]
 
@@ -59,7 +59,7 @@ headers = ["in_test_set",  "practiceID", "physicianID", "contra1", "contra2", "c
                         "other_no_insurance","workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
                     "commercial_health_plan", "practice_type",  "histology",
                 "stage", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
-                  "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "other_therapy",
+                  "io_mono", "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug",
                     "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "days_from_dx_to_tx",
                     "progression_12",  "progression_days", "censor_days"]
 

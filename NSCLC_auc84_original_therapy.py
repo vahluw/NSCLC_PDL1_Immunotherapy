@@ -969,7 +969,6 @@ if __name__ == '__main__':
         temp_combo_list = []
         combo_therapy = 0
         first_line_chemo = 0
-        other_therapy = 0
         io_mono = 0
         io_mono_used = 0
         egfr_drug = 0
@@ -1067,7 +1066,10 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
-        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
+        if days_from_dx_to_tx > 365:
+            continue
+
+        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
 
         lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
@@ -1255,7 +1257,10 @@ if __name__ == '__main__':
         'l2_regularization': [0, 0.001, 0.01, 0.1],
         'min_samples_leaf': [20, 40, 60, 100],
         "max_depth": [2, 5, None],
-        'class_weight': ['balanced', None]
+        'class_weight': ['balanced', None],
+        'max_features': [0.25, 0.5, 0.75, 1.0],
+        'max_iter': [100, 200, 50],
+        'max_leaf_nodes': [31, 100, None]
         }
 
     perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
@@ -1364,10 +1369,14 @@ if __name__ == '__main__':
 
     learning_units = 1
 
+    if exclude_diagnoses:
+        dense_units = 50
+    else:
+        dense_units = 3000
     stat = layers.Input(shape=(X_static_train.shape[1], ))
     stat = layers.Flatten()(stat)
     stat_dynam_drop = layers.Dropout(0.2)(stat)
-    x6 = layers.Dense(3000, activation='relu')(stat_dynam_drop)
+    x6 = layers.Dense(dense_units, activation='relu')(stat_dynam_drop)
     x7 = layers.BatchNormalization()(x6)
     x8 = layers.Dropout(0.2)(x7)
     out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
