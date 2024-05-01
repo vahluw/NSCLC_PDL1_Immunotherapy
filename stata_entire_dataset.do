@@ -1,5 +1,6 @@
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
+ global indiv_covar "i.race i.ecog i.histology i.stage pdl1 i.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
+  global indiv_covar_pdl1 "i.race i.ecog i.histology i.stage i.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan "
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -26,7 +27,7 @@
  ****************************
 
  global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
- 
+   global indiv_covar_pdl1 "i.race i.ecog i.histology i.stage i.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan "
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -90,10 +91,26 @@ drop if yhat < 0.00001
 drop if stage == 1 | stage == 18
 teffects ipwra (progression_12 ${indiv_covar}) (therapy_type ${indiv_covar})
 teffects ipw (progression_12 ) (therapy_type ${indiv_covar})
+
+
+teffects ipwra (progression_12 ${indiv_covar_pdl1}) (therapy_type ${indiv_covar_pdl1}) if pdl1>=0.5
+teffects ipw (progression_12 ) (therapy_type ${indiv_covar_pdl1}) if pdl1>=0.5
+
+
+teffects ipwra (progression_12 ${indiv_covar_pdl1}) (therapy_type ${indiv_covar_pdl1}) if pdl1<0.5 & pdl1_given==1
+teffects ipw (progression_12 ) (therapy_type ${indiv_covar_pdl1}) if pdl1<0.5 & pdl1_given==1
+
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days <=182
+
 teffects ipwra (progression_6_months ${indiv_covar}) (therapy_type ${indiv_covar})
 teffects ipw (progression_6_months ) (therapy_type ${indiv_covar}) 
+
+teffects ipwra (progression_6_months ${indiv_covar_pdl1}) (therapy_type ${indiv_covar_pdl1}) if pdl1>=0.5
+teffects ipw (progression_6_months ) (therapy_type ${indiv_covar_pdl1}) if pdl1>=0.5
+
+teffects ipwra (progression_6_months ${indiv_covar_pdl1}) (therapy_type ${indiv_covar_pdl1}) if pdl1<0.5 & pdl1_given==1
+teffects ipw (progression_6_months ) (therapy_type ${indiv_covar_pdl1}) if pdl1<0.5 & pdl1_given==1
  
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace

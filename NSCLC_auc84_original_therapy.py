@@ -1063,6 +1063,8 @@ if __name__ == '__main__':
                     AST_date_new = AST_date
                     if AST_date_new <= start_date and AST_val > 0:
                         AST_final = AST_val
+        else:
+            continue
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, other_therapy,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy]
@@ -1207,7 +1209,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(lr) + "_" + str(min_time) + '_'
+    file_name_extender = str(min_time) + "_" + str(lr) + "_" + str(min_time) + '_'
 
     if skip_absent == 1:
         file_name_extender += "1"
