@@ -90,6 +90,10 @@ drop if yhat < 0.00001
 drop if stage == 1 | stage == 18
 teffects ipwra (progression_12 ${indiv_covar}) (therapy_type ${indiv_covar})
 teffects ipw (progression_12 ) (therapy_type ${indiv_covar})
+gen progression_6_months = 0
+replace progression_6_months = 1 if progression_days <=182
+teffects ipwra (progression_6_months ${indiv_covar}) (therapy_type ${indiv_covar})
+teffects ipw (progression_6_months ) (therapy_type ${indiv_covar}) 
  
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
@@ -148,4 +152,36 @@ graph export "propensity_post_match_hist.png", replace
  graph export "chemo_io_post_match_pdl1_under50.png", replace
   sts test therapy_type, logrank
   
+  /////////////////////////////
+/*  Instrumental variables */
+ global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan pdl1_given"
+ 
+
+ global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
+ cd "${path}"
+ set scheme cleanplots
+
+  
+ import delimited "all_data.csv", clear 
+  gen therapy_type = 10
+ replace therapy_type = 0 if first_line_chemo == 1
+ replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 2 if combo_therapy == 1
+ replace therapy_type = 3 if secondary_chemo_drug == 1
+ replace therapy_type = 4 if alk_drug == 1
+ replace therapy_type = 5 if egfr_drug == 1
+ replace therapy_type = 6 if braf_drug == 1
+ replace therapy_type = 7 if ros1_drug == 1
+ replace therapy_type = 8 if ras_drug == 1
+ replace therapy_type = 9 if other_first_line_therapy == 1
+
+ 
+ drop if alk==1
+ drop if egfr==1
+ drop if ros1==1
+ drop if therapy_type>2
+ 
+ ivreghdfe progression_12  (therapy_type = i.physicianid) $indiv_covar, first robust
+
+
   
