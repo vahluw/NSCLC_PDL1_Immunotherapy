@@ -297,7 +297,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+    min_time, lr, dir, exclude_diagnoses, tx_interval = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -1066,7 +1066,7 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
-        if days_from_dx_to_tx > 365:
+        if days_from_dx_to_tx > tx_interval:
             continue
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
