@@ -408,7 +408,7 @@ if __name__ == '__main__':
     for i in range(len(cancer_types['PatientID'])):
         [patientID, histology, stage, smoking_status] = [cancer_types['PatientID'][i], cancer_types['Histology'][i],
                                                  cancer_types['GroupStage'][i], cancer_types['SmokingStatus'][i]]
-        patientIDs_cancer_types[patientID] = np.array(stages[stage], [histologies[histology], smoking_statuses[smoking_status]])
+        patientIDs_cancer_types[patientID] = np.array([stages[stage], histologies[histology], smoking_statuses[smoking_status]])
 
     demographics = pd.read_csv(dir_path+'Demographics.csv')
     patients_IDs_to_number = create_set(demographics['PatientID'])

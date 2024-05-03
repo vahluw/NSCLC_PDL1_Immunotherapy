@@ -7,8 +7,9 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_curve
 
-all_dataset = np.array(np.load('whole_dataset_182_0.005_0.npy'))
-test_dataset = np.array(np.load('test_set_182_0.005_0.npy'))
+limit = "365"
+all_dataset = np.array(np.load('whole_dataset_' + limit +'_0.005_0.npy'))
+test_dataset = np.array(np.load('test_set_' + limit +'_0.005_0.npy'))
 #hgb_preds = np.expand_dims(np.array(np.load('y_pred__0.005_365_00_hgb_0.78__0.005_365_00.npy')), axis=1)
 #xgb_preds = np.expand_dims(np.array(np.load('y_pred_xgb_0.81_0110111.npy')), axis=1)
 #rf_preds = np.expand_dims(np.array(np.load('y_pred_rf_0.80_0110111.npy')), axis=1)
@@ -30,7 +31,7 @@ headers_test_set = [ "practiceID", "physicianID",  "diag_year", "age_at_diagnosi
 data = pd.DataFrame(data=all_test_data)
 
 data.columns = headers_test_set
-data.to_csv('test_set_182.csv')
+data.to_csv('test_set_' + limit + '.csv')
 
 
 '''
@@ -64,5 +65,5 @@ headers = ["in_test_set",  "practiceID", "physicianID",  "diag_year", "age_at_di
 all_data = np.concatenate((in_test_set, all_dataset), axis=1)
 data = pd.DataFrame(data=all_data)
 data.columns = headers
-data.to_csv('all_data_182.csv')
+data.to_csv('all_data_' + limit + '.csv')
 

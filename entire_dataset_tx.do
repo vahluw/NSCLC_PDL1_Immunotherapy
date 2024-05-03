@@ -8,10 +8,10 @@
  cd "${path}"
  set scheme cleanplots
 
-  
- import delimited "all_data_182.csv", clear 
+
+ import delimited "all_data_365.csv", clear 
  
-  gen time_limit = 182
+  gen time_limit = 365
  gen outcome = "progression"
  
  
@@ -150,8 +150,8 @@ graph export "propensity_post_match_hist.png", replace
 
  
  ////// Regression discontinuity ///////////
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/all_data_182.csv", clear
-gen therapy_type = -1
+replace filename = "all_data_365.csv"
+ import delimited filename, clear gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
 drop if io_mono_used == 1 | io_mono_used>=5
@@ -189,7 +189,9 @@ cd "${path}"
 set scheme cleanplots
 global indiv_covar "i.ecog i.histology i.stage pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf"
   
-import delimited "all_data_182.csv", clear 
+
+ replace filename = "all_data_365.csv"
+ import delimited filename, clear 
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
@@ -198,6 +200,9 @@ drop if egfr==1
 drop if ros1==1
 keep if therapy_type >= 0
 drop if days_from_dx_to_tx > 182
+
+ivreg2 progression_outcome (therapy_type = i.practiceid ) days_from_dx_to_tx i.race i.gender i.smoking_status, first robust
+ivreg2 mortality_outcome (therapy_type = i.practiceid ) days_from_dx_to_tx i.race i.gender i.smoking_status, first robust
 
 ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given, first robust
 ivreg2 mortality_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given, first robust
