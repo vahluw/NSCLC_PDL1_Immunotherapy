@@ -297,7 +297,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_ml, tx_start = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -408,7 +408,7 @@ if __name__ == '__main__':
     for i in range(len(cancer_types['PatientID'])):
         [patientID, histology, stage, smoking_status] = [cancer_types['PatientID'][i], cancer_types['Histology'][i],
                                                  cancer_types['GroupStage'][i], cancer_types['SmokingStatus'][i]]
-        patientIDs_cancer_types[patientID] = np.array([histologies[histology], stages[stage], smoking_statuses[smoking_status]])
+        patientIDs_cancer_types[patientID] = np.array(stages[stage], [histologies[histology], smoking_statuses[smoking_status]])
 
     demographics = pd.read_csv(dir_path+'Demographics.csv')
     patients_IDs_to_number = create_set(demographics['PatientID'])
@@ -609,6 +609,7 @@ if __name__ == '__main__':
         else:
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
 
+    '''
     vitals = pd.read_csv(dir_path + 'Vitals.csv')
     patientID_to_vitals = dict()
 
@@ -885,7 +886,7 @@ if __name__ == '__main__':
                     dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
 
         dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
-
+    '''
     y = []
     static_variables = dict()
 
@@ -936,35 +937,6 @@ if __name__ == '__main__':
 
         else:
             all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
-
-        if patientID in patientID_to_contraindications:
-            contraindication_dates = patientID_to_contraindications[patientID]
-        else:
-            contraindication_dates = [list(), list(), list(), list(), list(), list()]
-
-        current_contraindications_for_patient = [0, 0, 0, 0, 0, 0]
-        lab_value_avgs = []
-        bili_final, creatinine_final, AST_final, ALT_final = 0.0, 0.0, 0.0, 0.0
-
-        if patientID in patientID_to_bilirubin:
-            bilirubin_vals = patientID_to_bilirubin[patientID]
-        else:
-            bilirubin_vals = []
-
-        if patientID in patientID_to_creatinine:
-            creatinine_vals = patientID_to_creatinine[patientID]
-        else:
-            creatinine_vals = []
-
-        if patientID in patientID_to_AST:
-            AST_vals = patientID_to_AST[patientID]
-        else:
-            AST_vals = []
-
-        if patientID in patientID_to_ALT:
-            ALT_vals = patientID_to_ALT[patientID]
-        else:
-            ALT_vals = []
 
         temp_combo_list = []
         combo_therapy = 0
@@ -1037,32 +1009,6 @@ if __name__ == '__main__':
                         else:
                             other_first_line_therapy = 1
 
-                for ind in range(len(contraindication_dates)):
-                    all_dates_current = contraindication_dates[ind]
-                    for current_date in sorted(all_dates_current):
-                        if current_date <= start_date:
-                            current_contraindications_for_patient[ind] = 1
-
-                for bili_date, bili_val in sorted(bilirubin_vals):
-                    bili_date_new = bili_date
-                    if bili_date_new <= start_date and bili_val > 0:
-                        bili_final = bili_val
-
-                for creatinine_date, creatinine_val in sorted(creatinine_vals):
-                    creatinine_date_new = creatinine_date
-                    if creatinine_date_new <= start_date and creatinine_val > 0:
-                        creatinine_final = creatinine_val
-
-                for ALT_date, ALT_val in sorted(ALT_vals):
-                    ALT_date_new = ALT_date
-                    if ALT_date_new <= start_date and ALT_val > 0:
-                        ALT_final = ALT_val
-
-                for AST_date, AST_val in sorted(AST_vals):
-                    AST_date_new = AST_date
-                    if AST_date_new <= start_date and AST_val > 0:
-                        AST_final = AST_val
-
         if patientID not in patientID_to_first_line_start_date:
             continue
 
@@ -1070,13 +1016,12 @@ if __name__ == '__main__':
             continue
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy,
+                        days_from_dx_to_tx]
 
-        lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
-
-        x_demos_no_diagnoses =np.concatenate(([x_practice[0], x_practice[2]], current_contraindications_for_patient, lab_value_avgs,
-                                age_diagnosis_stats, x_demos, insurance_patient, [x_practice[1]], cancer_vec, ecog_,
-                                               all_biomarkers, therapy_info))
+        x_demos_no_diagnoses = np.concatenate(([x_practice[0], x_practice[2], cancer_vec[0]], age_diagnosis_stats, x_demos,
+                                               insurance_patient, [x_practice[1]], cancer_vec[1:3], ecog_, all_biomarkers,
+                                               therapy_info))
 
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
@@ -1131,9 +1076,14 @@ if __name__ == '__main__':
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
+        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+
+        if tx_init_date > progression_date_final and tx_start:
+            continue
 
         if patient_ID not in patientID_to_progression:
             if progression_bool:
+
                 patientID_to_progression[patient_ID] = progression_date_final
             else:
                 patientID_to_progression[patient_ID] = no_progression_date
@@ -1150,11 +1100,28 @@ if __name__ == '__main__':
     max_features = -1
     max_time_steps = -1
 
+    mortality_dates = pd.read_csv(dir_path+'Enhanced_Mortality_V2.csv')
+    mortality_dict = dict()
+    for i in range(len(mortality_dates['PatientID'])):
+        patientID, date_of_death = mortality_dates['PatientID'][i], mortality_dates['DateOfDeath'][i]
+        try:
+            mortality_date = date(int(date_of_death[0:4]), int(date_of_death[5:7]), 1)
+            mortality_dict[patientID] = mortality_date
+            patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, mortality_date)
+        except:
+            mortality_dict[patientID] = patientID_to_censor_date[patientID]
+
     for patientID, vals in static_variables.items():
 
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
+        tx_start_date = patientID_to_first_line_start_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
-        starting_date = adv_dx_date
+
+        if tx_start:
+            starting_date = tx_start_date
+        else:
+            starting_date = adv_dx_date
+
         time_to_censor = (last_final_recorded_date_records - starting_date).days
 
         if patientID in patientID_to_progression:
@@ -1163,7 +1130,7 @@ if __name__ == '__main__':
             if progression_date == no_progression_date:
                 progression = 0
             else:
-                progression = (progression_date - adv_dx_date).days
+                progression = (progression_date - starting_date).days
 
             if time_to_censor < min_time and progression_date == no_progression_date:
                 continue
@@ -1171,8 +1138,13 @@ if __name__ == '__main__':
         else:
             continue
 
+        if patientID in mortality_dict:
+            mortality_days = (mortality_dict[patientID]-starting_date).days
+        else:
+            mortality_days = 0
+
         X_static.append(vals)
-        y.append([int(min_time >= progression > 0), progression, time_to_censor])
+        y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
 
     num_patients = len(X_static)
     print(num_patients)
@@ -1186,6 +1158,7 @@ if __name__ == '__main__':
     del patientIDs_cancer_types
     del static_variables
 
+    '''
     del patientID_to_med_administration
     del patientID_to_vitals
     del patientID_to_labs
@@ -1194,7 +1167,7 @@ if __name__ == '__main__':
     del patientID_to_AST
     del patientID_to_ALT
     del dynamic_variables
-
+    '''
     y = np.array(y)
     y = y.astype('float32')
     X_static = np.array(X_static)
@@ -1216,7 +1189,6 @@ if __name__ == '__main__':
 
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
-
     del entire_dataset
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
@@ -1239,8 +1211,11 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    X_static_train = X_static_train[:, 12:]
-    X_static_test = X_static_test[:, 12:]
+    if use_ml == 0:
+        exit(0)
+
+    X_static_train = X_static_train[:, 2:]
+    X_static_test = X_static_test[:, 2:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -1255,12 +1230,10 @@ if __name__ == '__main__':
     params_hgb = {
         'learning_rate': [0.1, 0.05, 0.2, 0.01],
         'l2_regularization': [0, 0.001, 0.01, 0.1],
-        'min_samples_leaf': [20, 40, 60, 100],
+        'min_samples_leaf': [20, 50, 100],
         "max_depth": [2, 5, None],
         'class_weight': ['balanced', None],
-        'max_features': [0.25, 0.5, 0.75, 1.0],
-        'max_iter': [100, 200, 50],
-        'max_leaf_nodes': [31, 100, None]
+        'max_features': [ 0.5, 0.75, 1.0],
         }
 
     perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
@@ -1351,7 +1324,7 @@ if __name__ == '__main__':
         'leaf_size': [20, 40]
         }
     perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
-
+    '''
     X_train_static_mean = X_static_train.mean()
     X_train_static_std = X_static_train.std()
     X_test_static_mean = X_static_test.mean()
@@ -1398,3 +1371,4 @@ if __name__ == '__main__':
     np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
     print("Performing testing: ")
     res = model.evaluate(X_static_test, y_test_final, verbose=2)
+    '''

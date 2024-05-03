@@ -297,7 +297,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_ml, tx_start = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -609,6 +609,7 @@ if __name__ == '__main__':
         else:
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
 
+
     y = []
     static_variables = dict()
 
@@ -708,6 +709,7 @@ if __name__ == '__main__':
                     else:
                         days_from_dx_to_tx = (start_date-diagnosis_date).days
 
+
                     if therapy_name in approved_first_line_immunomonotherapies:
                         io_mono = 1
                         io_mono_used = first_line_mono_io_to_index[therapy_name]
@@ -777,17 +779,14 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
-        if days_from_dx_to_tx > tx_interval:
-            continue
-
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, days_from_dx_to_tx]
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy]
 
         lab_value_avgs = [bili_final, creatinine_final, AST_final, ALT_final]
 
-        x_demos_no_diagnoses =np.concatenate(([x_practice[0], x_practice[2]], current_contraindications_for_patient, lab_value_avgs,
-                                age_diagnosis_stats, x_demos, insurance_patient, [x_practice[1]], cancer_vec, ecog_,
-                                               all_biomarkers, therapy_info))
+        x_demos_no_diagnoses = np.concatenate(([x_practice[0], x_practice[2], days_from_dx_to_tx], current_contraindications_for_patient,
+                                              lab_value_avgs, age_diagnosis_stats, x_demos, insurance_patient,
+                                              [x_practice[1]], cancer_vec, ecog_, all_biomarkers, therapy_info))
 
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
@@ -842,9 +841,14 @@ if __name__ == '__main__':
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
+        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+
+        if tx_init_date > progression_date_final:
+            continue
 
         if patient_ID not in patientID_to_progression:
             if progression_bool:
+
                 patientID_to_progression[patient_ID] = progression_date_final
             else:
                 patientID_to_progression[patient_ID] = no_progression_date
@@ -864,8 +868,14 @@ if __name__ == '__main__':
     for patientID, vals in static_variables.items():
 
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
+        tx_start_date = patientID_to_first_line_start_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
-        starting_date = adv_dx_date
+
+        if tx_start:
+            starting_date = tx_start_date
+        else:
+            starting_date = adv_dx_date
+
         time_to_censor = (last_final_recorded_date_records - starting_date).days
 
         if patientID in patientID_to_progression:
@@ -874,15 +884,15 @@ if __name__ == '__main__':
             if progression_date == no_progression_date:
                 progression = 0
             else:
-                progression = (progression_date - adv_dx_date).days
+                progression = (progression_date - starting_date).days
 
-            if time_to_censor < min_time and progression_date == no_progression_date:
+            if time_to_censor < min_time and progression_date == no_progression_date and use_ml:
                 continue
-
         else:
             continue
 
         X_static.append(vals)
+
         y.append([int(min_time >= progression > 0), progression, time_to_censor])
 
     num_patients = len(X_static)
@@ -918,7 +928,6 @@ if __name__ == '__main__':
 
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
-
     del entire_dataset
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
@@ -941,8 +950,11 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    X_static_train = X_static_train[:, 12:]
-    X_static_test = X_static_test[:, 12:]
+    if use_ml == 0:
+        exit(0)
+
+    X_static_train = X_static_train[:, 13:]
+    X_static_test = X_static_test[:, 13:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -957,12 +969,10 @@ if __name__ == '__main__':
     params_hgb = {
         'learning_rate': [0.1, 0.05, 0.2, 0.01],
         'l2_regularization': [0, 0.001, 0.01, 0.1],
-        'min_samples_leaf': [20, 40, 60, 100],
+        'min_samples_leaf': [20, 50, 100],
         "max_depth": [2, 5, None],
         'class_weight': ['balanced', None],
         'max_features': [0.25, 0.5, 0.75, 1.0],
-        'max_iter': [100, 200, 50],
-        'max_leaf_nodes': [31, 100, None]
         }
 
     perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
