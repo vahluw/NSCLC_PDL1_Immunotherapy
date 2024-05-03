@@ -3,7 +3,7 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology i.stage pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -11,7 +11,7 @@
 
  import delimited "all_data_365.csv", clear 
  
-  gen time_limit = 365
+  gen time_limit = 730
  gen outcome = "progression"
  
  
@@ -31,7 +31,7 @@
  tab progression_outcome
  gen insured = 0
  replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan ==1
-
+drop if days_from_dx_to_tx > 182
 
  histogram pdl1 if pdl1_given==1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
  graph export "PD_L1_distribution_whole_dataset_include_0.png", replace
@@ -77,18 +77,23 @@
  
 
 drop if stage==1 | stage==18 | stage ==4 | race ==4 | smoking_status == 0
-logit therapy_type ${indiv_covar} pdl1_given
-predict yhat
 
-teffects psmatch (endpoint) (therapy_type ${indiv_covar} pdl1_given)
+
+
 teffects ipwra (endpoint ${indiv_covar} pdl1_given) (therapy_type ${indiv_covar} pdl1_given) 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} pdl1_given) 
 
 teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
+
+
+teffects psmatch (endpoint) (therapy_type ${indiv_covar} pdl1_given) if pdl1>=0.01 & pdl1<0.5 , osample(delete)
+drop if delete == 1
 teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5
- 
+
+logit therapy_type ${indiv_covar} pdl1_given
+predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
 graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
@@ -187,11 +192,11 @@ rddensity pdl1, c(0.5) // check sorting/bunching assumption
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
-global indiv_covar "i.ecog i.histology i.stage pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf"
+global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf"
   
 
- replace filename = "all_data_365.csv"
- import delimited filename, clear 
+
+ import delimited "all_data_365.csv", clear 
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
