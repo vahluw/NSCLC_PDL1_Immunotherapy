@@ -3,13 +3,13 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance i.stage"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
 
 
- import delimited "all_data_365.csv", clear 
+ import delimited "all_data_730.csv", clear 
  
   gen time_limit = 730
  gen outcome = "progression"
@@ -61,6 +61,8 @@ drop if days_from_dx_to_tx > 182
  graph export "prog_survival_with_mutations_pre_match.png", replace
  sts test therapy_type, logrank
  
+ 
+ logistic endpoint $indiv_covar pdl1_given i.therapy_type i.io_mono_used alk egfr braf ras ros1
 
  drop if alk==1
  drop if egfr==1
@@ -78,8 +80,11 @@ drop if days_from_dx_to_tx > 182
 
 drop if stage==1 | stage==18 | stage ==4 | race ==4 | smoking_status == 0
 
+gen progression_6_months = 0
+replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 
 
+teffects psmatch (endpoint) (therapy_type ${indiv_covar} pdl1_given) 
 teffects ipwra (endpoint ${indiv_covar} pdl1_given) (therapy_type ${indiv_covar} pdl1_given) 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} pdl1_given) 
 
@@ -155,8 +160,9 @@ graph export "propensity_post_match_hist.png", replace
 
  
  ////// Regression discontinuity ///////////
-replace filename = "all_data_365.csv"
- import delimited filename, clear gen therapy_type = -1
+
+ import delimited "all_data_730.csv", clear
+ gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
 drop if io_mono_used == 1 | io_mono_used>=5
@@ -194,9 +200,7 @@ cd "${path}"
 set scheme cleanplots
 global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf"
   
-
-
- import delimited "all_data_365.csv", clear 
+import delimited "all_data_730.csv", clear 
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
@@ -206,8 +210,10 @@ drop if ros1==1
 keep if therapy_type >= 0
 drop if days_from_dx_to_tx > 182
 
-ivreg2 progression_outcome (therapy_type = i.practiceid ) days_from_dx_to_tx i.race i.gender i.smoking_status, first robust
-ivreg2 mortality_outcome (therapy_type = i.practiceid ) days_from_dx_to_tx i.race i.gender i.smoking_status, first robust
+gen progression_6_months = 0
+replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
+logit progression_outcome i.therapy_type $indiv_covar pdl1_given i.stage
+logit progression_6_months i.therapy_type $indiv_covar pdl1_given i.stage
 
-ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given, first robust
-ivreg2 mortality_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given, first robust
+ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given i.stage, first robust
+ivreg2 progression_6_months (therapy_type = i.practiceid ) $indiv_covar pdl1_given i.stage, first robust
