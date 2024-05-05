@@ -9,10 +9,11 @@
  set scheme cleanplots
 
 
- import delimited "all_data_730.csv", clear 
- 
-  gen time_limit = 730
+ import delimited "all_data_182.csv", clear 
+keep if diag_year >=2014
+  gen time_limit = 182
  gen outcome = "progression"
+ keep if stage > 12 & stage != 18
  
  
  gen censor_time = progression_days 
@@ -33,7 +34,7 @@
  replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan ==1
 drop if days_from_dx_to_tx > 182
 
- histogram pdl1 if pdl1_given==1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
+ histogram pdl1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
  graph export "PD_L1_distribution_whole_dataset_include_0.png", replace
  
  
@@ -62,7 +63,6 @@ drop if days_from_dx_to_tx > 182
  sts test therapy_type, logrank
  
  
- logistic endpoint $indiv_covar pdl1_given i.therapy_type i.io_mono_used alk egfr braf ras ros1
 
  drop if alk==1
  drop if egfr==1
@@ -84,20 +84,21 @@ gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 
 
-teffects psmatch (endpoint) (therapy_type ${indiv_covar} pdl1_given) 
-teffects ipwra (endpoint ${indiv_covar} pdl1_given) (therapy_type ${indiv_covar} pdl1_given) 
-teffects ipw (endpoint ) (therapy_type ${indiv_covar} pdl1_given) 
+teffects psmatch (endpoint) (therapy_type ${indiv_covar} ) 
+teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) 
+teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) 
 
 teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
 
 
-teffects psmatch (endpoint) (therapy_type ${indiv_covar} pdl1_given) if pdl1>=0.01 & pdl1<0.5 , osample(delete)
+drop if stage == 5 | stage== 6 | stage == 14
+teffects psmatch (endpoint) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5 , osample(delete)
 drop if delete == 1
 teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5 
 teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5
 
-logit therapy_type ${indiv_covar} pdl1_given
+logit therapy_type ${indiv_covar} 
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
@@ -120,7 +121,7 @@ drop if _support==0
 count if _treated==1
 count if _treated==0
 
-pstest ${indiv_covar} pdl1_given, treated(therapy_type)
+pstest ${indiv_covar} , treated(therapy_type)
 
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Mono"))
 graph export "propensity_post_match.png", replace
@@ -132,6 +133,8 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
 		subtitle("by Therapy Type, Entire Dataset") legend(label(1 "Chemotherapy") ///
 		label(2 "IO Monotherapy")) 
 graph export "propensity_post_match_hist.png", replace
+
+
 
 
 
@@ -161,12 +164,13 @@ graph export "propensity_post_match_hist.png", replace
  
  ////// Regression discontinuity ///////////
 
- import delimited "all_data_730.csv", clear
+ import delimited "all_data_182.csv", clear
+  keep if stage > 12 & stage != 18
  gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
 drop if io_mono_used == 1 | io_mono_used>=5
-keep if pdl1_given==1 & therapy_type>=0
+keep if therapy_type>=0
 gen first_line = 0
 replace first_line = 1 if therapy_type ==1
 gen over_threshold = 0
@@ -174,6 +178,7 @@ replace over_threshold = 1 if pdl1>=0.5
 drop if alk==1
 drop if egfr==1
 drop if ros1==1
+keep if pdl1_given==1
 rdplot first_line pdl1, c(0.5)
 binscatter first_line pdl1, rd(0.5) yti("Probability of IO Monotherapy Treatment") xti("PD-L1") 
 	
@@ -184,23 +189,23 @@ kdensity pdl1 , xline(0.5)
 
 //Plotting all, testing only within the optimal bandwidth estimated
 rddensity pdl1 , pl c(0.5)
-drop if days_from_dx_to_tx > 182
+//drop if days_from_dx_to_tx > 182
 
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(triangular) covariates(race gender smoking_status days_from_dx_to_tx ecog histology stage ethnicity practice_type diag_year age_at_diagnosis pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance)   seed(0) wl(0.4) wr(0.6)
-rdrandinf mortality_12 pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(triangular) covariates(race gender smoking_status days_from_dx_to_tx)  seed(0) wl(0.4) wr(0.6)
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(triangular) covariates(race gender smoking_status days_from_dx_to_tx)  seed(0) wl(0.4) wr(0.6)
 //rdrandinf progression_12 pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(triangular) wl(0.4) wr(0.6) seed(0)
 rddensity pdl1, c(0.5) // check sorting/bunching assumption
 
   /////////////////////////////
 /*  Instrumental variables */
-// Doesn't work because F-statistic ~6, not strong enough instrument
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
 global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf"
   
-import delimited "all_data_730.csv", clear 
+import delimited "all_data_182.csv", clear 
+keep if diag_year >=2014
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
@@ -209,11 +214,17 @@ drop if egfr==1
 drop if ros1==1
 keep if therapy_type >= 0
 drop if days_from_dx_to_tx > 182
+ keep if stage > 12 & stage != 18
 
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
-logit progression_outcome i.therapy_type $indiv_covar pdl1_given i.stage
-logit progression_6_months i.therapy_type $indiv_covar pdl1_given i.stage
+logit progression_outcome i.therapy_type $indiv_covar  i.stage
+logit progression_6_months i.therapy_type $indiv_covar  i.stage
 
-ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar pdl1_given i.stage, first robust
-ivreg2 progression_6_months (therapy_type = i.practiceid ) $indiv_covar pdl1_given i.stage, first robust
+gen progression_12_months = 0
+
+replace progression_12_months = 1 if progression_days < 365 & progression_days > 0
+ivreg2 progression_12_months (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
+
+ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
+ivreg2 progression_6_months (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
