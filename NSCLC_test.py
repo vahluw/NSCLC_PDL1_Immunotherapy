@@ -939,16 +939,12 @@ if __name__ == '__main__':
             for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1"]:
                 all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
 
-
-
         else:
             all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
             continue
 
-
         #if patientID_to_biomarkers[patientID]["ALK"] == 1 or patientID_to_biomarkers[patientID]["EGFR"] == 1 or patientID_to_biomarkers[patientID]["ROS1"] == 1:
         #   continue
-
 
         temp_combo_list = []
         combo_therapy = 0

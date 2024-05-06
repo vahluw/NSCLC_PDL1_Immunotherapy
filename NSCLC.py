@@ -5,10 +5,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 import keras
 from keras import models, layers, callbacks, regularizers
-#from keras.models import Sequential
-#from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, LSTM, Bidirectional, Input, ReLU
-#from keras.layers import  BatchNormalization, Embedding, Concatenate, LeakyReLU
-#from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping, ReduceLROnPlateau, CSVLogger
 from datetime import date
 import time
 from sklearn.utils import shuffle
@@ -926,6 +922,7 @@ if __name__ == '__main__':
         if patientID in patientIDs_cancer_types:
             cancer_vec = patientIDs_cancer_types[patientID]
 
+
         ecog_ = [0]
         if patientID in patientID_to_ecog:
             ecog_ = [patientID_to_ecog[patientID]]
@@ -934,9 +931,9 @@ if __name__ == '__main__':
         if patientID in patientID_to_biomarkers:
             for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given"]:
                 all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
-
         else:
             all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
+
 
         temp_combo_list = []
         combo_therapy = 0
@@ -1012,15 +1009,18 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
-        if days_from_dx_to_tx > tx_interval:
-            continue
+        #if days_from_dx_to_tx > tx_interval:
+        #    continue
+
 
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy,
                         days_from_dx_to_tx]
 
-        x_demos_no_diagnoses = np.concatenate(([x_practice[0], x_practice[2], cancer_vec[0]], age_diagnosis_stats, x_demos,
-                                               insurance_patient, [x_practice[1]], cancer_vec[1:3], ecog_, all_biomarkers,
+        #therapy_info = [io_mono, io_mono_used, first_line_chemo, days_from_dx_to_tx]
+
+        x_demos_no_diagnoses = np.concatenate(([x_practice[0], x_practice[2]], age_diagnosis_stats, x_demos,
+                                               insurance_patient, [x_practice[1]], cancer_vec, ecog_, all_biomarkers,
                                                therapy_info))
 
         len_static = len(x_demos_no_diagnoses)
@@ -1076,6 +1076,8 @@ if __name__ == '__main__':
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
+        if patient_ID not in patientID_to_first_line_start_date:
+            continue
         tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
         if tx_init_date > progression_date_final and tx_start:
@@ -1117,10 +1119,9 @@ if __name__ == '__main__':
         tx_start_date = patientID_to_first_line_start_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
 
-        if tx_start:
-            starting_date = tx_start_date
-        else:
-            starting_date = adv_dx_date
+        starting_date = tx_start_date
+        #else:
+        #    starting_date = adv_dx_date
 
         time_to_censor = (last_final_recorded_date_records - starting_date).days
 
@@ -1180,7 +1181,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(min_time) + "_" + str(lr) + '_'
+    file_name_extender = str(min_time) + "_" + str(lr) + '_nn_'
 
     if exclude_diagnoses:
         file_name_extender += "1"
@@ -1224,12 +1225,13 @@ if __name__ == '__main__':
     train_class_weights = {i:train_class_weights[i] for i in range(2)}
     print(train_class_weights)
 
+
     ###### HGB
-    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 28]
+    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
     hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
     params_hgb = {
         'learning_rate': [0.1, 0.05, 0.2, 0.01],
-        'l2_regularization': [0, 0.001, 0.01, 0.1],
+        'l2_regularization': [0, 0.01, 0.1],
         'min_samples_leaf': [20, 50, 100],
         "max_depth": [2, 5, None],
         'class_weight': ['balanced', None],
@@ -1252,23 +1254,17 @@ if __name__ == '__main__':
     perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                         file_name_extender,  type='xgb', weights=classes_weights)
 
+
+
+    '''
+
     ###### GB
     gb_clf = GradientBoostingClassifier(random_state=0)
-    if exclude_diagnoses == 0:
-        params_gb = {
+    params_gb = {
             'loss': ['log_loss', 'exponential'],
             'learning_rate': [0.1, 0.05],
             'n_estimators': [200, 300, 400],
-            'max_features': ["sqrt"],
-            "criterion": ["friedman_mse",  "squared_error"],
-            "max_depth": [5]
-            }
-    else:
-        params_gb = {
-            'loss': ['log_loss', 'exponential'],
-            'learning_rate': [0.1, 0.05],
-            'n_estimators': [200, 300, 400],
-            'max_features': [None],
+            'max_features': ["sqrt", None],
             "criterion": ["friedman_mse",  "squared_error"],
             "max_depth": [5, None]
             }
@@ -1279,23 +1275,13 @@ if __name__ == '__main__':
     ##### RF
     rf_clf = RandomForestClassifier(random_state=0)
 
-    if exclude_diagnoses == 0:
-        params_rf = {
+    params_rf = {
             'n_estimators': [100, 200],
             'max_depth': [80, 100],
             'criterion': ["entropy", "log_loss"],
             'min_samples_leaf': [1, 2],
             'class_weight': ["balanced", None],
-            'max_features': ["sqrt"]
-            }
-    else:
-        params_rf = {
-            'n_estimators': [100, 200],
-            'max_depth': [80, 100],
-            'criterion': ["entropy", "log_loss"],
-            'min_samples_leaf': [1, 2],
-            'class_weight': ["balanced", None],
-            'max_features': [None]
+            'max_features': [None, "sqrt"]
             }
 
     perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
@@ -1325,6 +1311,9 @@ if __name__ == '__main__':
         }
     perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
     '''
+    '''
+    dense_units = 3000
+   
     X_train_static_mean = X_static_train.mean()
     X_train_static_std = X_static_train.std()
     X_test_static_mean = X_static_test.mean()
@@ -1342,17 +1331,14 @@ if __name__ == '__main__':
 
     learning_units = 1
 
-    if exclude_diagnoses:
-        dense_units = 50
-    else:
-        dense_units = 3000
+
     stat = layers.Input(shape=(X_static_train.shape[1], ))
     stat = layers.Flatten()(stat)
     stat_dynam_drop = layers.Dropout(0.2)(stat)
     x6 = layers.Dense(dense_units, activation='relu')(stat_dynam_drop)
     x7 = layers.BatchNormalization()(x6)
     x8 = layers.Dropout(0.2)(x7)
-    out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
+    out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.001, l2=0.001))(x8)
     model = keras.Model(inputs= stat, outputs=out)
     early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=20)
     reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
