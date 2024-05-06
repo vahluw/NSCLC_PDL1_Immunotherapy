@@ -7,6 +7,7 @@
 
  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_182.csv", clear 
  rocreg progression_outcome hgb_preds
+ drop if days_from_dx_to_tx >182
  rocreg progression_outcome xgb_preds
  gen threshold = 0.50
 
@@ -99,11 +100,13 @@
 
  
  gen prog_pred = xgb_preds
- drop if prog_pred < 0.6 & prog_pred > 0.4
  gen pdl1_over_threshold = (pdl1 >=0.5) 
+  gen progressed_prediction = (prog_pred>=threshold)
+ drop if prog_pred < 0.6 & prog_pred > 0.4
+
 
  replace diag_year = 2024 - diag_year
- gen progressed_prediction = (prog_pred>=threshold)
+
  
  sum progression_days
  replace progression_days = 182 if progression_days == 0 | progression_days >182
@@ -178,6 +181,31 @@
  count if progression_outcome==0 & over_pdl1_threshold ==0 & therapy_type == 0 // Under 50, chemo, not progressed (correct) 
  
  
+ /* Try to see what's screwing up the model */
 
 
+ 
+  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_182.csv", clear 
+
+ gen threshold = 0.50
+ gen prog_pred = xgb_preds
+ gen pdl1_over_threshold = (pdl1 >=0.5) 
+ gen progressed_prediction = (prog_pred>=threshold)
+ gen incorrect = 0
+ replace incorrect = 1 if (progressed_prediction != progression_outcome)
+ 
+  gen therapy_type = -1
+ replace therapy_type = 0 if first_line_chemo == 1
+ replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 2 if combo_therapy == 1
+ replace therapy_type = 3 if secondary_chemo_drug == 1
+ replace therapy_type = 4 if alk_drug == 1
+ replace therapy_type = 5 if egfr_drug == 1
+ replace therapy_type = 6 if braf_drug == 1
+ replace therapy_type = 7 if ros1_drug == 1
+ replace therapy_type = 8 if other_first_line_therapy == 1 | ras_drug==1
+ 
+
+ 
+ logit incorrect i.therapy_type ${indiv_covar} alk egfr braf kras ros1 days_from_dx_to_tx
  

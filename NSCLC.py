@@ -1007,12 +1007,16 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
+        if days_from_dx_to_tx > 182:
+            continue
+
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy,
                         days_from_dx_to_tx]
 
+        # Note: deleted ECOG
         x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
-                                               insurance_patient, [x_practice[1]], cancer_vec, ecog_, all_biomarkers,
+                                               insurance_patient, [x_practice[1]], cancer_vec, all_biomarkers,
                                                therapy_info))
 
         len_static = len(x_demos_no_diagnoses)
@@ -1209,8 +1213,8 @@ if __name__ == '__main__':
     if use_ml == 0:
         exit(0)
 
-    X_static_train = X_static_train[:, 1:]
-    X_static_test = X_static_test[:, 1:]
+    X_static_train = X_static_train[:, 2:]
+    X_static_test = X_static_test[:, 2:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -1235,6 +1239,7 @@ if __name__ == '__main__':
     perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
                         y_test_final, file_name_extender, type='hgb')
 
+
     ####XGBoost
     xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
     params_xgb = {
@@ -1249,6 +1254,18 @@ if __name__ == '__main__':
                         file_name_extender,  type='xgb', weights=classes_weights)
 
 
+    ####XGBoost Unbalanced
+    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
+    params_xgb = {
+        'min_child_weight': [1, 5, 10],
+        'gamma': [0.5, 1, 1.5, 2.0],
+        'max_depth': [5, 10, 15, 25],
+        'learning_rate': [0.05, 0.1, 0.2, 1.0],
+        'n_estimators': [200, 300, 400],
+        }
+
+    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                        file_name_extender,  type='xgb_unbalanced')
 
     '''
 
