@@ -197,7 +197,7 @@ rdrandinf  progression_24_months pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(
 
   /////////////////////////////
 /*  Instrumental variables */
-/*
+
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
@@ -212,20 +212,11 @@ drop if alk==1
 drop if egfr==1
 drop if ros1==1
 keep if therapy_type >= 0
-//drop if days_from_dx_to_tx > 182
-//keep if stage > 12 & stage != 18
+
 set emptycells drop
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 logit progression_outcome i.therapy_type $indiv_covar  i.stage
-ivreg2 progression_outcome (therapy_type = i.physicianid ) $indiv_covar  i.stage, first robust
+ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
 
 logit progression_6_months i.therapy_type $indiv_covar  i.stage
-gen progression_12_months = 0
-
-replace progression_12_months = 1 if progression_days < 365 & progression_days > 0
-ivreg2 progression_12_months (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
-
-ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
-ivreg2 progression_6_months (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
-*/

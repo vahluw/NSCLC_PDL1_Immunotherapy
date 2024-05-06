@@ -99,7 +99,7 @@
 
  
  gen prog_pred = xgb_preds
- drop if prog_pred < 0.7 & prog_pred > 0.3
+ drop if prog_pred < 0.6 & prog_pred > 0.4
  gen pdl1_over_threshold = (pdl1 >=0.5) 
 
  replace diag_year = 2024 - diag_year
