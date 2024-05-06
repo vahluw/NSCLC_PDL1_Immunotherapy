@@ -922,7 +922,6 @@ if __name__ == '__main__':
         if patientID in patientIDs_cancer_types:
             cancer_vec = patientIDs_cancer_types[patientID]
 
-
         ecog_ = [0]
         if patientID in patientID_to_ecog:
             ecog_ = [patientID_to_ecog[patientID]]
@@ -933,7 +932,6 @@ if __name__ == '__main__':
                 all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
         else:
             all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
-
 
         temp_combo_list = []
         combo_therapy = 0
@@ -1009,17 +1007,11 @@ if __name__ == '__main__':
         if patientID not in patientID_to_first_line_start_date:
             continue
 
-        #if days_from_dx_to_tx > tx_interval:
-        #    continue
-
-
         therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy,
                         days_from_dx_to_tx]
 
-        #therapy_info = [io_mono, io_mono_used, first_line_chemo, days_from_dx_to_tx]
-
-        x_demos_no_diagnoses = np.concatenate(([x_practice[0], x_practice[2]], age_diagnosis_stats, x_demos,
+        x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], cancer_vec, ecog_, all_biomarkers,
                                                therapy_info))
 
@@ -1076,11 +1068,13 @@ if __name__ == '__main__':
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
+
         if patient_ID not in patientID_to_first_line_start_date:
             continue
+
         tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-        if tx_init_date > progression_date_final and tx_start:
+        if tx_init_date > progression_date_final:
             continue
 
         if patient_ID not in patientID_to_progression:
@@ -1118,11 +1112,7 @@ if __name__ == '__main__':
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
         tx_start_date = patientID_to_first_line_start_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
-
         starting_date = tx_start_date
-        #else:
-        #    starting_date = adv_dx_date
-
         time_to_censor = (last_final_recorded_date_records - starting_date).days
 
         if patientID in patientID_to_progression:
@@ -1132,6 +1122,10 @@ if __name__ == '__main__':
                 progression = 0
             else:
                 progression = (progression_date - starting_date).days
+                if progression < 0:
+                    print(patientID)
+                    print(progression_date)
+                    print(starting_date)
 
             if time_to_censor < min_time and progression_date == no_progression_date:
                 continue
@@ -1181,7 +1175,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(min_time) + "_" + str(lr) + '_nn_'
+    file_name_extender = str(min_time) + '_'
 
     if exclude_diagnoses:
         file_name_extender += "1"
@@ -1215,8 +1209,8 @@ if __name__ == '__main__':
     if use_ml == 0:
         exit(0)
 
-    X_static_train = X_static_train[:, 2:]
-    X_static_test = X_static_test[:, 2:]
+    X_static_train = X_static_train[:, 1:]
+    X_static_test = X_static_test[:, 1:]
     y_train_final = y_train[:, 0]
     y_test_final = y_test[:, 0]
 
@@ -1227,7 +1221,7 @@ if __name__ == '__main__':
 
 
     ###### HGB
-    categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
+    categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
     hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
     params_hgb = {
         'learning_rate': [0.1, 0.05, 0.2, 0.01],

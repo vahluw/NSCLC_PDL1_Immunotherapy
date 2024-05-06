@@ -10,10 +10,10 @@
 
 
  import delimited "all_data_182.csv", clear 
-keep if diag_year >=2014
+
   gen time_limit = 182
  gen outcome = "progression"
- //keep if stage > 12 & stage != 18
+
  
  
  gen censor_time = progression_days 
@@ -54,8 +54,8 @@ drop if days_from_dx_to_tx > 182
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
  logit progression_outcome i.therapy_type ${indiv_covar} alk egfr braf kras ros1
- predict yhat
- rocreg progression_outcome yhat
+ predict logit_pred
+ rocreg progression_outcome logit_pred
  
  
   stset censor_time, failure(endpoint)
@@ -71,46 +71,29 @@ drop if days_from_dx_to_tx > 182
  drop if egfr==1
  drop if ros1==1
  drop if therapy_type>=2
- 
+
  
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation  (Days)") ytitle("Proportion at Risk") legend(order(1 "Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation  (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
  graph export "prog_survival_without_mutations_pre_match_no_combo.png", replace
  sts test therapy_type, logrank
- 
 
-drop if stage==1 | stage==18 | stage ==4 | race ==4 | smoking_status == 0
 
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 
-
-teffects psmatch (endpoint) (therapy_type ${indiv_covar} ) 
-teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) 
-teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) 
-
-teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
-teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.5 
-
-
-drop if stage == 5 | stage== 6 | stage == 14
-teffects psmatch (endpoint) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5 , osample(delete)
-drop if delete == 1
-teffects ipwra (endpoint ${indiv_covar} ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5 
-teffects ipw (endpoint ) (therapy_type ${indiv_covar} ) if pdl1>=0.01 & pdl1<0.5
-
 logit therapy_type ${indiv_covar} 
 predict yhat
-graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
+graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
 graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
 		lcolor(none%0)) (histogram yhat if therapy_type==1, ///
 		fcolor(gray%25) lcolor(none%0)), xti("Propensity score") ///
 		title("Distribution of Propensity Scores Pre-Matching") ///
-		subtitle("by Therapy Type, Entire Dataset") legend(label(1 "Chemotherapy") ///
-		label(2 "IO Monotherapy"))
+		subtitle("by Therapy Type, Entire Dataset") legend(label(1 "First-Line Chemotherapy") ///
+		label(2 "First-Line IO Monotherapy"))
 graph export "propensity_pre_match_hist.png", replace
 
 pstest ${indiv_covar}, raw treated(therapy_type)
@@ -133,7 +116,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
 		lcolor(none%0)) (histogram yhat if therapy_type==1,  ///
 		fcolor(gray%25) lcolor(none%0)), xti("Propensity score") ///
 		title("Distribution of Propensity Scores Post-Matching")  ///
-		subtitle("by Therapy Type, Entire Dataset") legend(label(1 "Chemotherapy") ///
+		subtitle("by Therapy Type, Entire Dataset") legend(label(1 "First-Line Chemotherapy") ///
 		label(2 "IO Monotherapy")) 
 graph export "propensity_post_match_hist.png", replace
 
@@ -144,14 +127,14 @@ graph export "propensity_post_match_hist.png", replace
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
  graph export "chemo_io_post_match.png", replace
   sts test therapy_type, logrank
   
    stset censor_time if pdl1>=0.5, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
  graph export "chemo_io_post_match_pdl1_over50.png", replace
   sts test therapy_type, logrank
   
@@ -159,7 +142,7 @@ graph export "propensity_post_match_hist.png", replace
  stset censor_time , failure(endpoint)
  stci , by(therapy_type) rmean
  stcox therapy_type 
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
  graph export "chemo_io_post_match_pdl1_under50.png", replace
   sts test therapy_type, logrank
   
@@ -200,6 +183,8 @@ logit progression_outcome i.therapy_type $indiv_covar  i.stage if pdl1>=0.4 & pd
 
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.4) wr(0.6)
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.3) wr(0.7)
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.2) wr(0.8)
 
 rddensity pdl1, c(0.5) all level(95) p(3) // check sorting/bunching assumption
 

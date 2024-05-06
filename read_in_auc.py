@@ -12,10 +12,7 @@ all_dataset = np.array(np.load('whole_dataset_' + limit +'_0.005_1.npy'))
 test_dataset = np.array(np.load('test_set_' + limit +'_0.005_1.npy'))
 hgb_preds = np.expand_dims(np.array(np.load('y_pred_182_0.005_1_hgb_0.70_182_0.005_1.npy')), axis=1)
 xgb_preds = np.expand_dims(np.array(np.load('y_pred_182_0.005_1_xgb_0.70_182_0.005_1.npy')), axis=1)
-#rf_preds = np.expand_dims(np.array(np.load('y_pred_rf_0.80_0110111.npy')), axis=1)
-#knn_preds = np.expand_dims(np.array(np.load('y_pred_knn_0.73_0110111.npy')), axis=1)
-#logistic_preds = np.expand_dims(np.array(np.load('y_pred_logistic_0.63_0110111.npy')), axis=1)
-#all_test_data = np.concatenate((test_dataset, hgb_preds), axis=1)
+
 #all_test_data = test_dataset
 all_test_data =  np.concatenate((test_dataset, hgb_preds, xgb_preds), axis=1)
 headers_test_set = [ "practiceID", "physicianID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state",
