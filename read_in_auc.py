@@ -8,8 +8,8 @@ import pandas as pd
 from sklearn.metrics import roc_curve
 
 limit = "182"
-all_dataset = np.array(np.load('whole_dataset_' + limit +'_1.npy'))
-test_dataset = np.array(np.load('test_set_' + limit +'_1.npy'))
+all_dataset = np.array(np.load('whole_dataset_' + limit +'_10.npy'))
+test_dataset = np.array(np.load('test_set_' + limit +'_10.npy'))
 #hgb_preds = np.expand_dims(np.array(np.load('y_pred_182_1_hgb_0.67_182_1.npy')), axis=1)
 #xgb_preds = np.expand_dims(np.array(np.load('y_pred_182_1_xgb_0.68_182_1.npy')), axis=1)
 
@@ -17,8 +17,8 @@ all_test_data = test_dataset
 #all_test_data =  np.concatenate((test_dataset, hgb_preds, xgb_preds), axis=1)
 headers_test_set = ["physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race",
                     "ethnicity", "state", "other_no_insurance","workers_comp","self_pay","pt_assistance",
-                    "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type",   "stage",
-                    "histology", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
+                    "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type", "ecog", "stage",
+                    "histology", "smoking_status", "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
                    "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "alk_drug", "egfr_drug",
                     "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "clinical_study_drug", "bev_used",
                 "three_plus_chemo_drugs", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",
@@ -65,8 +65,8 @@ in_test_set = np.array(in_test_set)
 in_test_set = np.expand_dims(in_test_set, axis=1)
 headers = ["in_test_set", "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race",
                     "ethnicity", "state", "other_no_insurance","workers_comp","self_pay","pt_assistance",
-                    "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type",   "stage",
-                    "histology", "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
+                    "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type",  "ecog", "stage",
+                    "histology", "smoking_status",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
                    "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug", "alk_drug", "egfr_drug",
                     "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "clinical_study_drug", "bev_used",
                    "three_plus_chemo_drugs", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",

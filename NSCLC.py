@@ -1308,10 +1308,12 @@ if __name__ == '__main__':
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
         '''
 
-        X_static_train_df = pd.get_dummies(X_static_train, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_train = X_static_train_df.values
-        X_static_test_df = pd.get_dummies(X_static_test, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_test = X_static_test_df.values
+        X_static_train_df = pd.DataFrame(data=X_static_train)
+        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_train = X_static_train_df_final.values
+        X_static_test_df = pd.DataFrame(data=X_static_test)
+        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_test = X_static_test_df_final.values
 
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
@@ -1384,10 +1386,12 @@ if __name__ == '__main__':
         '''
 
     else:
-        X_static_train_df = pd.get_dummies(X_static_train, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_train = X_static_train_df.values
-        X_static_test_df = pd.get_dummies(X_static_test, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_test = X_static_test_df.values
+        X_static_train_df = pd.DataFrame(data=X_static_train)
+        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_train = X_static_train_df_final.values
+        X_static_test_df = pd.DataFrame(data=X_static_test)
+        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_test = X_static_test_df_final.values
         dense_units = 3000
 
         X_train_static_mean = X_static_train.mean()

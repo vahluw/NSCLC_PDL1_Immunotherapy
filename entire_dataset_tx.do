@@ -3,7 +3,7 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance i.stage"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -41,7 +41,7 @@ drop if days_from_dx_to_tx > 182
  
  gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 1 if io_mono_used > 0
  replace therapy_type = 2 if combo_therapy == 1
  replace therapy_type = 3 if secondary_chemo_drug == 1
  replace therapy_type = 4 if alk_drug == 1
@@ -53,7 +53,7 @@ drop if days_from_dx_to_tx > 182
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- logit progression_outcome i.therapy_type ${indiv_covar} alk egfr braf kras ros1
+ logit progression_outcome i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug
  predict logit_pred
  rocreg progression_outcome logit_pred
  
@@ -71,6 +71,8 @@ drop if days_from_dx_to_tx > 182
  drop if egfr==1
  drop if ros1==1
  drop if therapy_type>=2
+ drop if bev_used == 1 | three_plus_chemo_drugs == 1
+ //keep if therapy_type == 0 | io_mono_used == 2
 
  
  stset censor_time, failure(endpoint)
@@ -80,11 +82,18 @@ drop if days_from_dx_to_tx > 182
  graph export "prog_survival_without_mutations_pre_match_no_combo.png", replace
  sts test therapy_type, logrank
 
-
+ logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year
+ 
+ /*
+ drop if stage == 1 | stage == 18 | kidney_transplant == 1 | liver_transplant == 1 | scleroderma == 1 | polyangiitis == 1 | polymyositis == 1 | marfan == 1
+teffects ipwra (progression_outcome) (therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year)
+ 
+teffects ipwra (progression_outcome) (therapy_type ${indiv_covar})
+*/
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 
-logit therapy_type ${indiv_covar} 
+logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
@@ -122,8 +131,6 @@ graph export "propensity_post_match_hist.png", replace
 
 
 
-
-
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
@@ -153,8 +160,7 @@ graph export "propensity_post_match_hist.png", replace
 import delimited "all_data_182.csv", clear
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
-replace therapy_type = 1 if io_mono == 1
-drop if io_mono_used == 1 | io_mono_used>=5
+replace therapy_type = 1 if io_mono >=2 & therapy_type <=5
 keep if therapy_type>=0
 gen first_line = 0
 replace first_line = 1 if therapy_type ==1
@@ -163,6 +169,8 @@ replace over_threshold = 1 if pdl1>=0.5
 drop if alk==1
 drop if egfr==1
 drop if ros1==1
+drop if three_plus_chemo_drugs == 1
+drop if bev_used==1
 keep if pdl1_given==1
 rdplot first_line pdl1, c(0.5) ci(95) p(3)
 graph export "polynomial_fit_RD.png", replace
@@ -177,26 +185,20 @@ kdensity pdl1 , xline(0.5)
 
 //Plotting all, testing only within the optimal bandwidth estimated
 rddensity pdl1 , pl c(0.5)
-//drop if days_from_dx_to_tx > 182
-
 
 
 // Note: The "T" is your local average treatment effect. The P>|T| in the large sample is your p-value. Use the confidence interval.
 // RD density plot shows that while there is a significant spike from 0.4 to 0.5 there is no reason to think pathologists
 // are artificially inflating PD-L1 values so as to increase likelihood of IO monotherapy. 
 
+gen insured = 0
+replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan == 1 | self_pay == 1 
+
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
 rddensity pdl1, c(0.5) vce(jackknife) plot
-rddensity pdl1, c(0.5) all level(95) p(3) // check sorting/bunching assumption
-rdwinselect pdl1 days_from_dx_to_tx diag_year age_at_diagnosis, c(0.5) seed(0) reps(1000) wstep(0.1)
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
-
-
-gen progression_24_months = 0
-replace progression_24_months = 1 if progression_days < 730 & progression_days > 0
-rdrandinf progression_24_months pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
-rdrandinf progression_24_months pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
+rdwinselect pdl1 days_from_dx_to_tx therapy_year age_at_diagnosis practice_type insured, c(0.5) seed(0) reps(1000)  wmass level(0.05)
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.01) wr(1) wmass
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.01) wr(1) wmass
 
   /////////////////////////////
 /*  Instrumental variables */
@@ -207,7 +209,7 @@ set scheme cleanplots
 global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf pdl1_given"
   
 import delimited "all_data_182.csv", clear 
-//keep if diag_year >=2014
+
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono == 1
@@ -215,11 +217,12 @@ drop if alk==1
 drop if egfr==1
 drop if ros1==1
 keep if therapy_type >= 0
-
+drop if three_plus_chemo_drugs == 1
+drop if bev_used==1
 set emptycells drop
 gen progression_6_months = 0
 replace progression_6_months = 1 if progression_days < 182 & progression_days > 0
 logit progression_outcome i.therapy_type $indiv_covar  i.stage
-ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar  i.stage, first robust
+ivreg2 progression_outcome (therapy_type = i.practiceid ) $indiv_covar kras  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets  
 
 logit progression_6_months i.therapy_type $indiv_covar  i.stage
