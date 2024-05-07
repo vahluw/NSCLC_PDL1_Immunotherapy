@@ -458,69 +458,6 @@ if __name__ == '__main__':
     print("Stages set: ", stages)
     print("States set: ", state_to_number)
 
-    diagnosis = pd.read_csv(dir_path + 'Diagnosis.csv')
-    all_diagnoses_to_numbers = create_set(diagnosis["DiagnosisCode"], start_at_zero=True)
-    patientIDs_diagnoses = dict()
-    patientID_to_contraindications = dict()
-
-    for i in range(len(diagnosis['PatientID'])):
-
-        patientID_current = diagnosis['PatientID'][i]
-        diagnosis_current_code = diagnosis['DiagnosisCode'][i]
-        diagnosis_name = diagnosis['DiagnosisDescription'][i].lower()
-        diagnosis_date = diagnosis['DiagnosisDate'][i]
-
-        if isinstance(diagnosis_date, float) or '1800' in diagnosis_date or '1899' in diagnosis_date:
-            continue
-
-        if dir_path == dir_path2:
-            dx_date_temp = time.strptime(diagnosis_date, "%m/%d/%y")
-        else:
-            dx_date_temp = time.strptime(diagnosis_date, "%Y-%m-%d")
-
-        dx_date = date(dx_date_temp.tm_year, dx_date_temp.tm_mon, dx_date_temp.tm_mday)
-        adv_dx_date = patientID_to_advanced_diagnosis_date[patientID_current]
-        patientID_to_censor_date = update_last_note(patientID_current, patientID_to_censor_date, dx_date)
-
-        if adv_dx_date < dx_date:
-            continue
-
-        index_diagnosis = all_diagnoses_to_numbers[diagnosis_current_code]
-        possible_contraindications_kidney = ["kidney failure", "chronic kidney disease", "renal disease", "kidney transplant"]
-        possible_contraindications_liver = ["cirrhosis", "hepatitis", "liver transplant"]
-        possible_contraindications_ctd = ["connective tissue", "scleroderma", "lupus", "rheumatoid arthritis", "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis", "marfan", "churg-strauss", "interstitial lung disease"]
-        comorbidities = [list(), list(), list(), list(), list(), list()]
-
-        if patientID_current in patientIDs_diagnoses:
-            patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
-        else:
-            patientIDs_diagnoses[patientID_current] = np.zeros(len(all_diagnoses_to_numbers))
-            patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
-
-        if patientID_current not in patientID_to_contraindications:
-            patientID_to_contraindications[patientID_current] = [list(), list(), list(), list(), list(), list()]
-
-        for item in possible_contraindications_liver:
-            if item in diagnosis_name:
-                patientID_to_contraindications[patientID_current][0].append(dx_date)
-
-        for item in possible_contraindications_kidney:
-            if item in diagnosis_name:
-                patientID_to_contraindications[patientID_current][1].append(dx_date)
-
-        for item in possible_contraindications_ctd:
-            if item in diagnosis_name:
-                patientID_to_contraindications[patientID_current][2].append(dx_date)
-
-        if "diabetes" in diagnosis_name:
-            patientID_to_contraindications[patientID_current][3].append(dx_date)
-
-        if "heart failure" in diagnosis_name:
-            patientID_to_contraindications[patientID_current][4].append(dx_date)
-
-        if "chronic obstructive pulmonary disease" in diagnosis_name:
-            patientID_to_contraindications[patientID_current][5].append(dx_date)
-
     ECOGs = pd.read_csv(dir_path + 'ECOG.csv')
     patientID_to_ecog = dict()
 
@@ -605,7 +542,252 @@ if __name__ == '__main__':
         else:
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
 
-    '''
+    diagnosis = pd.read_csv(dir_path + 'Diagnosis.csv')
+    diagnosis_values = list(map(lambda x: x.lower(), diagnosis["DiagnosisDescription"].values))
+    all_diagnoses_to_numbers = create_set(diagnosis_values, start_at_zero=True)
+    patientIDs_diagnoses = dict()
+    patientID_to_contraindications = dict()
+    patientID_to_important_diagnoses = dict()
+
+    for i in range(len(diagnosis['PatientID'])):
+
+        patientID_current = diagnosis['PatientID'][i]
+        diagnosis_name = diagnosis['DiagnosisDescription'][i].lower()
+        diagnosis_date = diagnosis['DiagnosisDate'][i]
+
+        if isinstance(diagnosis_date, float) or '1800' in diagnosis_date or '1899' in diagnosis_date:
+            continue
+
+        if dir_path == dir_path2:
+            dx_date_temp = time.strptime(diagnosis_date, "%m/%d/%y")
+        else:
+            dx_date_temp = time.strptime(diagnosis_date, "%Y-%m-%d")
+
+        dx_date = date(dx_date_temp.tm_year, dx_date_temp.tm_mon, dx_date_temp.tm_mday)
+        adv_dx_date = patientID_to_advanced_diagnosis_date[patientID_current]
+        patientID_to_censor_date = update_last_note(patientID_current, patientID_to_censor_date, dx_date)
+
+        if adv_dx_date < dx_date:
+            continue
+
+        index_diagnosis = all_diagnoses_to_numbers[diagnosis_name]
+        possible_contraindications_kidney = ["kidney failure", "chronic kidney disease", "renal disease", "kidney transplant"]
+        possible_contraindications_liver = ["cirrhosis", "hepatitis", "liver transplant"]
+        possible_contraindications_ctd = ["connective tissue", "scleroderma", "lupus", "rheumatoid arthritis", "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis", "marfan", "churg-strauss", "interstitial lung disease"]
+        comorbidities = [list(), list(), list(), list(), list(), list()]
+
+        if patientID_current in patientIDs_diagnoses:
+            patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
+        else:
+            patientIDs_diagnoses[patientID_current] = np.zeros(len(all_diagnoses_to_numbers))
+            patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
+
+        if patientID_current not in patientID_to_important_diagnoses:
+            patientID_to_important_diagnoses[patientID_current] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        for i in range(len(possible_contraindications_kidney)):
+            kidney_contra = possible_contraindications_kidney[i]
+            if kidney_contra in diagnosis_name or diagnosis_name == kidney_contra:
+                patientID_to_important_diagnoses[patientID_current][i] = 1
+
+        for i in range(len(possible_contraindications_liver)):
+            liver_contra = possible_contraindications_liver[i]
+            if liver_contra in diagnosis_name or diagnosis_name == liver_contra:
+                patientID_to_important_diagnoses[patientID_current][4+i] = 1
+
+        for i in range(len(possible_contraindications_ctd)):
+            ctd_contra = possible_contraindications_ctd[i]
+            if ctd_contra in diagnosis_name or diagnosis_name == ctd_contra:
+                patientID_to_important_diagnoses[patientID_current][7+i] = 1
+
+        if "diabetes" in diagnosis_name:
+            patientID_to_important_diagnoses[patientID_current][-1] = 1
+
+        if "secondary malignant neoplasm" in diagnosis_name:
+            name_len = len("secondary malignant neoplasm of ")
+            organ = diagnosis_name[name_len:]
+            if "bone" in organ or "bone marrow" in organ:
+                patientID_to_important_diagnoses[patientID_current][18] = 1
+            elif "brain" in organ:
+                patientID_to_important_diagnoses[patientID_current][19] = 1
+            elif "nervous system" in organ or "spinal cord" in organ:
+                patientID_to_important_diagnoses[patientID_current][20] = 1
+            elif "retroperitoneum" in organ or "liver" in organ or "digestive" in organ:
+                patientID_to_important_diagnoses[patientID_current][21] = 1
+            elif "adrenal" in organ:
+                patientID_to_important_diagnoses[patientID_current][22] = 1
+            elif "pleura" in organ or "unspecified" in organ:
+                patientID_to_important_diagnoses[patientID_current][23] = 1
+
+    y = []
+    static_variables = dict()
+
+    len_static = 0
+    total_len_static = 0
+    chemotherapy_drugs = ["cisplatin", "carboplatin"]
+    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "cemiplimab": 3, "atezolizumab": 4,
+                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6}
+    first_line_chemotherapy_drugs = ["cisplatin", "carboplatin"]
+    egfr_drugs = ["osimertinib", "erlotinib", "gefitinib", "afatinib"]
+    alk_drugs = ["alectinib", "ceritinib", "brigatinib"]
+    ros1_drugs = ["crizotinib", "entrectinib", "repotrectinib"]
+    braf_drugs = ["dabrafenib,trametinib", "binimetinib,encorafenib"]
+    ras_drugs = ["sotorasib", "adagrasib"]
+    secondary_chemo_drugs = ["vinorelbine", "docetaxel", "gemcitabine", "pemetrexed", "paclitaxel", "paclitaxel protein-bound"]
+    patientID_to_first_line_start_date = dict()
+
+    for patientID in patientID_to_advanced_diagnosis_date:
+        x_demos = patientIDs_demos[patientID]
+
+        age_diagnosis_stats = [0, 0]
+
+        if patientID in patientID_to_advanced_diagnosis_date:
+            diagnosis_year = patientID_to_advanced_diagnosis_date[patientID].year
+            age_at_diagnosis = diagnosis_year - x_demos[0]
+            age_diagnosis_stats = [diagnosis_year, age_at_diagnosis]
+
+        insurance_patient = [0, 0, 0, 0, 0, 0, 0, 0]
+        if patientID in patientID_to_insurance:
+            insurance_patient = patientID_to_insurance[patientID]
+
+        x_practice = [0, 0, 0]
+        if patientID in practiceIDs_data:
+            x_practice = practiceIDs_data[patientID]
+
+        cancer_vec = [0, 0, 0]
+        if patientID in patientIDs_cancer_types:
+            cancer_vec = patientIDs_cancer_types[patientID]
+
+        ecog_ = [0]
+        if patientID in patientID_to_ecog:
+            ecog_ = [patientID_to_ecog[patientID]]
+
+        all_biomarkers = []
+        if patientID in patientID_to_biomarkers:
+            for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given"]:
+                all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
+        else:
+            all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
+
+        temp_combo_list = []
+        combo_therapy = 0
+        first_line_chemo = 0
+        io_mono = 0
+        io_mono_used = 0
+        egfr_drug = 0
+        alk_drug = 0
+        ros1_drug = 0
+        braf_drug = 0
+        ras_drug = 0
+        secondary_chemo_drug = 0
+        other_first_line_therapy = 0
+        days_from_dx_to_tx = 0
+        clinical_study_drug = 0
+
+        if patientID in patientID_to_therapyline:
+            diagnosis_date = patientID_to_advanced_diagnosis_date[patientID]
+            all_therapies_used = patientID_to_therapyline[patientID]
+
+            # Loop through all therapies this patient was prescribed
+            for i in range(len(all_therapies_used)):
+                (therapy_line, therapy_name, end_date, start_date) = all_therapies_used[i]
+
+                # Only examine first-line therapies that had at least one dose given after advanced diagnosis date
+                if therapy_line == 1:
+                    some_other_immuno = 0
+                    patientID_to_first_line_start_date[patientID] = start_date
+                    if start_date < diagnosis_date:
+                        patientID_to_advanced_diagnosis_date[patientID] = start_date
+                        days_from_dx_to_tx = 0
+                    else:
+                        days_from_dx_to_tx = (start_date-diagnosis_date).days
+                    if "clinical study drug" in therapy_name:
+                        clinical_study_drug = 1
+
+                    if therapy_name in approved_first_line_immunomonotherapies:
+                        io_mono = 1
+                        io_mono_used = first_line_mono_io_to_index[therapy_name]
+                    elif therapy_name in egfr_drugs:
+                        egfr_drug = 1
+                    elif therapy_name in alk_drugs:
+                        alk_drug = 1
+                    elif therapy_name in ros1_drugs:
+                        ros1_drug = 1
+                    elif therapy_name in braf_drugs:
+                        braf_drug = 1
+                    elif therapy_name in ras_drugs:
+                        ras_drug = 1
+                    elif therapy_name in secondary_chemo_drugs:
+                        secondary_chemo_drug = 1
+                    else:
+                        temp_combo = [0, 0, 0, 0]
+                        all_meds_at_instance = therapy_name.split(',')
+                        for j in range(len(all_meds_at_instance)):
+                            current_med = all_meds_at_instance[j]
+
+                            if current_med in approved_first_line_immunomonotherapies:
+                                temp_combo[0] = 1
+                            elif current_med in first_line_chemotherapy_drugs:
+                                temp_combo[1] = 1
+                            elif current_med in secondary_chemo_drugs:
+                                temp_combo[2] = 1
+                            else:
+                                temp_combo[3] = 1
+
+                            if current_med in egfr_drugs or current_med in alk_drugs or current_med in ros1_drugs \
+                                    or current_med in braf_drugs or current_med in ras_drugs:
+                                some_other_immuno = 1
+
+                        if clinical_study_drug == 1:
+                            other_first_line_therapy = 1
+                        # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line) plus other drug(s)
+                        elif temp_combo[0] == 0 and temp_combo[1] == 1 and some_other_immuno == 0 and temp_combo[2] == 1:
+                            first_line_chemo = 1
+
+                        # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line)
+                        elif temp_combo[0] == 1 and temp_combo[1] == 1:
+                            combo_therapy = 1
+
+                        # Other therapy: No IO monotherapy and no first-line cisplatin/carboplatin
+                        else:
+                            other_first_line_therapy = 1
+
+        if patientID not in patientID_to_first_line_start_date:
+            continue
+
+        if days_from_dx_to_tx > 182:
+            continue
+
+        therapy_year = patientID_to_first_line_start_date[patientID].year
+        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
+                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug,
+                        days_from_dx_to_tx, therapy_year]
+
+        if patientID in patientID_to_important_diagnoses:
+            all_important_dx = patientID_to_important_diagnoses[patientID]
+        else:
+            all_important_dx = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
+                                               insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
+                                               therapy_info, all_important_dx))
+
+        len_static = len(x_demos_no_diagnoses)
+        location = x_demos_no_diagnoses.shape[0]
+
+        x_diagnosis = np.zeros(len(all_diagnoses_to_numbers))
+        if patientID in patientIDs_diagnoses:
+            x_diagnosis = patientIDs_diagnoses[patientID]
+
+        if exclude_diagnoses:
+            x_static = x_demos_no_diagnoses
+        else:
+            x_static = np.concatenate((x_demos_no_diagnoses, x_diagnosis))
+        static_variables[patientID] = x_static
+        total_len_static = x_static.shape[0]
+
+        del x_diagnosis
+
     vitals = pd.read_csv(dir_path + 'Vitals.csv')
     patientID_to_vitals = dict()
 
@@ -630,7 +812,15 @@ if __name__ == '__main__':
         vitals_date = date(vitals_date_temp.tm_year, vitals_date_temp.tm_mon, vitals_date_temp.tm_mday)
         adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, vitals_date)
-        if adv_dx_date < vitals_date:
+
+
+
+        if patient_ID not in patientID_to_first_line_start_date:
+            continue
+
+        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+
+        if tx_init_date < vitals_date:
             continue
 
         if patient_ID not in patientID_to_vitals:
@@ -663,7 +853,11 @@ if __name__ == '__main__':
             labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
             adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
             patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
-            if adv_dx_date < labs_date:
+            if patient_ID not in patientID_to_first_line_start_date:
+                continue
+            tx_init_date = patientID_to_first_line_start_date[patient_ID]
+
+            if tx_init_date < labs_date:
                 continue
 
             test_name = test_name.lower()
@@ -739,8 +933,11 @@ if __name__ == '__main__':
         meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
         adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
+        if patient_ID not in patientID_to_first_line_start_date:
+            continue
+        tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-        if adv_dx_date < meds_date:
+        if tx_init_date < meds_date:
             continue
 
         if patient_ID not in patientID_to_med_administration:
@@ -872,168 +1069,16 @@ if __name__ == '__main__':
         dynamic_holder_all_dates_single_patient_array = np.array(dynamic_holder_all_dates_single_patient)
         total_rows = dynamic_holder_all_dates_single_patient_array.shape[0]
         for row in range(1, total_rows, 1):
-            for col in range(total_vitals_labs):
+            for col in range(total_meds_vitals_labs):
                 if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row-1][col] != 0.0:
                     dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row-1][col]
 
         for row in range(total_rows-2, -1, -1):
-            for col in range(total_vitals_labs):
+            for col in range(total_meds_vitals_labs):
                 if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row+1][col] != 0.0:
                     dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
 
         dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
-    '''
-    y = []
-    static_variables = dict()
-
-    len_static = 0
-    total_len_static = 0
-    chemotherapy_drugs = ["cisplatin", "carboplatin"]
-    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "cemiplimab": 3, "atezolizumab": 4,
-                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6}
-    first_line_chemotherapy_drugs = ["cisplatin", "carboplatin"]
-    egfr_drugs = ["osimertinib", "erlotinib", "gefitinib", "afatinib"]
-    alk_drugs = ["alectinib", "ceritinib", "brigatinib"]
-    ros1_drugs = ["crizotinib", "entrectinib", "repotrectinib"]
-    braf_drugs = ["dabrafenib,trametinib", "binimetinib,encorafenib"]
-    ras_drugs = ["sotorasib", "adagrasib"]
-    secondary_chemo_drugs = ["vinorelbine", "docetaxel", "gemcitabine", "pemetrexed"]
-    patientID_to_first_line_start_date = dict()
-
-    for patientID in patientID_to_advanced_diagnosis_date:
-        x_demos = patientIDs_demos[patientID]
-
-        age_diagnosis_stats = [0, 0]
-
-        if patientID in patientID_to_advanced_diagnosis_date:
-            diagnosis_year = patientID_to_advanced_diagnosis_date[patientID].year
-            age_at_diagnosis = diagnosis_year - x_demos[0]
-            age_diagnosis_stats = [diagnosis_year, age_at_diagnosis]
-
-        insurance_patient = [0, 0, 0, 0, 0, 0, 0, 0]
-        if patientID in patientID_to_insurance:
-            insurance_patient = patientID_to_insurance[patientID]
-
-        x_practice = [0, 0, 0]
-        if patientID in practiceIDs_data:
-            x_practice = practiceIDs_data[patientID]
-
-        cancer_vec = [0, 0, 0]
-        if patientID in patientIDs_cancer_types:
-            cancer_vec = patientIDs_cancer_types[patientID]
-
-        ecog_ = [0]
-        if patientID in patientID_to_ecog:
-            ecog_ = [patientID_to_ecog[patientID]]
-
-        all_biomarkers = []
-        if patientID in patientID_to_biomarkers:
-            for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given"]:
-                all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
-        else:
-            all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
-
-        temp_combo_list = []
-        combo_therapy = 0
-        first_line_chemo = 0
-        io_mono = 0
-        io_mono_used = 0
-        egfr_drug = 0
-        alk_drug = 0
-        ros1_drug = 0
-        braf_drug = 0
-        ras_drug = 0
-        secondary_chemo_drug = 0
-        other_first_line_therapy = 0
-        days_from_dx_to_tx = 0
-
-        if patientID in patientID_to_therapyline:
-            diagnosis_date = patientID_to_advanced_diagnosis_date[patientID]
-            all_therapies_used = patientID_to_therapyline[patientID]
-
-            # Loop through all therapies this patient was prescribed
-            for i in range(len(all_therapies_used)):
-                (therapy_line, therapy_name, end_date, start_date) = all_therapies_used[i]
-
-                # Only examine first-line therapies that had at least one dose given after advanced diagnosis date
-                if therapy_line == 1:
-                    patientID_to_first_line_start_date[patientID] = start_date
-                    if start_date < diagnosis_date:
-                        patientID_to_advanced_diagnosis_date[patientID] = start_date
-                        days_from_dx_to_tx = 0
-                    else:
-                        days_from_dx_to_tx = (start_date-diagnosis_date).days
-
-                    if therapy_name in approved_first_line_immunomonotherapies:
-                        io_mono = 1
-                        io_mono_used = first_line_mono_io_to_index[therapy_name]
-                    elif therapy_name in egfr_drugs:
-                        egfr_drug = 1
-                    elif therapy_name in alk_drugs:
-                        alk_drug = 1
-                    elif therapy_name in ros1_drugs:
-                        ros1_drug = 1
-                    elif therapy_name in braf_drugs:
-                        braf_drug = 1
-                    elif therapy_name in ras_drugs:
-                        ras_drug = 1
-                    elif therapy_name in secondary_chemo_drugs:
-                        secondary_chemo_drug = 1
-                    else:
-                        temp_combo = [0, 0, 0]
-                        all_meds_at_instance = therapy_name.split(',')
-                        for j in range(len(all_meds_at_instance)):
-                            current_med = all_meds_at_instance[j]
-
-                            if current_med in approved_first_line_immunomonotherapies:
-                                temp_combo[0] = 1
-                            elif current_med in first_line_chemotherapy_drugs:
-                                temp_combo[1] = 1
-                            else:
-                                temp_combo[2] = 1
-
-                        # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line) plus other drug(s)
-                        if temp_combo[0] == 0 and temp_combo[1] == 1:
-                            first_line_chemo = 1
-
-                        # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line)
-                        elif temp_combo[0] == 1 and temp_combo[1] == 1:
-                            combo_therapy = 1
-
-                        # Other therapy: No IO monotherapy and no first-line cisplatin/carboplatin
-                        else:
-                            other_first_line_therapy = 1
-
-        if patientID not in patientID_to_first_line_start_date:
-            continue
-
-        if days_from_dx_to_tx > 182:
-            continue
-
-        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy,
-                        days_from_dx_to_tx]
-
-        # Note: deleted ECOG
-        x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
-                                               insurance_patient, [x_practice[1]], cancer_vec, all_biomarkers,
-                                               therapy_info))
-
-        len_static = len(x_demos_no_diagnoses)
-        location = x_demos_no_diagnoses.shape[0]
-
-        x_diagnosis = np.zeros(len(all_diagnoses_to_numbers))
-        if patientID in patientIDs_diagnoses:
-            x_diagnosis = patientIDs_diagnoses[patientID]
-
-        if exclude_diagnoses:
-            x_static = x_demos_no_diagnoses
-        else:
-            x_static = np.concatenate((x_demos_no_diagnoses, x_diagnosis))
-        static_variables[patientID] = x_static
-        total_len_static = x_static.shape[0]
-
-        del x_diagnosis
 
     progressions = pd.read_csv(dir_path+'Enhanced_AdvNSCLCProgression.csv')
     pd1s_progression = []
@@ -1083,7 +1128,6 @@ if __name__ == '__main__':
 
         if patient_ID not in patientID_to_progression:
             if progression_bool:
-
                 patientID_to_progression[patient_ID] = progression_date_final
             else:
                 patientID_to_progression[patient_ID] = no_progression_date
@@ -1126,10 +1170,6 @@ if __name__ == '__main__':
                 progression = 0
             else:
                 progression = (progression_date - starting_date).days
-                if progression < 0:
-                    print(patientID)
-                    print(progression_date)
-                    print(starting_date)
 
             if time_to_censor < min_time and progression_date == no_progression_date:
                 continue
@@ -1142,7 +1182,13 @@ if __name__ == '__main__':
         else:
             mortality_days = 0
 
-        X_static.append(vals)
+        if patientID in dynamic_variables:
+            dynamic_data = (dynamic_variables[patientID][-1]).flatten()
+        else:
+            dynamic_data = np.zeros(total_meds_vitals_labs)
+
+        final_vals = np.concatenate((vals, dynamic_data))
+        X_static.append(final_vals)
         y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
 
     num_patients = len(X_static)
@@ -1157,7 +1203,6 @@ if __name__ == '__main__':
     del patientIDs_cancer_types
     del static_variables
 
-    '''
     del patientID_to_med_administration
     del patientID_to_vitals
     del patientID_to_labs
@@ -1166,7 +1211,7 @@ if __name__ == '__main__':
     del patientID_to_AST
     del patientID_to_ALT
     del dynamic_variables
-    '''
+
     y = np.array(y)
     y = y.astype('float32')
     X_static = np.array(X_static)
@@ -1182,6 +1227,11 @@ if __name__ == '__main__':
     file_name_extender = str(min_time) + '_'
 
     if exclude_diagnoses:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
+    if use_ml:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1210,9 +1260,6 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    if use_ml == 0:
-        exit(0)
-
     X_static_train = X_static_train[:, 2:]
     X_static_test = X_static_test[:, 2:]
     y_train_final = y_train[:, 0]
@@ -1223,149 +1270,137 @@ if __name__ == '__main__':
     train_class_weights = {i:train_class_weights[i] for i in range(2)}
     print(train_class_weights)
 
+    if use_ml==0:
 
-    ###### HGB
-    categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
-    hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
-    params_hgb = {
-        'learning_rate': [0.1, 0.05, 0.2, 0.01],
-        'l2_regularization': [0, 0.01, 0.1],
-        'min_samples_leaf': [20, 50, 100],
-        "max_depth": [2, 5, None],
-        'class_weight': ['balanced', None],
-        'max_features': [ 0.5, 0.75, 1.0],
-        }
+        ###### HGB
+        categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
+        hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
+        params_hgb = {
+            'learning_rate': [0.1, 0.05, 0.2, 0.01],
+            'l2_regularization': [0, 0.01, 0.1],
+            'min_samples_leaf': [20, 50, 100],
+            "max_depth": [2, 5, None],
+            'class_weight': ['balanced', None],
+            'max_features': [ 0.5, 0.75, 1.0],
+            }
 
-    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
-                        y_test_final, file_name_extender, type='hgb')
-
-
-    ####XGBoost
-    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-    params_xgb = {
-        'min_child_weight': [1, 5, 10],
-        'gamma': [0.5, 1, 1.5, 2.0],
-        'max_depth': [5, 10, 15, 25],
-        'learning_rate': [0.05, 0.1, 0.2, 1.0],
-        'n_estimators': [200, 300, 400],
-        }
-    classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
-    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                        file_name_extender,  type='xgb', weights=classes_weights)
+        perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
+                            y_test_final, file_name_extender, type='hgb')
 
 
-    ####XGBoost Unbalanced
-    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-    params_xgb = {
-        'min_child_weight': [1, 5, 10],
-        'gamma': [0.5, 1, 1.5, 2.0],
-        'max_depth': [5, 10, 15, 25],
-        'learning_rate': [0.05, 0.1, 0.2, 1.0],
-        'n_estimators': [200, 300, 400],
-        }
-
-    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                        file_name_extender,  type='xgb_unbalanced')
-
-    '''
-
-    ###### GB
-    gb_clf = GradientBoostingClassifier(random_state=0)
-    params_gb = {
-            'loss': ['log_loss', 'exponential'],
-            'learning_rate': [0.1, 0.05],
+        ####XGBoost
+        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
+        params_xgb = {
+            'min_child_weight': [1, 5, 10],
+            'gamma': [0.5, 1, 1.5, 2.0],
+            'max_depth': [5, 10, 15, 25],
+            'learning_rate': [0.05, 0.1, 0.2, 1.0],
             'n_estimators': [200, 300, 400],
-            'max_features': ["sqrt", None],
-            "criterion": ["friedman_mse",  "squared_error"],
-            "max_depth": [5, None]
             }
+        classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
+        perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                            file_name_extender,  type='xgb', weights=classes_weights)
 
-    perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
-                        file_name_extender, type='gb')
 
-    ##### RF
-    rf_clf = RandomForestClassifier(random_state=0)
-
-    params_rf = {
-            'n_estimators': [100, 200],
-            'max_depth': [80, 100],
-            'criterion': ["entropy", "log_loss"],
-            'min_samples_leaf': [1, 2],
-            'class_weight': ["balanced", None],
-            'max_features': [None, "sqrt"]
+        '''
+    
+        ###### GB
+        gb_clf = GradientBoostingClassifier(random_state=0)
+        params_gb = {
+                'loss': ['log_loss', 'exponential'],
+                'learning_rate': [0.1, 0.05],
+                'n_estimators': [200, 300, 400],
+                'max_features': ["sqrt", None],
+                "criterion": ["friedman_mse",  "squared_error"],
+                "max_depth": [5, None]
+                }
+    
+        perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
+                            file_name_extender, type='gb')
+    
+        ##### RF
+        rf_clf = RandomForestClassifier(random_state=0)
+    
+        params_rf = {
+                'n_estimators': [100, 200],
+                'max_depth': [80, 100],
+                'criterion': ["entropy", "log_loss"],
+                'min_samples_leaf': [1, 2],
+                'class_weight': ["balanced", None],
+                'max_features': [None, "sqrt"]
+                }
+    
+        perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
+    
+        #######   LR
+        logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
+        logistic_model.fit(X_static_train, y_train_final)
+        logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
+        logistic_score = logistic_model.score(X_static_test, y_test_final)
+        auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
+        print("Logistic: ",)
+        print("Score: ", logistic_score)
+        print("AUC: ", auc_final_lr)
+        auc_dec = Decimal(str(auc_final_lr))
+        rounded_num = round(auc_dec, 2)
+        np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender + '.npy', logistic_pred)
+        del logistic_model
+        del logistic_score
+        del logistic_pred
+    
+        ###### KNN
+        knn_clf = KNeighborsClassifier()
+        params_knn = {
+            'n_neighbors': [5, 20, 50],
+            'weights': ["uniform", "distance"],
+            'leaf_size': [20, 40]
             }
+        perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
+        '''
 
-    perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
+    else:
+        dense_units = 3000
 
-    #######   LR
-    logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
-    logistic_model.fit(X_static_train, y_train_final)
-    logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
-    logistic_score = logistic_model.score(X_static_test, y_test_final)
-    auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
-    print("Logistic: ",)
-    print("Score: ", logistic_score)
-    print("AUC: ", auc_final_lr)
-    auc_dec = Decimal(str(auc_final_lr))
-    rounded_num = round(auc_dec, 2)
-    np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender + '.npy', logistic_pred)
-    del logistic_model
-    del logistic_score
-    del logistic_pred
+        X_train_static_mean = X_static_train.mean()
+        X_train_static_std = X_static_train.std()
+        X_test_static_mean = X_static_test.mean()
+        X_test_static_std = X_static_test.std()
+        X_static_train = (X_static_train - X_train_static_mean)/X_train_static_std
+        X_static_test = (X_static_test - X_test_static_mean)/X_test_static_std
 
-    ###### KNN
-    knn_clf = KNeighborsClassifier()
-    params_knn = {
-        'n_neighbors': [5, 20, 50],
-        'weights': ["uniform", "distance"],
-        'leaf_size': [20, 40]
-        }
-    perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
-    '''
-    '''
-    dense_units = 3000
-   
-    X_train_static_mean = X_static_train.mean()
-    X_train_static_std = X_static_train.std()
-    X_test_static_mean = X_static_test.mean()
-    X_test_static_std = X_static_test.std()
-    X_static_train = (X_static_train - X_train_static_mean)/X_train_static_std
-    X_static_test = (X_static_test - X_test_static_mean)/X_test_static_std
+        EPOCHS = 500
+        BATCH_SIZE = 64
 
-    EPOCHS = 500
-    BATCH_SIZE = 64
+        csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
+        opt = keras.optimizers.Adam(learning_rate=lr)
+        checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
+        model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
 
-    csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
-    opt = keras.optimizers.Adam(learning_rate=lr)
-    checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
-    model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
-
-    learning_units = 1
+        learning_units = 1
 
 
-    stat = layers.Input(shape=(X_static_train.shape[1], ))
-    stat = layers.Flatten()(stat)
-    stat_dynam_drop = layers.Dropout(0.2)(stat)
-    x6 = layers.Dense(dense_units, activation='relu')(stat_dynam_drop)
-    x7 = layers.BatchNormalization()(x6)
-    x8 = layers.Dropout(0.2)(x7)
-    out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.001, l2=0.001))(x8)
-    model = keras.Model(inputs= stat, outputs=out)
-    early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=20)
-    reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
-    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
-                keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
-                keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
-                keras.metrics.TrueNegatives(),'binary_accuracy','mse', 'mae'])
-    print(model.summary())
+        stat = layers.Input(shape=(X_static_train.shape[1], ))
+        stat = layers.Flatten()(stat)
+        stat_dynam_drop = layers.Dropout(0.2)(stat)
+        x6 = layers.Dense(dense_units, activation='relu')(stat_dynam_drop)
+        x7 = layers.BatchNormalization()(x6)
+        x8 = layers.Dropout(0.2)(x7)
+        out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.001, l2=0.001))(x8)
+        model = keras.Model(inputs= stat, outputs=out)
+        early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=20)
+        reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
+        model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
+                    keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
+                    keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
+                    keras.metrics.TrueNegatives(),'binary_accuracy','mse', 'mae'])
+        print(model.summary())
 
-    history = model.fit(X_static_train, y_train_final, batch_size=BATCH_SIZE, epochs=EPOCHS,
-                        callbacks=[model_checkpoint, early_stopping, reduce_lr, csv_logger], validation_split=0.13,
-                        verbose=0, class_weight=train_class_weights)
+        history = model.fit(X_static_train, y_train_final, batch_size=BATCH_SIZE, epochs=EPOCHS,
+                            callbacks=[model_checkpoint, early_stopping, reduce_lr, csv_logger], validation_split=0.13,
+                            verbose=0, class_weight=train_class_weights)
 
-    model.load_weights(checkpoint_name)
-    y_pred = model.predict(X_static_test)
-    np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
-    print("Performing testing: ")
-    res = model.evaluate(X_static_test, y_test_final, verbose=2)
-    '''
+        model.load_weights(checkpoint_name)
+        y_pred = model.predict(X_static_test)
+        np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
+        print("Performing testing: ")
+        res = model.evaluate(X_static_test, y_test_final, verbose=2)

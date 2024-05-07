@@ -178,22 +178,25 @@ kdensity pdl1 , xline(0.5)
 //Plotting all, testing only within the optimal bandwidth estimated
 rddensity pdl1 , pl c(0.5)
 //drop if days_from_dx_to_tx > 182
-logit progression_outcome i.therapy_type $indiv_covar  i.stage if pdl1>=0.4 & pdl1<=0.6
 
+
+
+// Note: The "T" is your local average treatment effect. The P>|T| in the large sample is your p-value. Use the confidence interval.
+// RD density plot shows that while there is a significant spike from 0.4 to 0.5 there is no reason to think pathologists
+// are artificially inflating PD-L1 values so as to increase likelihood of IO monotherapy. 
 
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.4) wr(0.6)
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.3) wr(0.7)
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.2) wr(0.8)
-
+rddensity pdl1, c(0.5) vce(jackknife) plot
 rddensity pdl1, c(0.5) all level(95) p(3) // check sorting/bunching assumption
+rdwinselect pdl1 days_from_dx_to_tx diag_year age_at_diagnosis, c(0.5) seed(0) reps(1000) wstep(0.1)
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
 
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform)  seed(0) wl(0.4) wr(0.6) ci(0.05)
-rddensity pdl1, c(0.5) all level(95) p(3) // check sorting/bunching assumption
 
 gen progression_24_months = 0
 replace progression_24_months = 1 if progression_days < 730 & progression_days > 0
-rdrandinf  progression_24_months pdl1, cutoff(0.5) fuzzy(first_line itt) kernel(uniform) seed(0)  ci(0.05) wl (0.4) wr(0.6)
+rdrandinf progression_24_months pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
+rdrandinf progression_24_months pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05 -1(0.1)1) wl (0.3) wr(0.7) wmass
 
   /////////////////////////////
 /*  Instrumental variables */
