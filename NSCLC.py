@@ -293,7 +293,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -548,6 +548,7 @@ if __name__ == '__main__':
     patientIDs_diagnoses = dict()
     patientID_to_contraindications = dict()
     patientID_to_important_diagnoses = dict()
+    dynamic_variables = dict()
 
     for i in range(len(diagnosis['PatientID'])):
 
@@ -621,7 +622,7 @@ if __name__ == '__main__':
 
     y = []
     static_variables = dict()
-
+    total_meds_vitals_labs = 700
     len_static = 0
     total_len_static = 0
     chemotherapy_drugs = ["cisplatin", "carboplatin"]
@@ -683,6 +684,8 @@ if __name__ == '__main__':
         other_first_line_therapy = 0
         days_from_dx_to_tx = 0
         clinical_study_drug = 0
+        bevacizumab_used = 0
+        three_plus_chemo_drugs = 0
 
         if patientID in patientID_to_therapyline:
             diagnosis_date = patientID_to_advanced_diagnosis_date[patientID]
@@ -730,6 +733,8 @@ if __name__ == '__main__':
                             elif current_med in first_line_chemotherapy_drugs:
                                 temp_combo[1] = 1
                             elif current_med in secondary_chemo_drugs:
+                                if temp_combo[1] == 1 and temp_combo[2] == 1:
+                                    three_plus_chemo_drugs = 1
                                 temp_combo[2] = 1
                             else:
                                 temp_combo[3] = 1
@@ -738,11 +743,15 @@ if __name__ == '__main__':
                                     or current_med in braf_drugs or current_med in ras_drugs:
                                 some_other_immuno = 1
 
+                            if current_med == "bevacizumab":
+                                bevacizumab_used = 1
+
                         if clinical_study_drug == 1:
                             other_first_line_therapy = 1
                         # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line) plus other drug(s)
                         elif temp_combo[0] == 0 and temp_combo[1] == 1 and some_other_immuno == 0 and temp_combo[2] == 1:
                             first_line_chemo = 1
+                            print(therapy_name)
 
                         # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line)
                         elif temp_combo[0] == 1 and temp_combo[1] == 1:
@@ -759,9 +768,9 @@ if __name__ == '__main__':
             continue
 
         therapy_year = patientID_to_first_line_start_date[patientID].year
-        therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
-                        alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug,
-                        days_from_dx_to_tx, therapy_year]
+        therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, alk_drug, egfr_drug,
+                        braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
+                        three_plus_chemo_drugs, days_from_dx_to_tx, therapy_year]
 
         if patientID in patientID_to_important_diagnoses:
             all_important_dx = patientID_to_important_diagnoses[patientID]
@@ -788,297 +797,296 @@ if __name__ == '__main__':
 
         del x_diagnosis
 
-    vitals = pd.read_csv(dir_path + 'Vitals.csv')
-    patientID_to_vitals = dict()
+    if use_dynamic:
+        vitals = pd.read_csv(dir_path + 'Vitals.csv')
+        patientID_to_vitals = dict()
 
-    for i in range(len(vitals['PatientID'])):
+        for i in range(len(vitals['PatientID'])):
 
-        patient_ID, date_, test_name, test_result, test_units = vitals['PatientID'][i], vitals['TestDate'][i], \
-                                                   vitals['LabComponent'][i], vitals['TestResult'][i], vitals['TestUnits'][i]
+            patient_ID, date_, test_name, test_result, test_units = vitals['PatientID'][i], vitals['TestDate'][i], \
+                                                       vitals['LabComponent'][i], vitals['TestResult'][i], vitals['TestUnits'][i]
 
-        if not isinstance(date_, str):
-            continue
-
-        test_name = test_name.lower()
-
-        if dir_path == dir_path2:
-            try:
-                vitals_date_temp = time.strptime(date_, "%m/%d/%y")
-            except:
-                vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
-        else:
-            vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-        vitals_date = date(vitals_date_temp.tm_year, vitals_date_temp.tm_mon, vitals_date_temp.tm_mday)
-        adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
-        patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, vitals_date)
-
-
-
-        if patient_ID not in patientID_to_first_line_start_date:
-            continue
-
-        tx_init_date = patientID_to_first_line_start_date[patient_ID]
-
-        if tx_init_date < vitals_date:
-            continue
-
-        if patient_ID not in patientID_to_vitals:
-            patientID_to_vitals[patient_ID] = dict()
-            patientID_to_vitals[patient_ID][vitals_date] = {test_name: (test_result, test_units)}
-        elif vitals_date not in patientID_to_vitals[patient_ID]:
-            patientID_to_vitals[patient_ID][vitals_date] = {test_name: (test_result, test_units)}
-        else:
-            patientID_to_vitals[patient_ID][vitals_date][test_name] = (test_result, test_units)
-
-    patientID_to_labs = dict()
-    labs = pd.read_csv(dir_path + 'Lab.csv')
-    patientID_to_creatinine = dict()
-    patientID_to_bilirubin = dict()
-    patientID_to_ALT = dict()
-    patientID_to_AST = dict()
-
-    for i in range(len(labs['PatientID'])):
-        patient_ID, date_, test_name, test_result = labs['PatientID'][i], labs['ResultDate'][i], labs['LabComponent'][i], labs['TestResult'][i]
-
-        if not isinstance(date_, str) or test_result == 'nan':
-            continue
-
-        try:
-            if dir_path == dir_path2:
-                labs_date_temp = time.strptime(date_, "%m/%d/%y")
-            else:
-                labs_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-            labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
-            adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
-            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
-            if patient_ID not in patientID_to_first_line_start_date:
-                continue
-            tx_init_date = patientID_to_first_line_start_date[patient_ID]
-
-            if tx_init_date < labs_date:
+            if not isinstance(date_, str):
                 continue
 
             test_name = test_name.lower()
 
-            if patient_ID not in patientID_to_labs:
-                patientID_to_labs[patient_ID] = dict()
-                patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
-            elif labs_date not in patientID_to_labs[patient_ID]:
-                patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
+            if dir_path == dir_path2:
+                try:
+                    vitals_date_temp = time.strptime(date_, "%m/%d/%y")
+                except:
+                    vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
             else:
-                patientID_to_labs[patient_ID][labs_date][test_name] = test_result
+                vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
 
-            if "Test not performed" in test_result or "Negative" in test_result or "Pending" in test_result or "Note_Comment" in test_result or test_result=="":
-                continue
-            elif '<' in test_result or '>' in test_result:
-                test_result = test_result[1:]
-            elif '%' in test_result or 'L' in test_result or 'H' in test_result or '+' in test_result:
-                test_result = test_result[:-1]
-            test_result = float(test_result)
+            vitals_date = date(vitals_date_temp.tm_year, vitals_date_temp.tm_mon, vitals_date_temp.tm_mday)
+            adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
+            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, vitals_date)
 
-            if test_result <= 0.0:
+            if patient_ID not in patientID_to_first_line_start_date:
                 continue
 
-            if "creatinine, serum" in test_name or "creatinine, whole blood" in test_name:
-                if patient_ID in patientID_to_creatinine:
-                    patientID_to_creatinine[patient_ID].append((labs_date, test_result))
-                else:
-                    patientID_to_creatinine[patient_ID] = [(labs_date, test_result)]
+            tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-            elif 'bilirubin' in test_name and 'total' in test_name:
-                if patient_ID in patientID_to_bilirubin:
-                    patientID_to_bilirubin[patient_ID].append((labs_date, test_result))
-                else:
-                    patientID_to_bilirubin[patient_ID] = [(labs_date, test_result)]
+            if tx_init_date < vitals_date:
+                continue
 
-            elif "alanine aminotransferase" in test_name:
-                if patient_ID in patientID_to_ALT:
-                    patientID_to_ALT[patient_ID].append((labs_date, test_result))
-                else:
-                    patientID_to_ALT[patient_ID] = [(labs_date, test_result)]
-
-            elif "aspartate aminotransferase" in test_name:
-                if patient_ID in patientID_to_AST:
-                    patientID_to_AST[patient_ID].append((labs_date, test_result))
-                else:
-                    patientID_to_AST[patient_ID] = [(labs_date, test_result)]
+            if patient_ID not in patientID_to_vitals:
+                patientID_to_vitals[patient_ID] = dict()
+                patientID_to_vitals[patient_ID][vitals_date] = {test_name: (test_result, test_units)}
+            elif vitals_date not in patientID_to_vitals[patient_ID]:
+                patientID_to_vitals[patient_ID][vitals_date] = {test_name: (test_result, test_units)}
             else:
+                patientID_to_vitals[patient_ID][vitals_date][test_name] = (test_result, test_units)
+
+        patientID_to_labs = dict()
+        labs = pd.read_csv(dir_path + 'Lab.csv')
+        patientID_to_creatinine = dict()
+        patientID_to_bilirubin = dict()
+        patientID_to_ALT = dict()
+        patientID_to_AST = dict()
+
+        for i in range(len(labs['PatientID'])):
+            patient_ID, date_, test_name, test_result = labs['PatientID'][i], labs['ResultDate'][i], labs['LabComponent'][i], labs['TestResult'][i]
+
+            if not isinstance(date_, str) or test_result == 'nan':
                 continue
 
-
-        except:
-            continue
-
-    patientID_to_med_administration = dict()
-    med_administration = pd.read_csv(dir_path + 'MedicationAdministration.csv')
-
-    for i in range(len(med_administration['PatientID'])):
-        patient_ID, date_, drug_name, drug_dose, dose_units = med_administration['PatientID'][i], med_administration['AdministeredDate'][i], med_administration['CommonDrugName'][i], med_administration['AdministeredAmount'][i], med_administration['AdministeredUnits'][i]
-
-        if not isinstance(date_, str):
-            continue
-
-        if dir_path == dir_path2:
             try:
-                meds_date_temp = time.strptime(date_, "%m/%d/%y")
+                if dir_path == dir_path2:
+                    labs_date_temp = time.strptime(date_, "%m/%d/%y")
+                else:
+                    labs_date_temp = time.strptime(date_, "%Y-%m-%d")
+
+                labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
+                adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
+                patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
+                if patient_ID not in patientID_to_first_line_start_date:
+                    continue
+                tx_init_date = patientID_to_first_line_start_date[patient_ID]
+
+                if tx_init_date < labs_date:
+                    continue
+
+                test_name = test_name.lower()
+
+                if patient_ID not in patientID_to_labs:
+                    patientID_to_labs[patient_ID] = dict()
+                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
+                elif labs_date not in patientID_to_labs[patient_ID]:
+                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
+                else:
+                    patientID_to_labs[patient_ID][labs_date][test_name] = test_result
+
+                if "Test not performed" in test_result or "Negative" in test_result or "Pending" in test_result or "Note_Comment" in test_result or test_result=="":
+                    continue
+                elif '<' in test_result or '>' in test_result:
+                    test_result = test_result[1:]
+                elif '%' in test_result or 'L' in test_result or 'H' in test_result or '+' in test_result:
+                    test_result = test_result[:-1]
+                test_result = float(test_result)
+
+                if test_result <= 0.0:
+                    continue
+
+                if "creatinine, serum" in test_name or "creatinine, whole blood" in test_name:
+                    if patient_ID in patientID_to_creatinine:
+                        patientID_to_creatinine[patient_ID].append((labs_date, test_result))
+                    else:
+                        patientID_to_creatinine[patient_ID] = [(labs_date, test_result)]
+
+                elif 'bilirubin' in test_name and 'total' in test_name:
+                    if patient_ID in patientID_to_bilirubin:
+                        patientID_to_bilirubin[patient_ID].append((labs_date, test_result))
+                    else:
+                        patientID_to_bilirubin[patient_ID] = [(labs_date, test_result)]
+
+                elif "alanine aminotransferase" in test_name:
+                    if patient_ID in patientID_to_ALT:
+                        patientID_to_ALT[patient_ID].append((labs_date, test_result))
+                    else:
+                        patientID_to_ALT[patient_ID] = [(labs_date, test_result)]
+
+                elif "aspartate aminotransferase" in test_name:
+                    if patient_ID in patientID_to_AST:
+                        patientID_to_AST[patient_ID].append((labs_date, test_result))
+                    else:
+                        patientID_to_AST[patient_ID] = [(labs_date, test_result)]
+                else:
+                    continue
+
+
             except:
+                continue
+
+        patientID_to_med_administration = dict()
+        med_administration = pd.read_csv(dir_path + 'MedicationAdministration.csv')
+
+        for i in range(len(med_administration['PatientID'])):
+            patient_ID, date_, drug_name, drug_dose, dose_units = med_administration['PatientID'][i], med_administration['AdministeredDate'][i], med_administration['CommonDrugName'][i], med_administration['AdministeredAmount'][i], med_administration['AdministeredUnits'][i]
+
+            if not isinstance(date_, str):
+                continue
+
+            if dir_path == dir_path2:
+                try:
+                    meds_date_temp = time.strptime(date_, "%m/%d/%y")
+                except:
+                    meds_date_temp = time.strptime(date_, "%Y-%m-%d")
+
+            else:
                 meds_date_temp = time.strptime(date_, "%Y-%m-%d")
 
-        else:
-            meds_date_temp = time.strptime(date_, "%Y-%m-%d")
+            drug_name = drug_name.lower()
+            meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
+            adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
+            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
+            if patient_ID not in patientID_to_first_line_start_date:
+                continue
+            tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-        drug_name = drug_name.lower()
-        meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
-        adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
-        patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
-        if patient_ID not in patientID_to_first_line_start_date:
-            continue
-        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+            if tx_init_date < meds_date:
+                continue
 
-        if tx_init_date < meds_date:
-            continue
+            if patient_ID not in patientID_to_med_administration:
+                patientID_to_med_administration[patient_ID] = dict()
+                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
+            elif meds_date not in patientID_to_med_administration[patient_ID]:
+                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
+            else:
+                patientID_to_med_administration[patient_ID][meds_date][drug_name] = (drug_dose, dose_units)
 
-        if patient_ID not in patientID_to_med_administration:
-            patientID_to_med_administration[patient_ID] = dict()
-            patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
-        elif meds_date not in patientID_to_med_administration[patient_ID]:
-            patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
-        else:
-            patientID_to_med_administration[patient_ID][meds_date][drug_name] = (drug_dose, dose_units)
+        med_admin_set, vitals_set, labs_set = [], [], []
+        all_dates_for_all_meds_vitals_labs = dict()
 
-    med_admin_set, vitals_set, labs_set = [], [], []
-    all_dates_for_all_meds_vitals_labs = dict()
+        for patientID in patientID_to_med_administration:
+            all_meds_all_dates = patientID_to_med_administration[patientID]
+            for med_date, all_meds_single_date in sorted(all_meds_all_dates.items()):
 
-    for patientID in patientID_to_med_administration:
-        all_meds_all_dates = patientID_to_med_administration[patientID]
-        for med_date, all_meds_single_date in sorted(all_meds_all_dates.items()):
+                if patientID not in all_dates_for_all_meds_vitals_labs:
+                    all_dates_for_all_meds_vitals_labs[patientID] = set()
+                all_dates_for_all_meds_vitals_labs[patientID].add(med_date)
 
-            if patientID not in all_dates_for_all_meds_vitals_labs:
-                all_dates_for_all_meds_vitals_labs[patientID] = set()
-            all_dates_for_all_meds_vitals_labs[patientID].add(med_date)
+                for drug in all_meds_single_date:
+                    med_admin_set.append(drug)
 
-            for drug in all_meds_single_date:
-                med_admin_set.append(drug)
+        for patientID in patientID_to_vitals:
+            all_vitals_all_dates = patientID_to_vitals[patientID]
+            for vitals_date, all_vitals_single_date in sorted(all_vitals_all_dates.items()):
 
-    for patientID in patientID_to_vitals:
-        all_vitals_all_dates = patientID_to_vitals[patientID]
-        for vitals_date, all_vitals_single_date in sorted(all_vitals_all_dates.items()):
+                if patientID not in all_dates_for_all_meds_vitals_labs:
+                    all_dates_for_all_meds_vitals_labs[patientID] = set()
+                all_dates_for_all_meds_vitals_labs[patientID].add(vitals_date)
 
-            if patientID not in all_dates_for_all_meds_vitals_labs:
-                all_dates_for_all_meds_vitals_labs[patientID] = set()
-            all_dates_for_all_meds_vitals_labs[patientID].add(vitals_date)
+                for vital in all_vitals_single_date:
+                    vitals_set.append(vital)
 
-            for vital in all_vitals_single_date:
-                vitals_set.append(vital)
+        for patientID in patientID_to_labs:
+            all_labs_all_dates = patientID_to_labs[patientID]
+            for labs_date, all_labs_single_date in sorted(all_labs_all_dates.items()):
 
-    for patientID in patientID_to_labs:
-        all_labs_all_dates = patientID_to_labs[patientID]
-        for labs_date, all_labs_single_date in sorted(all_labs_all_dates.items()):
+                if patientID not in all_dates_for_all_meds_vitals_labs:
+                    all_dates_for_all_meds_vitals_labs[patientID] = set()
+                all_dates_for_all_meds_vitals_labs[patientID].add(labs_date)
 
-            if patientID not in all_dates_for_all_meds_vitals_labs:
-                all_dates_for_all_meds_vitals_labs[patientID] = set()
-            all_dates_for_all_meds_vitals_labs[patientID].add(labs_date)
+                for lab in all_labs_single_date:
+                    labs_set.append(lab)
 
-            for lab in all_labs_single_date:
-                labs_set.append(lab)
+        med_admin_set_final, vitals_set_final, labs_set_final = create_set(med_admin_set, start_at_zero=True), create_set(vitals_set, start_at_zero=True), create_set(labs_set, start_at_zero=True)
 
-    med_admin_set_final, vitals_set_final, labs_set_final = create_set(med_admin_set, start_at_zero=True), create_set(vitals_set, start_at_zero=True), create_set(labs_set, start_at_zero=True)
+        total_num_meds = len(med_admin_set_final)
+        total_num_vitals = len(vitals_set_final)
+        total_num_labs = len(labs_set_final)
+        total_meds_vitals_labs = total_num_labs + total_num_meds + total_num_vitals
+        total_vitals_labs = total_num_vitals + total_num_labs
 
-    total_num_meds = len(med_admin_set_final)
-    total_num_vitals = len(vitals_set_final)
-    total_num_labs = len(labs_set_final)
-    total_meds_vitals_labs = total_num_labs + total_num_meds + total_num_vitals
-    total_vitals_labs = total_num_vitals + total_num_labs
+        print("Number of unique meds: ", total_num_meds)
+        print("Number of unique vitals: ", total_num_vitals)
+        print("Number of unique labs: ", total_num_labs)
+        print("Dynamic length: ", total_meds_vitals_labs)
+        patientID_to_height_weight = dict()
 
-    print("Number of unique meds: ", total_num_meds)
-    print("Number of unique vitals: ", total_num_vitals)
-    print("Number of unique labs: ", total_num_labs)
-    print("Dynamic length: ", total_meds_vitals_labs)
-    patientID_to_height_weight = dict()
-    dynamic_variables = dict()
-    # Go through each dict of patientID --> all dates for which a vital, med, or lab was recorded to add info to dynamic variables for that respective patient
-    for patientID, dates_set in all_dates_for_all_meds_vitals_labs.items():
-        if patientID in patientID_to_med_administration:
-            all_meds_for_patient = patientID_to_med_administration[patientID]
-        else:
-            all_meds_for_patient = []
+        # Go through each dict of patientID --> all dates for which a vital, med, or lab was recorded to add info to dynamic variables for that respective patient
+        for patientID, dates_set in all_dates_for_all_meds_vitals_labs.items():
+            if patientID in patientID_to_med_administration:
+                all_meds_for_patient = patientID_to_med_administration[patientID]
+            else:
+                all_meds_for_patient = []
 
-        if patientID in patientID_to_vitals:
-            all_vitals_for_patient = patientID_to_vitals[patientID]
-        else:
-            all_vitals_for_patient = []
+            if patientID in patientID_to_vitals:
+                all_vitals_for_patient = patientID_to_vitals[patientID]
+            else:
+                all_vitals_for_patient = []
 
-        if patientID in patientID_to_labs:
-            all_labs_for_patient = patientID_to_labs[patientID]
-        else:
-            all_labs_for_patient = []
+            if patientID in patientID_to_labs:
+                all_labs_for_patient = patientID_to_labs[patientID]
+            else:
+                all_labs_for_patient = []
 
-        dynamic_holder_all_dates_single_patient = []
-        current_count = 0   # counter for current timestep in patient's array
+            dynamic_holder_all_dates_single_patient = []
+            current_count = 0   # counter for current timestep in patient's array
 
-        for current_date in sorted(dates_set):
-            dynamic_holder_single_date = np.zeros(total_meds_vitals_labs, dtype='float64')    # value holder
+            for current_date in sorted(dates_set):
+                dynamic_holder_single_date = np.zeros(total_meds_vitals_labs, dtype='float64')    # value holder
 
-            if current_date in all_vitals_for_patient:                      # If vitals were taken on this date, add them
-                date_specific_vitals = all_vitals_for_patient[current_date]
-                for vital, value_units in sorted(date_specific_vitals.items()):     # Iterate through all vitals on date
-                    value, units = value_units[0], value_units[1]
-                    index = vitals_set_final[vital]                         # New index in dynamic array
-                    if current_count > 0:
-                        final_value = get_vitals_value(value, units, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index])
-                    else:
-                        final_value = get_vitals_value(value, units, current_count, 0)
+                if current_date in all_vitals_for_patient:                      # If vitals were taken on this date, add them
+                    date_specific_vitals = all_vitals_for_patient[current_date]
+                    for vital, value_units in sorted(date_specific_vitals.items()):     # Iterate through all vitals on date
+                        value, units = value_units[0], value_units[1]
+                        index = vitals_set_final[vital]                         # New index in dynamic array
+                        if current_count > 0:
+                            final_value = get_vitals_value(value, units, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index])
+                        else:
+                            final_value = get_vitals_value(value, units, current_count, 0)
 
-                    if "body height" in vital and final_value > 0:
-                        if patientID not in patientID_to_height_weight:
-                            patientID_to_height_weight[patientID] = ([], [])
-                        patientID_to_height_weight[patientID][0].append(final_value)#[current_date, final_value])
+                        if "body height" in vital and final_value > 0:
+                            if patientID not in patientID_to_height_weight:
+                                patientID_to_height_weight[patientID] = ([], [])
+                            patientID_to_height_weight[patientID][0].append(final_value)#[current_date, final_value])
 
-                    if "body weight" in vital and final_value > 0:
-                        if patientID not in patientID_to_height_weight:
-                            patientID_to_height_weight[patientID] = ([], [])
-                        patientID_to_height_weight[patientID][1].append(final_value)#[current_date, final_value])
+                        if "body weight" in vital and final_value > 0:
+                            if patientID not in patientID_to_height_weight:
+                                patientID_to_height_weight[patientID] = ([], [])
+                            patientID_to_height_weight[patientID][1].append(final_value)#[current_date, final_value])
 
-                    dynamic_holder_single_date[index] = final_value
+                        dynamic_holder_single_date[index] = final_value
 
-            if current_date in all_labs_for_patient:                        # If labs were taken on this date, add them
-                date_specific_labs = all_labs_for_patient[current_date]
-                for lab, lab_value in sorted(date_specific_labs.items()):   # Iterate through all labs on date
-                    index2 = labs_set_final[lab] + total_num_vitals         # New index in dynamic array
-                    if current_count > 0:
-                        final_value = get_labs_value(lab_value, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index2])
-                    else:
-                        final_value = get_labs_value(lab_value, current_count, 0)
-                    dynamic_holder_single_date[index2] = final_value
+                if current_date in all_labs_for_patient:                        # If labs were taken on this date, add them
+                    date_specific_labs = all_labs_for_patient[current_date]
+                    for lab, lab_value in sorted(date_specific_labs.items()):   # Iterate through all labs on date
+                        index2 = labs_set_final[lab] + total_num_vitals         # New index in dynamic array
+                        if current_count > 0:
+                            final_value = get_labs_value(lab_value, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index2])
+                        else:
+                            final_value = get_labs_value(lab_value, current_count, 0)
+                        dynamic_holder_single_date[index2] = final_value
 
-            if current_date in all_meds_for_patient:                        # If meds were taken on this date, add them
-                date_specific_meds = all_meds_for_patient[current_date]
-                for med_name, (med_dose, med_units) in sorted(date_specific_meds.items()):  # Iterate through all meds on date
-                    index3 = med_admin_set_final[med_name] + total_num_vitals + total_num_labs   # New index in dynamic array
-                    if current_count > 0:
-                        final_value = get_meds_value(med_dose, med_units, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index3])
-                    else:
-                        final_value = get_meds_value(med_dose, med_units, current_count, 0)
-                    dynamic_holder_single_date[index3] = final_value
+                if current_date in all_meds_for_patient:                        # If meds were taken on this date, add them
+                    date_specific_meds = all_meds_for_patient[current_date]
+                    for med_name, (med_dose, med_units) in sorted(date_specific_meds.items()):  # Iterate through all meds on date
+                        index3 = med_admin_set_final[med_name] + total_num_vitals + total_num_labs   # New index in dynamic array
+                        if current_count > 0:
+                            final_value = get_meds_value(med_dose, med_units, current_count, dynamic_holder_all_dates_single_patient[current_count-1][index3])
+                        else:
+                            final_value = get_meds_value(med_dose, med_units, current_count, 0)
+                        dynamic_holder_single_date[index3] = final_value
 
-            dynamic_holder_all_dates_single_patient.append(dynamic_holder_single_date)
-            current_count += 1
+                dynamic_holder_all_dates_single_patient.append(dynamic_holder_single_date)
+                current_count += 1
 
-        dynamic_holder_all_dates_single_patient_array = np.array(dynamic_holder_all_dates_single_patient)
-        total_rows = dynamic_holder_all_dates_single_patient_array.shape[0]
-        for row in range(1, total_rows, 1):
-            for col in range(total_meds_vitals_labs):
-                if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row-1][col] != 0.0:
-                    dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row-1][col]
+            dynamic_holder_all_dates_single_patient_array = np.array(dynamic_holder_all_dates_single_patient)
+            total_rows = dynamic_holder_all_dates_single_patient_array.shape[0]
+            for row in range(1, total_rows, 1):
+                for col in range(total_meds_vitals_labs):
+                    if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row-1][col] != 0.0:
+                        dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row-1][col]
 
-        for row in range(total_rows-2, -1, -1):
-            for col in range(total_meds_vitals_labs):
-                if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row+1][col] != 0.0:
-                    dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
+            for row in range(total_rows-2, -1, -1):
+                for col in range(total_meds_vitals_labs):
+                    if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row+1][col] != 0.0:
+                        dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
 
-        dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
+            dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
 
     progressions = pd.read_csv(dir_path+'Enhanced_AdvNSCLCProgression.csv')
     pd1s_progression = []
