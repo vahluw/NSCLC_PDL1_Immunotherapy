@@ -293,7 +293,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval, use_ml, tx_start = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -583,7 +583,7 @@ if __name__ == '__main__':
             patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
 
         if patientID_current not in patientID_to_important_diagnoses:
-            patientID_to_important_diagnoses[patientID_current] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            patientID_to_important_diagnoses[patientID_current] = [0] * 25
 
         for i in range(len(possible_contraindications_kidney)):
             kidney_contra = possible_contraindications_kidney[i]
@@ -601,23 +601,23 @@ if __name__ == '__main__':
                 patientID_to_important_diagnoses[patientID_current][7+i] = 1
 
         if "diabetes" in diagnosis_name:
-            patientID_to_important_diagnoses[patientID_current][-1] = 1
+            patientID_to_important_diagnoses[patientID_current][18] = 1
 
         if "secondary malignant neoplasm" in diagnosis_name:
             name_len = len("secondary malignant neoplasm of ")
             organ = diagnosis_name[name_len:]
             if "bone" in organ or "bone marrow" in organ:
-                patientID_to_important_diagnoses[patientID_current][18] = 1
-            elif "brain" in organ:
                 patientID_to_important_diagnoses[patientID_current][19] = 1
-            elif "nervous system" in organ or "spinal cord" in organ:
+            elif "brain" in organ:
                 patientID_to_important_diagnoses[patientID_current][20] = 1
-            elif "retroperitoneum" in organ or "liver" in organ or "digestive" in organ:
+            elif "nervous system" in organ or "spinal cord" in organ:
                 patientID_to_important_diagnoses[patientID_current][21] = 1
-            elif "adrenal" in organ:
+            elif "retroperitoneum" in organ or "liver" in organ or "digestive" in organ:
                 patientID_to_important_diagnoses[patientID_current][22] = 1
-            elif "pleura" in organ or "unspecified" in organ:
+            elif "adrenal" in organ:
                 patientID_to_important_diagnoses[patientID_current][23] = 1
+            else:
+                patientID_to_important_diagnoses[patientID_current][24] = 1
 
     y = []
     static_variables = dict()
@@ -759,14 +759,14 @@ if __name__ == '__main__':
             continue
 
         therapy_year = patientID_to_first_line_start_date[patientID].year
-        therapy_info = [io_mono, io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
+        therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug,
                         alk_drug, egfr_drug, braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug,
                         days_from_dx_to_tx, therapy_year]
 
         if patientID in patientID_to_important_diagnoses:
             all_important_dx = patientID_to_important_diagnoses[patientID]
         else:
-            all_important_dx = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            all_important_dx = [0] * 25
 
         x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
@@ -1231,7 +1231,7 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
-    if use_ml:
+    if use_dl:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1270,7 +1270,7 @@ if __name__ == '__main__':
     train_class_weights = {i:train_class_weights[i] for i in range(2)}
     print(train_class_weights)
 
-    if use_ml==0:
+    if use_dl == 0:
 
         ###### HGB
         categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
@@ -1287,6 +1287,23 @@ if __name__ == '__main__':
         perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
                             y_test_final, file_name_extender, type='hgb')
 
+        '''
+        headers_test_set = [  "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state",
+                        "other_no_insurance","workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
+                    "commercial_health_plan", "practice_type",   "stage", "histology",
+                 "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
+                  "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug",
+                    "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "clinical_study_drug", "days_from_dx_to_tx", "therapy_year",
+                      "kidney_failure", "chronic_kidney_disease", "renal_disease", "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant",
+                      "connective_tissue", "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis", "marfan", "churg-strauss", "interstitial_lung_disease", "diabetes",
+                      "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets",
+                    "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
+        '''
+
+        X_static_train_df = pd.get_dummies(X_static_train, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_train = X_static_train_df.values
+        X_static_test_df = pd.get_dummies(X_static_test, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_test = X_static_test_df.values
 
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
@@ -1301,9 +1318,6 @@ if __name__ == '__main__':
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb', weights=classes_weights)
 
-
-        '''
-    
         ###### GB
         gb_clf = GradientBoostingClassifier(random_state=0)
         params_gb = {
@@ -1314,13 +1328,13 @@ if __name__ == '__main__':
                 "criterion": ["friedman_mse",  "squared_error"],
                 "max_depth": [5, None]
                 }
-    
+
         perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender, type='gb')
-    
+
         ##### RF
         rf_clf = RandomForestClassifier(random_state=0)
-    
+
         params_rf = {
                 'n_estimators': [100, 200],
                 'max_depth': [80, 100],
@@ -1329,8 +1343,11 @@ if __name__ == '__main__':
                 'class_weight': ["balanced", None],
                 'max_features': [None, "sqrt"]
                 }
-    
+
         perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
+        '''
+    
+
     
         #######   LR
         logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
@@ -1359,6 +1376,10 @@ if __name__ == '__main__':
         '''
 
     else:
+        X_static_train_df = pd.get_dummies(X_static_train, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_train = X_static_train_df.values
+        X_static_test_df = pd.get_dummies(X_static_test, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
+        x_static_test = X_static_test_df.values
         dense_units = 3000
 
         X_train_static_mean = X_static_train.mean()
@@ -1377,7 +1398,6 @@ if __name__ == '__main__':
         model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
 
         learning_units = 1
-
 
         stat = layers.Input(shape=(X_static_train.shape[1], ))
         stat = layers.Flatten()(stat)
