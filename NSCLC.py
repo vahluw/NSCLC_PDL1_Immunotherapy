@@ -606,23 +606,23 @@ if __name__ == '__main__':
                 patientID_to_important_diagnoses[patientID_current][7+i] = 1
 
         if "diabetes" in diagnosis_name:
-            patientID_to_important_diagnoses[patientID_current][18] = 1
+            patientID_to_important_diagnoses[patientID_current][-7] = 1
 
         if "secondary malignant neoplasm" in diagnosis_name:
             name_len = len("secondary malignant neoplasm of ")
             organ = diagnosis_name[name_len:]
             if "bone" in organ or "bone marrow" in organ:
-                patientID_to_important_diagnoses[patientID_current][19] = 1
+                patientID_to_important_diagnoses[patientID_current][-6] = 1
             elif "brain" in organ:
-                patientID_to_important_diagnoses[patientID_current][20] = 1
+                patientID_to_important_diagnoses[patientID_current][-5] = 1
             elif "nervous system" in organ or "spinal cord" in organ:
-                patientID_to_important_diagnoses[patientID_current][21] = 1
+                patientID_to_important_diagnoses[patientID_current][-4] = 1
             elif "retroperitoneum" in organ or "liver" in organ or "digestive" in organ:
-                patientID_to_important_diagnoses[patientID_current][22] = 1
+                patientID_to_important_diagnoses[patientID_current][-3] = 1
             elif "adrenal" in organ:
-                patientID_to_important_diagnoses[patientID_current][23] = 1
+                patientID_to_important_diagnoses[patientID_current][-2] = 1
             else:
-                patientID_to_important_diagnoses[patientID_current][24] = 1
+                patientID_to_important_diagnoses[patientID_current][-1] = 1
 
     y = []
     static_variables = dict()
