@@ -73,6 +73,7 @@
  drop if therapy_type>=2
  drop if bev_used == 1 | three_plus_chemo_drugs == 1
  drop if clinical_study_drug == 1
+ keep if pdl1 >=0.5
  
 
  
@@ -136,20 +137,7 @@ graph export "propensity_post_match_hist_prog_reck.png", replace
  graph export "chemo_io_post_match_pdl1_over50_prog_reck.png", replace
   sts test therapy_type, logrank
   
-     stset censor_time if pdl1==0.0 & pdl1_given==1, failure(endpoint)
- stci if pdl1==0.0 & pdl1_given==1, by(therapy_type) rmean
- stcox therapy_type if pdl1==0.0 & pdl1_given==1
- sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("Progression-Free Survival for Entire Dataset (Confirmed PD-L1 Negative)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_zero_prog_reck.png", replace
-  sts test therapy_type, logrank
-  
- keep if pdl1>=0.01 & pdl1 < 0.5
- stset censor_time , failure(endpoint)
- stci , by(therapy_type) rmean
- stcox therapy_type 
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (1%<=PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_under50_prog_reck.png", replace
-  sts test therapy_type, logrank
+
   
 
   
@@ -218,7 +206,7 @@ graph export "propensity_post_match_hist_prog_reck.png", replace
   drop if interstitial_lung_disease == 1
   
  
-
+ keep if pdl1 >=0.5
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
 
@@ -292,19 +280,7 @@ graph export "propensity_post_match_hist_mortality_reck.png", replace
  graph export "chemo_io_post_match_pdl1_over50_mortality_reck.png", replace
   sts test therapy_type, logrank
   
-     stset censor_time if pdl1==0.0 & pdl1_given==1, failure(endpoint)
- stci if pdl1==0.0 & pdl1_given==1, by(therapy_type) rmean
- stcox therapy_type if pdl1==0.0 & pdl1_given==1
- sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("OverallSurvival for Entire Dataset (Confirmed PD-L1 Negative)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_zero_mortality_reck.png", replace
-  sts test therapy_type, logrank
-  
- keep if pdl1>=0.01 & pdl1 < 0.5
- stset censor_time , failure(endpoint)
- stci , by(therapy_type) rmean
- stcox therapy_type 
- sts graph, by(therapy_type) title("Overall Survival for Entire Dataset (1%<=PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_under50_mortality.png", replace
+
   sts test therapy_type, logrank
  
  ////// Regression discontinuity ///////////
