@@ -804,18 +804,18 @@ if __name__ == '__main__':
         if days_from_dx_to_tx > tx_interval and use_dx==0:
             continue
 
-        therapy_year = patientID_to_first_line_start_date[patientID].year
-        therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, alk_drug, egfr_drug,
-                        braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
-                        three_plus_chemo_drugs, carboplatin_only, cisplatin_only, pembrolizumab_used, trk_inhibitor,
-                        met_drug, days_from_dx_to_tx, therapy_year]
-
         if patientID in patientID_to_important_diagnoses:
             all_important_dx = patientID_to_important_diagnoses[patientID]
         else:
             all_important_dx = [0] * 23
 
         if use_dx == 0:
+            therapy_year = patientID_to_first_line_start_date[patientID].year
+            therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, alk_drug, egfr_drug,
+                        braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
+                        three_plus_chemo_drugs, carboplatin_only, cisplatin_only, pembrolizumab_used, trk_inhibitor,
+                        met_drug, days_from_dx_to_tx, therapy_year]
+
             x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
                                                therapy_info, all_important_dx))
@@ -1352,161 +1352,96 @@ if __name__ == '__main__':
     train_class_weights = {i:train_class_weights[i] for i in range(2)}
     print(train_class_weights)
 
-    if use_dl == 0:
-
-        ###### HGB
+    if use_dx == 0:
         categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
-        hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
-        params_hgb = {
-            'learning_rate': [0.1, 0.05, 0.2, 0.01],
-            'l2_regularization': [0, 0.01, 0.1],
-            'min_samples_leaf': [20, 50, 100],
-            "max_depth": [2, 5, None],
-            'class_weight': ['balanced', None],
-            'max_features': [0.5, 0.75, 1.0],
-            }
-
-        perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
-                            y_test_final, file_name_extender, type='hgb')
-
-        '''
-        headers_test_set = [  "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race", "ethnicity", "state",
-                        "other_no_insurance","workers_comp","self_pay","pt_assistance","other_gov_insurance","medicare", "medicaid",
-                    "commercial_health_plan", "practice_type",   "stage", "histology",
-                 "smoking_status","ecog",  "ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given",
-                  "io_mono_used", "combo_therapy", "first_line_chemo", "secondary_chemo_drug",
-                    "alk_drug", "egfr_drug", "braf_drug", "ros1_drug", "ras_drug", "other_first_line_therapy", "clinical_study_drug", "days_from_dx_to_tx", "therapy_year",
-                      "kidney_failure", "chronic_kidney_disease", "renal_disease", "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant",
-                      "connective_tissue", "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis", "marfan", "churg-strauss", "interstitial_lung_disease", "diabetes",
-                      "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets",
-                    "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
-        '''
-
-        X_static_train_df = pd.DataFrame(data=X_static_train)
-        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_train = X_static_train_df_final.values
-        X_static_test_df = pd.DataFrame(data=X_static_test)
-        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_test = X_static_test_df_final.values
-
-        ####XGBoost
-        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-        params_xgb = {
-            'min_child_weight': [1, 5, 10],
-            'gamma': [0.5, 1, 1.5, 2.0],
-            'max_depth': [5, 10, 15, 25],
-            'learning_rate': [0.05, 0.1, 0.2, 1.0],
-            'n_estimators': [200, 300, 400],
-            }
-        classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
-        perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                            file_name_extender,  type='xgb', weights=classes_weights)
-
-        ###### GB
-        gb_clf = GradientBoostingClassifier(random_state=0)
-        params_gb = {
-                'loss': ['log_loss', 'exponential'],
-                'learning_rate': [0.1, 0.05],
-                'n_estimators': [200, 300, 400],
-                'max_features': ["sqrt", None],
-                "criterion": ["friedman_mse",  "squared_error"],
-                "max_depth": [5, None]
-                }
-
-        perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
-                            file_name_extender, type='gb')
-
-        ##### RF
-        rf_clf = RandomForestClassifier(random_state=0)
-
-        params_rf = {
-                'n_estimators': [100, 200],
-                'max_depth': [80, 100],
-                'criterion': ["entropy", "log_loss"],
-                'min_samples_leaf': [1, 2],
-                'class_weight': ["balanced", None],
-                'max_features': [None, "sqrt"]
-                }
-
-        perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
-        '''
-    
-
-    
-        #######   LR
-        logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
-        logistic_model.fit(X_static_train, y_train_final)
-        logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
-        logistic_score = logistic_model.score(X_static_test, y_test_final)
-        auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
-        print("Logistic: ",)
-        print("Score: ", logistic_score)
-        print("AUC: ", auc_final_lr)
-        auc_dec = Decimal(str(auc_final_lr))
-        rounded_num = round(auc_dec, 2)
-        np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender + '.npy', logistic_pred)
-        del logistic_model
-        del logistic_score
-        del logistic_pred
-    
-        ###### KNN
-        knn_clf = KNeighborsClassifier()
-        params_knn = {
-            'n_neighbors': [5, 20, 50],
-            'weights': ["uniform", "distance"],
-            'leaf_size': [20, 40]
-            }
-        perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
-        '''
-
     else:
-        X_static_train_df = pd.DataFrame(data=X_static_train)
-        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_train = X_static_train_df_final.values
-        X_static_test_df = pd.DataFrame(data=X_static_test)
-        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=[0, 3, 4, 6, 15, 16, 17, 18, 19, 27])
-        x_static_test = X_static_test_df_final.values
-        dense_units = 3000
+        categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19]
 
-        X_train_static_mean = X_static_train.mean()
-        X_train_static_std = X_static_train.std()
-        X_test_static_mean = X_static_test.mean()
-        X_test_static_std = X_static_test.std()
-        X_static_train = (X_static_train - X_train_static_mean)/X_train_static_std
-        X_static_test = (X_static_test - X_test_static_mean)/X_test_static_std
+    ###### HGB
 
-        EPOCHS = 500
-        BATCH_SIZE = 64
+    hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
+    params_hgb = {
+        'learning_rate': [0.1, 0.05, 0.2, 0.01],
+        'l2_regularization': [0, 0.01, 0.1],
+        'min_samples_leaf': [20, 50, 100],
+        "max_depth": [2, 5, None],
+        'class_weight': ['balanced', None],
+        'max_features': [0.5, 0.75, 1.0],
+        }
 
-        csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
-        opt = keras.optimizers.Adam(learning_rate=lr)
-        checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
-        model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
+    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
+                        y_test_final, file_name_extender, type='hgb')
 
-        learning_units = 1
+    X_static_train_df = pd.DataFrame(data=X_static_train)
+    X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=categorical_indices)
+    x_static_train = X_static_train_df_final.values
+    X_static_test_df = pd.DataFrame(data=X_static_test)
+    X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=categorical_indices)
+    x_static_test = X_static_test_df_final.values
 
-        stat = layers.Input(shape=(X_static_train.shape[1], ))
-        stat = layers.Flatten()(stat)
-        stat_dynam_drop = layers.Dropout(0.2)(stat)
-        x6 = layers.Dense(dense_units, activation='relu')(stat_dynam_drop)
-        x7 = layers.BatchNormalization()(x6)
-        x8 = layers.Dropout(0.2)(x7)
-        out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.001, l2=0.001))(x8)
-        model = keras.Model(inputs= stat, outputs=out)
-        early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=20)
-        reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
-        model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
-                    keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
-                    keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
-                    keras.metrics.TrueNegatives(),'binary_accuracy','mse', 'mae'])
-        print(model.summary())
+    ####XGBoost
+    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
+    params_xgb = {
+        'min_child_weight': [1, 5, 10],
+        'gamma': [0.5, 1, 1.5, 2.0],
+        'max_depth': [5, 10, 15, 25],
+        'learning_rate': [0.05, 0.1, 0.2, 1.0],
+        'n_estimators': [200, 300, 400],
+        }
+    classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
+    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                        file_name_extender,  type='xgb', weights=classes_weights)
 
-        history = model.fit(X_static_train, y_train_final, batch_size=BATCH_SIZE, epochs=EPOCHS,
-                            callbacks=[model_checkpoint, early_stopping, reduce_lr, csv_logger], validation_split=0.13,
-                            verbose=0, class_weight=train_class_weights)
+    ###### GB
+    gb_clf = GradientBoostingClassifier(random_state=0)
+    params_gb = {
+            'loss': ['log_loss', 'exponential'],
+            'learning_rate': [0.1, 0.05],
+            'n_estimators': [200, 300, 400],
+            'max_features': ["sqrt", None],
+            "criterion": ["friedman_mse",  "squared_error"],
+            "max_depth": [5, None]
+            }
 
-        model.load_weights(checkpoint_name)
-        y_pred = model.predict(X_static_test)
-        np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
-        print("Performing testing: ")
-        res = model.evaluate(X_static_test, y_test_final, verbose=2)
+    perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
+                        file_name_extender, type='gb')
+
+    ##### RF
+    rf_clf = RandomForestClassifier(random_state=0)
+
+    params_rf = {
+            'n_estimators': [100, 200],
+            'max_depth': [80, 100],
+            'criterion': ["entropy", "log_loss"],
+            'min_samples_leaf': [1, 2],
+            'class_weight': ["balanced", None],
+            'max_features': [None, "sqrt"]
+            }
+
+    perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
+
+    #######   LR
+    logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
+    logistic_model.fit(X_static_train, y_train_final)
+    logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
+    logistic_score = logistic_model.score(X_static_test, y_test_final)
+    auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
+    print("Logistic: ",)
+    print("Score: ", logistic_score)
+    print("AUC: ", auc_final_lr)
+    auc_dec = Decimal(str(auc_final_lr))
+    rounded_num = round(auc_dec, 2)
+    np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender + '.npy', logistic_pred)
+    del logistic_model
+    del logistic_score
+    del logistic_pred
+
+    ###### KNN
+    knn_clf = KNeighborsClassifier()
+    params_knn = {
+        'n_neighbors': [5, 20, 50],
+        'weights': ["uniform", "distance"],
+        'leaf_size': [20, 40]
+        }
+    perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
+
