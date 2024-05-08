@@ -293,7 +293,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -572,9 +572,13 @@ if __name__ == '__main__':
             continue
 
         index_diagnosis = all_diagnoses_to_numbers[diagnosis_name]
-        possible_contraindications_kidney = ["kidney failure", "chronic kidney disease", "renal disease", "kidney transplant"]
+        possible_contraindications_kidney = ["kidney failure", "chronic kidney disease",
+                                             "renal disease", "kidney transplant"]
         possible_contraindications_liver = ["cirrhosis", "hepatitis", "liver transplant"]
-        possible_contraindications_ctd = ["connective tissue", "scleroderma", "lupus", "rheumatoid arthritis", "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis", "marfan", "churg-strauss", "interstitial lung disease"]
+        possible_contraindications_ctd = ["connective tissue", "scleroderma", "lupus", "rheumatoid arthritis",
+                                          "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis",
+                                          "interstitial lung disease"]
+
         comorbidities = [list(), list(), list(), list(), list(), list()]
 
         if patientID_current in patientIDs_diagnoses:
@@ -584,7 +588,7 @@ if __name__ == '__main__':
             patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
 
         if patientID_current not in patientID_to_important_diagnoses:
-            patientID_to_important_diagnoses[patientID_current] = [0] * 25
+            patientID_to_important_diagnoses[patientID_current] = [0] * 23
 
         for i in range(len(possible_contraindications_kidney)):
             kidney_contra = possible_contraindications_kidney[i]
@@ -632,9 +636,12 @@ if __name__ == '__main__':
     egfr_drugs = ["osimertinib", "erlotinib", "gefitinib", "afatinib"]
     alk_drugs = ["alectinib", "ceritinib", "brigatinib"]
     ros1_drugs = ["crizotinib", "entrectinib", "repotrectinib"]
-    braf_drugs = ["dabrafenib,trametinib", "binimetinib,encorafenib"]
+    braf_drugs = ["dabrafenib,trametinib", "binimetinib,encorafenib", "dabrafenib", "trametinib", "binimetinib", "encorafenib"]
     ras_drugs = ["sotorasib", "adagrasib"]
-    secondary_chemo_drugs = ["vinorelbine", "docetaxel", "gemcitabine", "pemetrexed", "paclitaxel", "paclitaxel protein-bound"]
+    secondary_chemo_drugs = ["vinorelbine", "docetaxel", "gemcitabine", "pemetrexed", "paclitaxel",
+                             "paclitaxel protein-bound", "etoposide", "vinblastine"]
+    trk_inhibitors = ["imatinib", "dasatinib", "nilotinib", "bosutinib"]
+    met_inhibitors = ["capmatinib", "tepotinib"]
     patientID_to_first_line_start_date = dict()
 
     for patientID in patientID_to_advanced_diagnosis_date:
@@ -686,6 +693,11 @@ if __name__ == '__main__':
         clinical_study_drug = 0
         bevacizumab_used = 0
         three_plus_chemo_drugs = 0
+        carboplatin_only = 0
+        cisplatin_only = 0
+        pembrolizumab_used = 0
+        trk_inhibitor = 0
+        met_drug = 0
 
         if patientID in patientID_to_therapyline:
             diagnosis_date = patientID_to_advanced_diagnosis_date[patientID]
@@ -707,9 +719,21 @@ if __name__ == '__main__':
                     if "clinical study drug" in therapy_name:
                         clinical_study_drug = 1
 
+                    if "pembrolizumab" in therapy_name:
+                        pembrolizumab_used = 1
+
+                    if "bevacizumab" in therapy_name or "bevacizumab-awwb" in therapy_name:
+                        bevacizumab_used = 1
+
                     if therapy_name in approved_first_line_immunomonotherapies:
                         io_mono = 1
                         io_mono_used = first_line_mono_io_to_index[therapy_name]
+                    elif therapy_name == "carboplatin":
+                        carboplatin_only = 1
+                    elif therapy_name == "cisplatin":
+                        cisplatin_only = 1
+                    elif therapy_name in secondary_chemo_drugs:
+                        secondary_chemo_drug = 1
                     elif therapy_name in egfr_drugs:
                         egfr_drug = 1
                     elif therapy_name in alk_drugs:
@@ -720,15 +744,31 @@ if __name__ == '__main__':
                         braf_drug = 1
                     elif therapy_name in ras_drugs:
                         ras_drug = 1
-                    elif therapy_name in secondary_chemo_drugs:
-                        secondary_chemo_drug = 1
+                    elif therapy_name in trk_inhibitors:
+                        trk_inhibitor = 1
+                    elif therapy_name in met_inhibitors:
+                        met_drug = 1
                     else:
                         temp_combo = [0, 0, 0, 0]
                         all_meds_at_instance = therapy_name.split(',')
                         for j in range(len(all_meds_at_instance)):
                             current_med = all_meds_at_instance[j]
 
-                            if current_med in approved_first_line_immunomonotherapies:
+                            if current_med in egfr_drugs:
+                                egfr_drug = 1
+                            elif current_med in alk_drugs:
+                                alk_drug = 1
+                            elif current_med in ros1_drugs:
+                                ros1_drug = 1
+                            elif current_med in braf_drugs:
+                                braf_drug = 1
+                            elif current_med in ras_drugs:
+                                ras_drug = 1
+                            elif current_med in trk_inhibitors:
+                                trk_inhibitor = 1
+                            elif current_med in met_inhibitors:
+                                met_drug = 1
+                            elif current_med in approved_first_line_immunomonotherapies:
                                 temp_combo[0] = 1
                             elif current_med in first_line_chemotherapy_drugs:
                                 temp_combo[1] = 1
@@ -739,47 +779,50 @@ if __name__ == '__main__':
                             else:
                                 temp_combo[3] = 1
 
-                            if current_med in egfr_drugs or current_med in alk_drugs or current_med in ros1_drugs \
-                                    or current_med in braf_drugs or current_med in ras_drugs:
-                                some_other_immuno = 1
-
-                            if current_med == "bevacizumab":
-                                bevacizumab_used = 1
+                            #if current_med in egfr_drugs or current_med in alk_drugs or current_med in ros1_drugs \
+                            #        or current_med in braf_drugs or current_med in ras_drugs:
+                            #    some_other_immuno = 1
 
                         if clinical_study_drug == 1:
                             other_first_line_therapy = 1
-                        # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line) plus other drug(s)
-                        elif temp_combo[0] == 0 and temp_combo[1] == 1 and some_other_immuno == 0 and temp_combo[2] == 1:
+                        # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line)
+                        elif temp_combo[0] == 0 and temp_combo[1] == 1  and temp_combo[2] == 1:
                             first_line_chemo = 1
-                            print(therapy_name)
 
-                        # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line)
+                        # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line) +/- other drug(s)
                         elif temp_combo[0] == 1 and temp_combo[1] == 1:
                             combo_therapy = 1
+
 
                         # Other therapy: No IO monotherapy and no first-line cisplatin/carboplatin
                         else:
                             other_first_line_therapy = 1
 
-        if patientID not in patientID_to_first_line_start_date:
+        if patientID not in patientID_to_first_line_start_date and use_dx==0:
             continue
 
-        if days_from_dx_to_tx > 182:
+        if days_from_dx_to_tx > tx_interval and use_dx==0:
             continue
 
         therapy_year = patientID_to_first_line_start_date[patientID].year
         therapy_info = [io_mono_used, combo_therapy, first_line_chemo, secondary_chemo_drug, alk_drug, egfr_drug,
                         braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
-                        three_plus_chemo_drugs, days_from_dx_to_tx, therapy_year]
+                        three_plus_chemo_drugs, carboplatin_only, cisplatin_only, pembrolizumab_used, trk_inhibitor,
+                        met_drug, days_from_dx_to_tx, therapy_year]
 
         if patientID in patientID_to_important_diagnoses:
             all_important_dx = patientID_to_important_diagnoses[patientID]
         else:
-            all_important_dx = [0] * 25
+            all_important_dx = [0] * 23
 
-        x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
+        if use_dx == 0:
+            x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
                                                therapy_info, all_important_dx))
+        else:
+            x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
+                                               insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
+                                               all_important_dx))
 
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
@@ -823,12 +866,16 @@ if __name__ == '__main__':
             adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
             patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, vitals_date)
 
-            if patient_ID not in patientID_to_first_line_start_date:
-                continue
+            if use_dx == 0:
+                if patient_ID not in patientID_to_first_line_start_date:
+                    continue
+                else:
+                    tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                    starting_date = tx_init_date
+            else:
+                starting_date = adv_dx_date
 
-            tx_init_date = patientID_to_first_line_start_date[patient_ID]
-
-            if tx_init_date < vitals_date:
+            if starting_date < vitals_date:
                 continue
 
             if patient_ID not in patientID_to_vitals:
@@ -861,11 +908,17 @@ if __name__ == '__main__':
                 labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
                 adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
                 patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
-                if patient_ID not in patientID_to_first_line_start_date:
-                    continue
-                tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-                if tx_init_date < labs_date:
+                if use_dx == 0:
+                    if patient_ID not in patientID_to_first_line_start_date:
+                        continue
+                    else:
+                        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                        starting_date = tx_init_date
+                else:
+                    starting_date = adv_dx_date
+
+                if starting_date < labs_date:
                     continue
 
                 test_name = test_name.lower()
@@ -941,11 +994,17 @@ if __name__ == '__main__':
             meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
             adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
             patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
-            if patient_ID not in patientID_to_first_line_start_date:
-                continue
-            tx_init_date = patientID_to_first_line_start_date[patient_ID]
 
-            if tx_init_date < meds_date:
+            if use_dx == 0:
+                if patient_ID not in patientID_to_first_line_start_date:
+                    continue
+                else:
+                    tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                    starting_date = tx_init_date
+            else:
+                starting_date = adv_dx_date
+
+            if starting_date < meds_date:
                 continue
 
             if patient_ID not in patientID_to_med_administration:
@@ -1125,13 +1184,18 @@ if __name__ == '__main__':
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
+        adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
 
-        if patient_ID not in patientID_to_first_line_start_date:
-            continue
+        if use_dx == 0:
+            if patient_ID not in patientID_to_first_line_start_date:
+                continue
+            else:
+                tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                starting_date = tx_init_date
+        else:
+            starting_date = adv_dx_date
 
-        tx_init_date = patientID_to_first_line_start_date[patient_ID]
-
-        if tx_init_date > progression_date_final:
+        if starting_date > progression_date_final:
             continue
 
         if patient_ID not in patientID_to_progression:
@@ -1164,11 +1228,15 @@ if __name__ == '__main__':
             mortality_dict[patientID] = patientID_to_censor_date[patientID]
 
     for patientID, vals in static_variables.items():
-
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
-        tx_start_date = patientID_to_first_line_start_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
-        starting_date = tx_start_date
+
+        if use_dx == 0:
+            tx_start_date = patientID_to_first_line_start_date[patientID]
+            starting_date = tx_start_date
+        else:
+            starting_date = adv_dx_date
+
         time_to_censor = (last_final_recorded_date_records - starting_date).days
 
         if patientID in patientID_to_progression:
@@ -1211,14 +1279,15 @@ if __name__ == '__main__':
     del patientIDs_cancer_types
     del static_variables
 
-    del patientID_to_med_administration
-    del patientID_to_vitals
-    del patientID_to_labs
-    del patientID_to_bilirubin
-    del patientID_to_creatinine
-    del patientID_to_AST
-    del patientID_to_ALT
-    del dynamic_variables
+    if use_dynamic == 1:
+        del patientID_to_med_administration
+        del patientID_to_vitals
+        del patientID_to_labs
+        del patientID_to_bilirubin
+        del patientID_to_creatinine
+        del patientID_to_AST
+        del patientID_to_ALT
+        del dynamic_variables
 
     y = np.array(y)
     y = y.astype('float32')
@@ -1240,6 +1309,11 @@ if __name__ == '__main__':
         file_name_extender += "0"
 
     if use_dl:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
+    if use_dx:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
@@ -1289,7 +1363,7 @@ if __name__ == '__main__':
             'min_samples_leaf': [20, 50, 100],
             "max_depth": [2, 5, None],
             'class_weight': ['balanced', None],
-            'max_features': [ 0.5, 0.75, 1.0],
+            'max_features': [0.5, 0.75, 1.0],
             }
 
         perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,

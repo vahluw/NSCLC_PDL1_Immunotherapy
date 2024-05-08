@@ -13,7 +13,7 @@
 
  
  gen prog_pred = hgb_preds
- drop if prog_pred < 0.6 & prog_pred > 0.4
+ //drop if prog_pred < 0.6 & prog_pred > 0.4
  gen pdl1_over_threshold = (pdl1 >=0.5) 
 
  replace diag_year = 2024 - diag_year
@@ -30,11 +30,10 @@
  graph export "io_chemo_test_set_ml_mutations_hgb.png", replace
 
  
- gen therapy_type = 10
+ gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 1 if io_mono > 0
  replace therapy_type = 2 if combo_therapy == 1
- 
  replace therapy_type = 3 if secondary_chemo_drug == 1
  replace therapy_type = 4 if alk_drug == 1
  replace therapy_type = 5 if egfr_drug == 1
@@ -102,7 +101,7 @@
  gen prog_pred = xgb_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
   gen progressed_prediction = (prog_pred>=threshold)
- drop if prog_pred < 0.6 & prog_pred > 0.4
+ //drop if prog_pred < 0.6 & prog_pred > 0.4
 
 
  replace diag_year = 2024 - diag_year
@@ -119,11 +118,10 @@
  graph export "io_chemo_test_set_ml_mutations_xgb.png", replace
 
  
- gen therapy_type = 10
+ gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 1 if io_mono > 0
  replace therapy_type = 2 if combo_therapy == 1
- 
  replace therapy_type = 3 if secondary_chemo_drug == 1
  replace therapy_type = 4 if alk_drug == 1
  replace therapy_type = 5 if egfr_drug == 1
@@ -194,18 +192,18 @@
  gen incorrect = 0
  replace incorrect = 1 if (progressed_prediction != progression_outcome)
  
-  gen therapy_type = -1
+ gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono == 1
+ replace therapy_type = 1 if io_mono > 0
  replace therapy_type = 2 if combo_therapy == 1
  replace therapy_type = 3 if secondary_chemo_drug == 1
  replace therapy_type = 4 if alk_drug == 1
  replace therapy_type = 5 if egfr_drug == 1
  replace therapy_type = 6 if braf_drug == 1
  replace therapy_type = 7 if ros1_drug == 1
- replace therapy_type = 8 if other_first_line_therapy == 1 | ras_drug==1
- 
+ replace therapy_type = 8 if ras_drug == 1
+ replace therapy_type = 9 if other_first_line_therapy == 1
 
  
- logit incorrect i.therapy_type ${indiv_covar} alk egfr braf kras ros1 days_from_dx_to_tx
+ logit incorrect i.therapy_type ${indiv_covar} kras  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis marfan interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets  clinical_study_drug
  
