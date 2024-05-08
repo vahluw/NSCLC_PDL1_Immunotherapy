@@ -5,22 +5,24 @@
  cd "${path}"
  set scheme cleanplots
 
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_182.csv", clear 
+ import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365.csv", clear 
  rocreg progression_outcome hgb_preds
- drop if days_from_dx_to_tx >182
- rocreg progression_outcome xgb_preds
+ //rocreg progression_outcome xgb_preds
+ 
+  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365.csv", clear 
  gen threshold = 0.50
+ gen time_limit = 365
 
  
  gen prog_pred = hgb_preds
- //drop if prog_pred < 0.6 & prog_pred > 0.4
+// drop if prog_pred < 0.7 & prog_pred > 0.3
  gen pdl1_over_threshold = (pdl1 >=0.5) 
 
  replace diag_year = 2024 - diag_year
  gen progressed_prediction = (prog_pred>=threshold)
  
  sum progression_days
- replace progression_days = 182 if progression_days == 0 | progression_days >182
+ replace progression_days = time_limit if progression_days == 0 | progression_days >time_limit
 
  
    stset progression_days, failure(progression_outcome)
@@ -94,7 +96,7 @@
 
 
 
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_182.csv", clear 
+ import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365.csv", clear 
  gen threshold = 0.50
 
  
@@ -108,7 +110,7 @@
 
  
  sum progression_days
- replace progression_days = 182 if progression_days == 0 | progression_days >182
+ replace progression_days = time_limit if progression_days == 0 | progression_days >365
 
  
    stset progression_days, failure(progression_outcome)

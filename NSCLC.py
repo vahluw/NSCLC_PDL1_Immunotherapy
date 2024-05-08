@@ -293,7 +293,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx, mort_outcome = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9]), int(sys.argv[10])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -1318,6 +1318,11 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
+    if mort_outcome:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
     del entire_dataset
@@ -1344,8 +1349,12 @@ if __name__ == '__main__':
 
     X_static_train = X_static_train[:, 2:]
     X_static_test = X_static_test[:, 2:]
-    y_train_final = y_train[:, 0]
-    y_test_final = y_test[:, 0]
+    if mort_outcome == 0:
+        y_train_final = y_train[:, 0]
+        y_test_final = y_test[:, 0]
+    else:
+        y_train_final = y_train[:, 3]
+        y_test_final = y_test[:, 3]
 
     train_class_weights = class_weight.compute_class_weight(class_weight='balanced',
                             classes=np.unique(y_train_final.flatten()), y=y_train_final.flatten())
