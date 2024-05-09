@@ -3,18 +3,21 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin "
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
+ 
 
 
- import delimited "all_data_365_1000.csv", clear 
+
+ import delimited "all_data_365_100.csv", clear 
 
   gen time_limit = 365
  gen outcome = "progression"
 
- 
+ gen over_threshold = 0
+replace over_threshold = 1 if pdl1>=0.5
  
  gen censor_time = progression_days 
  replace censor_time = mortality_days if outcome == "mortality"
@@ -83,11 +86,13 @@
  teffects psmatch (progression_outcome) (therapy_type $indiv_covar pdl1_given)
 teffects ipwra (progression_outcome $indiv_covar i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug, logit) (therapy_type $indiv_covar pdl1_given i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug)
 drop if stage ==5
+/*
  teffects psmatch (progression_outcome) (therapy_type $indiv_covar) if pdl1>=0.5
 teffects ipwra (progression_outcome $indiv_covar, logit) (therapy_type $indiv_covar) if pdl1>=0.5
  teffects psmatch (progression_outcome) (therapy_type $indiv_covar) if pdl1<0.5 & pdl1>0
  drop if stage==14 | ecog ==5
 teffects ipwra (progression_outcome $indiv_covar, logit) (therapy_type $indiv_covar) if pdl1<0.5 & pdl1>0
+*/
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
@@ -95,7 +100,8 @@ teffects ipwra (progression_outcome $indiv_covar, logit) (therapy_type $indiv_co
  graph export "prog_survival_without_mutations_pre_match_no_combo_prog.png", replace
  sts test therapy_type, logrank
 
- logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year
+
+ logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year  //i.therapy_type##over_threshold
  
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
@@ -110,7 +116,7 @@ graph export "propensity_pre_match_hist_prog.png", replace
 
 pstest ${indiv_covar}, raw treated(therapy_type)
 
-//psmatch2 therapy_type  ${indiv_covar} pdl1_given braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year, outcome(endpoint) caliper(0.2) //n(1) noreplacement 
+psmatch2 therapy_type  ${indiv_covar} pdl1_given braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year, outcome(endpoint) caliper(0.2) //n(1) noreplacement 
 count 
 
 
@@ -172,13 +178,13 @@ graph export "propensity_post_match_hist_prog.png", replace
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid pembrolizumab_used"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
 
 
- import delimited "all_data_365_1000.csv", clear 
+ import delimited "all_data_365_100.csv", clear 
 
   gen time_limit = 365
  gen outcome = "mortality"
@@ -256,7 +262,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  graph export "overall_survival_without_mutations_pre_match_no_combo_mortality.png", replace
  sts test therapy_type, logrank
 
- logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year
+ logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year  therapy_type*pdl1
  
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
@@ -326,7 +332,7 @@ graph export "propensity_post_match_hist_mortality.png", replace
  
  ////// Regression discontinuity ///////////
 
-import delimited "all_data_365_1000.csv", clear
+import delimited "all_data_365_100.csv", clear
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono >0
@@ -400,9 +406,8 @@ rddensity pdl1 , pl c(0.5)
 // are artificially inflating PD-L1 values so as to increase likelihood of IO monotherapy. 
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
 rddensity pdl1, c(0.5) vce(jackknife) plot
-drop if therapy_year < 2014
+
 rdwinselect pdl1 days_from_dx_to_tx therapy_year age_at_diagnosis practice_type insured black white asian other_race hispanic male female never_smoker prev_smoker, c(0.5) seed(0) reps(1000) level(0.05) wmass
-wmass level(0.05) 
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.405) wr(0.627)  firststage // Unadjusted
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.0) wr(1) wmass firststage  // Unadjusted
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.405) wr(0.627) wmass firststage // Adjusted
@@ -434,7 +439,7 @@ cd "${path}"
 set scheme cleanplots
 global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf pdl1_given albumin abx steroid pembrolizumab_used"
   
-import delimited "all_data_365_1000.csv", clear 
+import delimited "all_data_365_100.csv", clear 
 
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
@@ -448,9 +453,7 @@ set emptycells drop
 
 logit progression_outcome i.therapy_type $indiv_covar  i.stage
 gen over_threshold =(pdl1>=0.5)
-keep if pdl1_given==1
+//keep if pdl1_given==1
 ivreg2 progression_outcome (therapy_type=i.practiceid) // Unadjusted regression
-ivreg2 progression_outcome (therapy_type=i.practiceid ) $indiv_covar  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets  // Adjusted regression
+ivreg2 progression_outcome (therapy_type=i.practiceid ) $indiv_covar  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets ast alt creatinine bilirubin // Adjusted regression
 
-ivreg2 progression_outcome (therapy_type=i.over_threshold) // Unadjusted regression
-ivreg2 progression_outcome (therapy_type=i.over_threshold ) $indiv_covar  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets  // Adjusted regression

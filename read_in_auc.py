@@ -11,8 +11,8 @@ limit = "365"
 extender = "100"
 all_dataset = np.array(np.load('whole_dataset_' + limit +'_' + extender + '.npy'))
 test_dataset = np.array(np.load('test_set_' + limit + '_' + extender + '.npy'))
-prog_gb_preds = np.expand_dims(np.array(np.load('y_pred_')), axis=1)
-mort_gb_preds = np.expand_dims(np.array(np.load('y_pred_')), axis=1)
+prog_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_100_hgbprog_0.70_365_100.npy')), axis=1)
+mort_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_100_hgbmort_0.74_365_100.npy')), axis=1)
 
 all_test_data = np.concatenate((test_dataset, prog_gb_preds, mort_gb_preds), axis=1)
 headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race",
@@ -28,6 +28,7 @@ headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosi
                     "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets","steroid",
                      "abx", "albumin", "creatinine", "bilirubin", "ast", "alt", "progression_outcome",
                      "progression_days", "mortality_days", "mortality_outcome", "censor_days", "prog_gb_preds", "mort_gb_preds"]
+
 
 
 data = pd.DataFrame(data=all_test_data)

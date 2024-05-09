@@ -123,6 +123,19 @@ def get_final_cancer_vec(cancer_vec_patient):
 
     return arr
 
+def perform_imputation_df(df, columns, type='mode'):
+    # Replace 0 values with NaN in the specified columns
+    df[columns] = df[columns].replace(0, pd.NA)
+
+    if type=='mode':
+        # Perform mode imputation
+        mode_values = df.mode(dropna=True)
+        df.fillna(mode_values, inplace=True)
+    else:
+        mean_values = df.mean(skipna=True, numeric_only=True)
+        df.fillna(mean_values, inplace=True)
+
+    return df
 
 def get_final_therapy_type(therapy_info_patient):
     [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
@@ -295,6 +308,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 if __name__ == '__main__':
     min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
+    use_imputation = int(sys.argv[10])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -920,6 +934,7 @@ if __name__ == '__main__':
                 if 'bilirubin' in test_name and 'total' in test_name and labs_date <= starting_date:
                     if test_result > 50:
                         continue
+
                     if patient_ID not in patientID_to_bilirubin:
                         patientID_to_bilirubin[patient_ID] = (labs_date, test_result)
                     else:
@@ -1295,6 +1310,8 @@ if __name__ == '__main__':
             ast = patientID_to_AST[patientID][1]
         if patientID in patientID_to_ALT:
             alt = patientID_to_ALT[patientID][1]
+        if patientID in patientID_to_bilirubin:
+            bilirubin = patientID_to_bilirubin[patientID][1]
 
         imp_predictors = [steroid_use, abx_use, albumin, creatinine, bilirubin, ast, alt]
         x_demos_no_diagnoses = np.concatenate((vals, imp_predictors))
@@ -1371,8 +1388,21 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
+    if use_imputation:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
+
+    if use_imputation:
+        whole_df = pd.DataFrame(data=X_static)
+        whole_df = perform_imputation_df(whole_df, [0, 3, 4, 6, 16, 17, 18, 19], type='mode')
+        whole_df = perform_imputation_df(whole_df, [68, 69, 70, 71, 72], type='mean')
+        X_static = whole_df.values
+        whole_df.to_csv('whole_df_imputed.csv')
+
     del entire_dataset
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
@@ -1402,11 +1432,11 @@ if __name__ == '__main__':
         if mort_outcome == 0:
             y_train_final = y_train[:, 0]
             y_test_final = y_test[:, 0]
-            final_extender = "prog"
+            final_extender = "_prog"
         else:
             y_train_final = y_train[:, 3]
             y_test_final = y_test[:, 3]
-            final_extender = "mort"
+            final_extender = "_mort"
 
         train_class_weights = class_weight.compute_class_weight(class_weight='balanced',
                                 classes=np.unique(y_train_final.flatten()), y=y_train_final.flatten())
@@ -1466,6 +1496,7 @@ if __name__ == '__main__':
         perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender, type='gb' + final_extender)
 
+
         ##### RF
         rf_clf = RandomForestClassifier(random_state=0)
 
@@ -1480,6 +1511,7 @@ if __name__ == '__main__':
 
         perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf' + final_extender)
 
+        '''
         #######   LR
         logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
         logistic_model.fit(X_static_train, y_train_final)
@@ -1505,3 +1537,4 @@ if __name__ == '__main__':
             }
         perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn' + final_extender)
 
+        '''
