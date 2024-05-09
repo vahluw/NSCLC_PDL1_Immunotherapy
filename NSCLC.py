@@ -1413,8 +1413,8 @@ if __name__ == '__main__':
     params_hgb = {
         'learning_rate': [0.1, 0.05, 0.2, 0.01],
         'l2_regularization': [0, 0.01, 0.1],
-        'min_samples_leaf': [20, 50, 100],
-        "max_depth": [2, 5, None],
+        'min_samples_leaf': [10, 32, 50],
+        "max_depth": [2, 5],
         'class_weight': ['balanced', None],
         'max_features': [0.5, 0.75, 1.0],
         }
@@ -1434,7 +1434,7 @@ if __name__ == '__main__':
     params_xgb = {
         'min_child_weight': [1, 5, 10],
         'gamma': [0.5, 1, 1.5, 2.0],
-        'max_depth': [5, 10, 15, 25],
+        'max_depth': [5, 10, 15],
         'learning_rate': [0.05, 0.1, 0.2, 1.0],
         'n_estimators': [200, 300, 400],
         }
