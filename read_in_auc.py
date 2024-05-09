@@ -26,7 +26,7 @@ headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosi
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
                     "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis",
                     "dermatomyositis", "interstitial_lung_disease", "diabetes",
-                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets",
+                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets","steroid", "abx", "albumin",
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days", "hgb_preds"]
 
 
@@ -73,7 +73,7 @@ headers = ["in_test_set", "physicianID", "practiceID",  "diag_year", "age_at_dia
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
                     "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis",
                     "dermatomyositis", "interstitial_lung_disease", "diabetes",
-                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets",
+                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets", "steroid", "abx", "albumin",
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
 
 
