@@ -8,13 +8,13 @@ import pandas as pd
 from sklearn.metrics import roc_curve
 
 limit = "365"
-all_dataset = np.array(np.load('whole_dataset_' + limit +'_0000.npy'))
-test_dataset = np.array(np.load('test_set_' + limit +'_0000.npy'))
-#hgb_preds = np.expand_dims(np.array(np.load('y_pred_365_100_hgb_0.70_365_100.npy')), axis=1)
-#xgb_preds = np.expand_dims(np.array(np.load('y_pred_182_10_xgb_0.69_182_10.npy')), axis=1)
+extender = "100"
+all_dataset = np.array(np.load('whole_dataset_' + limit +'_' + extender + '.npy'))
+test_dataset = np.array(np.load('test_set_' + limit + '_' + extender + '.npy'))
+prog_gb_preds = np.expand_dims(np.array(np.load('y_pred_')), axis=1)
+mort_gb_preds = np.expand_dims(np.array(np.load('y_pred_')), axis=1)
 
-all_test_data = test_dataset
-#all_test_data =  np.concatenate((test_dataset, hgb_preds), axis=1)
+all_test_data = np.concatenate((test_dataset, prog_gb_preds, mort_gb_preds), axis=1)
 headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race",
                     "ethnicity", "state", "other_no_insurance","workers_comp","self_pay","pt_assistance",
                     "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type",  "ecog", "stage",
@@ -25,31 +25,32 @@ headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosi
                         "met_drug", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
                     "scleroderma", "lupus", "rheumatoid_arthritis", "interstitial_lung_disease", "diabetes",
-                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets","steroid", "abx", "albumin",
-                    "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]#, "hgb_preds"]
+                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets","steroid",
+                     "abx", "albumin", "creatinine", "bilirubin", "ast", "alt", "progression_outcome",
+                     "progression_days", "mortality_days", "mortality_outcome", "censor_days", "prog_gb_preds", "mort_gb_preds"]
 
 
 data = pd.DataFrame(data=all_test_data)
 
 data.columns = headers_test_set
-data.to_csv('test_set_' + limit + '.csv')
+data.to_csv('test_set_' + limit + '_' + extender + '.csv')
 
-'''
-fpr, tpr, thresholds = roc_curve(data['progression_outcome'], hgb_preds)
+
+fpr, tpr, thresholds = roc_curve(data['progression_outcome'], prog_gb_preds)
 # get the best threshold
 J = tpr - fpr
 ix = np.argmax(J)
 best_thresh = thresholds[ix]
 print('Best Threshold For Temporal =%f' % (best_thresh))
 
-fpr, tpr, thresholds = roc_curve(data['progression_outcome'], xgb_preds)
+
+fpr, tpr, thresholds = roc_curve(data['progression_outcome'], mort_gb_preds)
 # get the best threshold
 J = tpr - fpr
 ix = np.argmax(J)
 best_thresh = thresholds[ix]
 print('Best Threshold For Temporal =%f' % (best_thresh))
 
-'''
 
 in_test_set = []
 test_dataset_list = test_dataset.tolist()
@@ -72,12 +73,13 @@ headers = ["in_test_set", "physicianID", "practiceID",  "diag_year", "age_at_dia
                         "met_drug", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
                     "scleroderma", "lupus", "rheumatoid_arthritis", "interstitial_lung_disease", "diabetes",
-                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets", "steroid", "abx", "albumin",
+                    "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets",
+           "steroid", "abx", "albumin", "creatinine", "bilirubin", "ast", "alt",
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
 
 
 all_data = np.concatenate((in_test_set, all_dataset), axis=1)
 data = pd.DataFrame(data=all_data)
 data.columns = headers
-data.to_csv('all_data_' + limit + '.csv')
+data.to_csv('all_data_' + limit + '_' + extender + '.csv')
 

@@ -294,7 +294,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 
 
 if __name__ == '__main__':
-    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx, mort_outcome = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9]), int(sys.argv[10])
+    min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -498,9 +498,9 @@ if __name__ == '__main__':
 
     biomarkers = pd.read_csv(dir_path +'Enhanced_AdvNSCLCBiomarkers.csv')
     patientID_to_biomarkers = dict()
-    staining = {"nan": -1.0, float('nan'): -1.0, "": -1.0, "0%": 0.0, "< 1%": 0.0, "1%": 0.01, "2% - 4%": 0.02,
-                "5% - 9%": 0.05,"10% - 19%": 0.1, "20% - 29%": 0.2, "30% - 39%": 0.3,"40% - 49%": 0.4,
-                "50% - 59%": 0.5, "60% - 69%": 0.6, "70% - 79%": 0.7, "80% - 89%": 0.8, "90% - 99%": 0.9, "100%": 1.0}
+    staining = {"nan": -1.0, float('nan'): -1.0, "": -1.0, "0%": 0.0, "< 1%": 0.0, "1%": 0.01, "2% - 4%": 0.03,
+                "5% - 9%": 0.07,"10% - 19%": 0.15, "20% - 29%": 0.25, "30% - 39%": 0.35,"40% - 49%": 0.45,
+                "50% - 59%": 0.55, "60% - 69%": 0.65, "70% - 79%": 0.75, "80% - 89%": 0.85, "90% - 99%": 0.95, "100%": 1.0}
 
     for i in range(len(biomarkers['PatientID'])):
         patient_ID, biomarker_name, cell_type, biomarker_status, expression_level, sample_type, staining_intensity=\
@@ -838,9 +838,113 @@ if __name__ == '__main__':
     patientID_to_abx = dict()
     patientID_to_albumin = dict()
     patientID_to_bmi = dict()
-    patientID_to_neutrophil_lymph = dict()
+    patientID_to_creatinine = dict()
+    patientID_to_bilirubin = dict()
+    patientID_to_ALT = dict()
+    patientID_to_AST = dict()
 
     if use_dynamic:
+        patientID_to_labs = dict()
+        labs = pd.read_csv(dir_path + 'Lab.csv')
+
+        for i in range(len(labs['PatientID'])):
+            patient_ID, date_, test_name, test_result = labs['PatientID'][i], labs['ResultDate'][i], labs['LabComponent'][i], labs['TestResult'][i]
+            easy_lab_name = labs['TestBaseName'][i]
+
+            if not isinstance(date_, str) or test_result == 'nan':
+                continue
+
+            try:
+                if dir_path == dir_path2:
+                    labs_date_temp = time.strptime(date_, "%m/%d/%y")
+                else:
+                    labs_date_temp = time.strptime(date_, "%Y-%m-%d")
+
+                labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
+                adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
+                patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
+
+                if use_dx == 0:
+                    if patient_ID not in patientID_to_first_line_start_date:
+                        continue
+                    else:
+                        tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                        starting_date = tx_init_date
+                else:
+                    starting_date = adv_dx_date
+
+                if starting_date < labs_date:
+                    continue
+
+                test_name = test_name.lower()
+
+                if patient_ID not in patientID_to_labs:
+                    patientID_to_labs[patient_ID] = dict()
+                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
+                elif labs_date not in patientID_to_labs[patient_ID]:
+                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
+                else:
+                    patientID_to_labs[patient_ID][labs_date][test_name] = test_result
+
+                if "Test not performed" in test_result or "Negative" in test_result or "Pending" in test_result or "Note_Comment" in test_result or test_result=="":
+                    continue
+                elif '<' in test_result or '>' in test_result:
+                    test_result = test_result[1:]
+                elif '%' in test_result or 'L' in test_result or 'H' in test_result or '+' in test_result:
+                    test_result = test_result[:-1]
+                test_result = float(test_result)
+
+                if test_result <= 0.0:
+                    continue
+
+                if test_name == "albumin, serum" and labs_date <= starting_date:
+                    if test_result > 10:
+                        continue
+
+                    if patient_ID not in patientID_to_albumin:
+                        patientID_to_albumin[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_albumin[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_albumin[patient_ID] = (labs_date, test_result)
+
+                if test_name == "creatinine, serum" and labs_date <= starting_date:
+
+                    if patient_ID not in patientID_to_creatinine:
+                        patientID_to_creatinine[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_creatinine[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_creatinine[patient_ID] = (labs_date, test_result)
+
+                if 'bilirubin' in test_name and 'total' in test_name and labs_date <= starting_date:
+                    if test_result > 50:
+                        continue
+                    if patient_ID not in patientID_to_bilirubin:
+                        patientID_to_bilirubin[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_bilirubin[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_bilirubin[patient_ID] = (labs_date, test_result)
+
+                if 'alanine aminotransferase' in test_name  and labs_date <= starting_date:
+                    if patient_ID not in patientID_to_ALT:
+                        patientID_to_ALT[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_ALT[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_ALT[patient_ID] = (labs_date, test_result)
+
+                if 'aspartate aminotransferase' in test_name and labs_date <= starting_date:
+                    if patient_ID not in patientID_to_AST:
+                        patientID_to_AST[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_AST[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_AST[patient_ID] = (labs_date, test_result)
+            except:
+                continue
+
         patientID_to_med_administration = dict()
         med_administration = pd.read_csv(dir_path + 'MedicationAdministration.csv')
 
@@ -934,101 +1038,6 @@ if __name__ == '__main__':
                 patientID_to_vitals[patient_ID][vitals_date] = {test_name: (test_result, test_units)}
             else:
                 patientID_to_vitals[patient_ID][vitals_date][test_name] = (test_result, test_units)
-
-        patientID_to_labs = dict()
-        labs = pd.read_csv(dir_path + 'Lab.csv')
-        patientID_to_creatinine = dict()
-        patientID_to_bilirubin = dict()
-        patientID_to_ALT = dict()
-        patientID_to_AST = dict()
-
-        for i in range(len(labs['PatientID'])):
-            patient_ID, date_, test_name, test_result = labs['PatientID'][i], labs['ResultDate'][i], labs['LabComponent'][i], labs['TestResult'][i]
-            easy_lab_name = labs['TestBaseName'][i]
-
-            if not isinstance(date_, str) or test_result == 'nan':
-                continue
-
-            try:
-                if dir_path == dir_path2:
-                    labs_date_temp = time.strptime(date_, "%m/%d/%y")
-                else:
-                    labs_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-                labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
-                adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
-                patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, labs_date)
-
-                if use_dx == 0:
-                    if patient_ID not in patientID_to_first_line_start_date:
-                        continue
-                    else:
-                        tx_init_date = patientID_to_first_line_start_date[patient_ID]
-                        starting_date = tx_init_date
-                else:
-                    starting_date = adv_dx_date
-
-                if starting_date < labs_date:
-                    continue
-
-                test_name = test_name.lower()
-
-                if patient_ID not in patientID_to_labs:
-                    patientID_to_labs[patient_ID] = dict()
-                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
-                elif labs_date not in patientID_to_labs[patient_ID]:
-                    patientID_to_labs[patient_ID][labs_date] = {test_name:test_result}
-                else:
-                    patientID_to_labs[patient_ID][labs_date][test_name] = test_result
-
-                if "Test not performed" in test_result or "Negative" in test_result or "Pending" in test_result or "Note_Comment" in test_result or test_result=="":
-                    continue
-                elif '<' in test_result or '>' in test_result:
-                    test_result = test_result[1:]
-                elif '%' in test_result or 'L' in test_result or 'H' in test_result or '+' in test_result:
-                    test_result = test_result[:-1]
-                test_result = float(test_result)
-
-                if test_result <= 0.0:
-                    continue
-
-                if easy_lab_name == "albumin" and labs_date <= starting_date:
-                    if patient_ID not in patientID_to_albumin:
-                        patientID_to_albumin[patient_ID] = (labs_date, test_result)
-                    else:
-                        (orig_date, orig_test_result) = patientID_to_albumin[patient_ID]
-                        if orig_date < labs_date:
-                            patientID_to_albumin[patient_ID] = (labs_date, test_result)
-
-                if "creatinine, serum" in test_name or "creatinine, whole blood" in test_name:
-                    if patient_ID in patientID_to_creatinine:
-                        patientID_to_creatinine[patient_ID].append((labs_date, test_result))
-                    else:
-                        patientID_to_creatinine[patient_ID] = [(labs_date, test_result)]
-
-                elif 'bilirubin' in test_name and 'total' in test_name:
-                    if patient_ID in patientID_to_bilirubin:
-                        patientID_to_bilirubin[patient_ID].append((labs_date, test_result))
-                    else:
-                        patientID_to_bilirubin[patient_ID] = [(labs_date, test_result)]
-
-                elif "alanine aminotransferase" in test_name:
-                    if patient_ID in patientID_to_ALT:
-                        patientID_to_ALT[patient_ID].append((labs_date, test_result))
-                    else:
-                        patientID_to_ALT[patient_ID] = [(labs_date, test_result)]
-
-                elif "aspartate aminotransferase" in test_name:
-                    if patient_ID in patientID_to_AST:
-                        patientID_to_AST[patient_ID].append((labs_date, test_result))
-                    else:
-                        patientID_to_AST[patient_ID] = [(labs_date, test_result)]
-                else:
-                    continue
-
-
-            except:
-                continue
 
         med_admin_set, vitals_set, labs_set = [], [], []
         all_dates_for_all_meds_vitals_labs = dict()
@@ -1273,15 +1282,21 @@ if __name__ == '__main__':
         else:
             mortality_days = 0
 
-        steroid_use, abx_use, albumin = 0, 0, 0
+        steroid_use, abx_use, albumin, creatinine, bilirubin, ast, alt = 0, 0, 0, 0, 0, 0, 0
         if patientID in patientID_to_steroids:
             steroid_use = 1
         if patientID in patientID_to_abx:
             abx_use = 1
         if patientID in patientID_to_albumin:
             albumin = patientID_to_albumin[patientID][1]
+        if patientID in patientID_to_creatinine:
+            creatinine = patientID_to_creatinine[patientID][1]
+        if patientID in patientID_to_AST:
+            ast = patientID_to_AST[patientID][1]
+        if patientID in patientID_to_ALT:
+            alt = patientID_to_ALT[patientID][1]
 
-        imp_predictors = [steroid_use, abx_use, albumin]
+        imp_predictors = [steroid_use, abx_use, albumin, creatinine, bilirubin, ast, alt]
         x_demos_no_diagnoses = np.concatenate((vals, imp_predictors))
         len_static = len(x_demos_no_diagnoses)
         location = x_demos_no_diagnoses.shape[0]
@@ -1356,11 +1371,6 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
-    if mort_outcome:
-        file_name_extender += "1"
-    else:
-        file_name_extender += "0"
-
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
     del entire_dataset
@@ -1387,108 +1397,111 @@ if __name__ == '__main__':
 
     X_static_train = X_static_train[:, 2:]
     X_static_test = X_static_test[:, 2:]
-    if mort_outcome == 0:
-        y_train_final = y_train[:, 0]
-        y_test_final = y_test[:, 0]
-    else:
-        y_train_final = y_train[:, 3]
-        y_test_final = y_test[:, 3]
 
-    train_class_weights = class_weight.compute_class_weight(class_weight='balanced',
-                            classes=np.unique(y_train_final.flatten()), y=y_train_final.flatten())
-    train_class_weights = {i:train_class_weights[i] for i in range(2)}
-    print(train_class_weights)
+    for mort_outcome in [0, 1]:
+        if mort_outcome == 0:
+            y_train_final = y_train[:, 0]
+            y_test_final = y_test[:, 0]
+            final_extender = "prog"
+        else:
+            y_train_final = y_train[:, 3]
+            y_test_final = y_test[:, 3]
+            final_extender = "mort"
 
-    if use_dx == 0:
-        categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
-    else:
-        categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19]
+        train_class_weights = class_weight.compute_class_weight(class_weight='balanced',
+                                classes=np.unique(y_train_final.flatten()), y=y_train_final.flatten())
+        train_class_weights = {i:train_class_weights[i] for i in range(2)}
+        print(train_class_weights)
 
-    ###### HGB
+        if use_dx == 0:
+            categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
+        else:
+            categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19]
 
-    hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
-    params_hgb = {
-        'learning_rate': [0.1, 0.05, 0.2, 0.01],
-        'l2_regularization': [0, 0.01, 0.1],
-        'min_samples_leaf': [10, 32, 50],
-        "max_depth": [2, 5],
-        'class_weight': ['balanced', None],
-        'max_features': [0.5, 0.75, 1.0],
-        }
+        ###### HGB
+        hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
+        params_hgb = {
+            'learning_rate': [0.1, 0.05, 0.2, 0.01],
+            'l2_regularization': [0, 0.01, 0.1],
+            'min_samples_leaf': [10, 32, 50],
+            "max_depth": [2, 5, None],
+            'class_weight': ['balanced', None],
+            'max_features': [0.5, 0.75, 1.0],
+            }
 
-    perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
-                        y_test_final, file_name_extender, type='hgb')
+        perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
+                            y_test_final, file_name_extender, type='hgb' + final_extender)
 
-    X_static_train_df = pd.DataFrame(data=X_static_train)
-    X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=categorical_indices)
-    x_static_train = X_static_train_df_final.values
-    X_static_test_df = pd.DataFrame(data=X_static_test)
-    X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=categorical_indices)
-    x_static_test = X_static_test_df_final.values
+        X_static_train_df = pd.DataFrame(data=X_static_train)
+        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=categorical_indices)
+        x_static_train = X_static_train_df_final.values
+        X_static_test_df = pd.DataFrame(data=X_static_test)
+        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=categorical_indices)
+        x_static_test = X_static_test_df_final.values
 
-    ####XGBoost
-    xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-    params_xgb = {
-        'min_child_weight': [1, 5, 10],
-        'gamma': [0.5, 1, 1.5, 2.0],
-        'max_depth': [5, 10, 15],
-        'learning_rate': [0.05, 0.1, 0.2, 1.0],
-        'n_estimators': [200, 300, 400],
-        }
-    classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
-    perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                        file_name_extender,  type='xgb', weights=classes_weights)
-
-    ###### GB
-    gb_clf = GradientBoostingClassifier(random_state=0)
-    params_gb = {
-            'loss': ['log_loss', 'exponential'],
-            'learning_rate': [0.1, 0.05],
+        ####XGBoost
+        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
+        params_xgb = {
+            'min_child_weight': [1, 5, 10],
+            'gamma': [0.5, 1, 1.5, 2.0],
+            'max_depth': [5, 10, 15, None],
+            'learning_rate': [0.05, 0.1, 0.2, 1.0],
             'n_estimators': [200, 300, 400],
-            'max_features': ["sqrt", None],
-            "criterion": ["friedman_mse",  "squared_error"],
-            "max_depth": [5, None]
             }
+        classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
+        perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                            file_name_extender,  type='xgb' + final_extender, weights=classes_weights)
 
-    perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
-                        file_name_extender, type='gb')
+        ###### GB
+        gb_clf = GradientBoostingClassifier(random_state=0)
+        params_gb = {
+                'loss': ['log_loss', 'exponential'],
+                'learning_rate': [0.1, 0.05],
+                'n_estimators': [200, 300, 400],
+                'max_features': ["sqrt", None],
+                "criterion": ["friedman_mse",  "squared_error"],
+                "max_depth": [5, None]
+                }
 
-    ##### RF
-    rf_clf = RandomForestClassifier(random_state=0)
+        perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
+                            file_name_extender, type='gb' + final_extender)
 
-    params_rf = {
-            'n_estimators': [100, 200],
-            'max_depth': [80, 100],
-            'criterion': ["entropy", "log_loss"],
-            'min_samples_leaf': [1, 2],
-            'class_weight': ["balanced", None],
-            'max_features': [None, "sqrt"]
+        ##### RF
+        rf_clf = RandomForestClassifier(random_state=0)
+
+        params_rf = {
+                'n_estimators': [100, 200],
+                'max_depth': [80, 100],
+                'criterion': ["entropy", "log_loss"],
+                'min_samples_leaf': [1, 2],
+                'class_weight': ["balanced", None],
+                'max_features': [None, "sqrt"]
+                }
+
+        perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf' + final_extender)
+
+        #######   LR
+        logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
+        logistic_model.fit(X_static_train, y_train_final)
+        logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
+        logistic_score = logistic_model.score(X_static_test, y_test_final)
+        auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
+        print("Logistic: ",)
+        print("Score: ", logistic_score)
+        print("AUC: ", auc_final_lr)
+        auc_dec = Decimal(str(auc_final_lr))
+        rounded_num = round(auc_dec, 2)
+        np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender +  '_'+ final_extender +'.npy', logistic_pred)
+        del logistic_model
+        del logistic_score
+        del logistic_pred
+
+        ###### KNN
+        knn_clf = KNeighborsClassifier()
+        params_knn = {
+            'n_neighbors': [5, 20, 50],
+            'weights': ["uniform", "distance"],
+            'leaf_size': [20, 40]
             }
-
-    perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf')
-
-    #######   LR
-    logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
-    logistic_model.fit(X_static_train, y_train_final)
-    logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
-    logistic_score = logistic_model.score(X_static_test, y_test_final)
-    auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
-    print("Logistic: ",)
-    print("Score: ", logistic_score)
-    print("AUC: ", auc_final_lr)
-    auc_dec = Decimal(str(auc_final_lr))
-    rounded_num = round(auc_dec, 2)
-    np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender + '.npy', logistic_pred)
-    del logistic_model
-    del logistic_score
-    del logistic_pred
-
-    ###### KNN
-    knn_clf = KNeighborsClassifier()
-    params_knn = {
-        'n_neighbors': [5, 20, 50],
-        'weights': ["uniform", "distance"],
-        'leaf_size': [20, 40]
-        }
-    perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn')
+        perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn' + final_extender)
 
