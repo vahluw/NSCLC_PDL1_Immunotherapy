@@ -3,7 +3,7 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid pembrolizumab_used"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -79,8 +79,6 @@
  drop if clinical_study_drug == 1
  
  drop if stage == 1 | stage == 18
- teffects ipwra (progression_outcome $indiv_covar, logit) ( therapy_type $indiv_covar, logit), aequations ate 
- tebalance summarize
 
  
  stset censor_time, failure(endpoint)
@@ -146,7 +144,7 @@ graph export "propensity_post_match_hist_prog.png", replace
      stset censor_time if pdl1==0.0 & pdl1_given==1, failure(endpoint)
  stci if pdl1==0.0 & pdl1_given==1, by(therapy_type) rmean
  stcox therapy_type if pdl1==0.0 & pdl1_given==1
- sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("Progression-Free Survival for Entire Dataset (Confirmed PD-L1 Negative)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
  graph export "chemo_io_post_match_pdl1_zero_prog.png", replace
   sts test therapy_type, logrank
   
@@ -166,7 +164,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage"
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid pembrolizumab_used"
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -228,8 +226,8 @@ graph export "propensity_post_match_hist_prog.png", replace
   stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Platinum-Based Chemotherapy" 2 "First-Line IO Monotherapy" 3 "Combination Therapy" 4 "Other Chemotherapy" 5 "ALK Drug" 6 "EGFR Drug" 7 "BRAF Drug" 8 "ROS1 Drug" 9  "Other First-Line Therapy" 10 "TRK Inhibitor" 11 "MET Drug" 12 "Carboplatin Only" 13 "Cisplatin Only"))
- graph export "prog_survival_with_mutations_pre_match_mortality.png", replace
+ sts graph, by(therapy_type) title("Overall Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Platinum-Based Chemotherapy" 2 "First-Line IO Monotherapy" 3 "Combination Therapy" 4 "Other Chemotherapy" 5 "ALK Drug" 6 "EGFR Drug" 7 "BRAF Drug" 8 "ROS1 Drug" 9  "Other First-Line Therapy" 10 "TRK Inhibitor" 11 "MET Drug" 12 "Carboplatin Only" 13 "Cisplatin Only"))
+ graph export "overall_survival_with_mutations_pre_match_mortality.png", replace
  sts test therapy_type, logrank
  
  
@@ -242,13 +240,12 @@ graph export "propensity_post_match_hist_prog.png", replace
  drop if clinical_study_drug == 1
  
  drop if stage == 1 | stage == 18
- teffects ipwra (progression_outcome) ( therapy_type $indiv_covar)
  
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation  (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "prog_survival_without_mutations_pre_match_no_combo_mortality.png", replace
+ sts graph, by(therapy_type) title("Overall Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation  (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ graph export "overall_survival_without_mutations_pre_match_no_combo_mortality.png", replace
  sts test therapy_type, logrank
 
  logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis granulomatosis polyangiitis polymyositis dermatomyositis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year
@@ -293,30 +290,30 @@ graph export "propensity_post_match_hist_mortality.png", replace
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_mortality.png", replace
+ sts graph, by(therapy_type) title("Overall Survival for Entire Dataset") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ graph export "overall_chemo_io_post_match_mortality.png", replace
   sts test therapy_type, logrank
   
    stset censor_time if pdl1>=0.5, failure(endpoint)
  stci if pdl1>=0.5, by(therapy_type) rmean
  stcox therapy_type if pdl1>=0.5
- sts graph if pdl1>=0.5, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_over50_mortality.png", replace
+ sts graph if pdl1>=0.5, by(therapy_type) title("Overall Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ graph export "overall_chemo_io_post_match_pdl1_over50_mortality.png", replace
   sts test therapy_type, logrank
   
      stset censor_time if pdl1==0.0 & pdl1_given==1, failure(endpoint)
  stci if pdl1==0.0 & pdl1_given==1, by(therapy_type) rmean
  stcox therapy_type if pdl1==0.0 & pdl1_given==1
- sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("Progression-Free Survival for Entire Dataset (PD-L1>=50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_zero_mortality.png", replace
+ sts graph if pdl1==0.0 & pdl1_given==1, by(therapy_type) title("Overall Survival for Entire Dataset (Confirmed PD-L1 Negative)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ graph export "overall_chemo_io_post_match_pdl1_zero_mortality.png", replace
   sts test therapy_type, logrank
   
  keep if pdl1>=0.01 & pdl1 < 0.5
  stset censor_time , failure(endpoint)
  stci , by(therapy_type) rmean
  stcox therapy_type 
- sts graph, by(therapy_type) title("Progression-Free Survival for Entire Dataset (1%<=PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
- graph export "chemo_io_post_match_pdl1_under50_mortality.png", replace
+ sts graph, by(therapy_type) title("Overall Survival for Entire Dataset (1%<=PD-L1<50%)") subtitle("by Therapy (Post-Matching)") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO Monotherapy")) 
+ graph export "overal_chemo_io_post_match_pdl1_under50_mortality.png", replace
   sts test therapy_type, logrank
  
  ////// Regression discontinuity ///////////
@@ -361,7 +358,7 @@ replace prev_smoker =1 if smoking_status==2
 gen insured = 0
 replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan == 1 | self_pay == 1 
 
-rdplot first_line pdl1, c(0.5) ci(95) //p(3)
+rdplot first_line pdl1, c(0.5) masspoints(adjust) nbins(7 6)
 graph export "polynomial_fit_RD.png", replace
 binscatter first_line pdl1, rd(0.5) yti("Proportion Receiving IO Monotherapy Treatment") xti("PD-L1") 
 graph export "discontinuity_treat.png", replace 
@@ -395,8 +392,8 @@ rddensity pdl1 , pl c(0.5)
 rddensity pdl1, c(0.5) vce(jackknife) plot
 rdwinselect pdl1 days_from_dx_to_tx therapy_year age_at_diagnosis practice_type insured black white asian other_race hispanic male female never_smoker prev_smoker, c(0.5) seed(0) reps(1000)  wmass level(0.15) 
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.0) wr(1) wmass firststage // Unadjusted
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.0) wr(1) wmass firststage  // Adjusted
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.4) wr(0.501) wmass firststage // Unadjusted
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.0) wr(1) wmass firststage  // Unadjusted
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.4) wr(0.501) wmass firststage // Adjusted
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.4) wr(0.501) wmass firststage  // Adjusted
 
 drop if therapy_year < 2014
@@ -423,7 +420,7 @@ rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(unif
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
-global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf pdl1_given"
+global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf pdl1_given albumin abx steroid pembrolizumab_used"
   
 import delimited "all_data_365.csv", clear 
 

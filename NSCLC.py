@@ -28,7 +28,7 @@ dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
 
     # Initialize GridSearchCV
-    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='roc_auc', n_jobs=None)
+    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='roc_auc', n_jobs=-1)
 
     # Perform grid search
     if type=='xgb':
@@ -509,13 +509,17 @@ if __name__ == '__main__':
                   biomarkers["PercentStaining"][i]
 
         if patient_ID not in patientID_to_biomarkers:
-            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": [], "PDL1_given": 0}
+            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": [],
+                                                   "PDL1_given": 0}
 
         if biomarker_name == "PDL1":
-            if biomarker_status == "Unsuccessful/indeterminate test":
+            test_type = biomarkers["TestType"][i]
+            if cell_type != "Tumor cells":
                 continue
-            elif "PD-L1 negative/not detected" == biomarker_status:
-                patientID_to_biomarkers[patient_ID]["PDL1"] = [0.0]
+            elif test_type != "IHC":
+                continue
+            elif biomarker_status == "Unsuccessful/indeterminate test":
+                continue
             else:
                 try:
                     perc = staining[staining_intensity]
@@ -526,18 +530,17 @@ if __name__ == '__main__':
                         perc = 0.01
                     elif expression_level == "PD-L1 high expression":
                         perc = 0.5
+                    elif "PD-L1 negative/not detected" == biomarker_status:
+                        perc = 0.0
                     else:
                         continue
-
-                if len(patientID_to_biomarkers[patient_ID]["PDL1"]) == 0 and perc >= 0.0:
-                    patientID_to_biomarkers[patient_ID]["PDL1"] = [perc]
-                elif len(patientID_to_biomarkers[patient_ID]["PDL1"]) >= 0 and perc >= 0.0:
+                if perc >= 0.0:
                     patientID_to_biomarkers[patient_ID]["PDL1"].append(perc)
                 else:
                     continue
-
         else:
-            if ("rearrangement present" in biomarker_status or "positive" in biomarker_status or "Rearrangement present" in biomarker_status):
+            if ("rearrangement present" in biomarker_status or "positive" in biomarker_status or
+                    "Rearrangement present" in biomarker_status):
                 patientID_to_biomarkers[patient_ID][biomarker_name] = 1
             else:
                 continue
@@ -789,11 +792,8 @@ if __name__ == '__main__':
                             else:
                                 temp_combo[3] = 1
 
-                            #if current_med in egfr_drugs or current_med in alk_drugs or current_med in ros1_drugs \
-                            #        or current_med in braf_drugs or current_med in ras_drugs:
-                            #    some_other_immuno = 1
-
                         if clinical_study_drug == 1:
+                            clinical_study_drug = 1
                             other_first_line_therapy = 1
                         # Chemotherapy only: No IO monotherapy but cisplatin/carboplatin (first-line)
                         elif temp_combo[0] == 0 and temp_combo[1] == 1  and temp_combo[2] == 1:
@@ -802,7 +802,6 @@ if __name__ == '__main__':
                         # Combination therapy: IO monotherapy plus cisplatin/carboplatin (first-line) +/- other drug(s)
                         elif temp_combo[0] == 1 and temp_combo[1] == 1:
                             combo_therapy = 1
-
 
                         # Other therapy: No IO monotherapy and no first-line cisplatin/carboplatin
                         else:
