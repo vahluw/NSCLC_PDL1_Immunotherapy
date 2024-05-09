@@ -588,7 +588,6 @@ if __name__ == '__main__':
                                              "renal disease", "kidney transplant"]
         possible_contraindications_liver = ["cirrhosis", "hepatitis", "liver transplant"]
         possible_contraindications_ctd = ["connective tissue", "scleroderma", "lupus", "rheumatoid arthritis",
-                                          "granulomatosis", "polyangiitis", "polymyositis", "dermatomyositis",
                                           "interstitial lung disease"]
 
         comorbidities = [list(), list(), list(), list(), list(), list()]
@@ -600,7 +599,7 @@ if __name__ == '__main__':
             patientIDs_diagnoses[patientID_current][index_diagnosis] = 1
 
         if patientID_current not in patientID_to_important_diagnoses:
-            patientID_to_important_diagnoses[patientID_current] = [0] * 23
+            patientID_to_important_diagnoses[patientID_current] = [0] * 19
 
         for i in range(len(possible_contraindications_kidney)):
             kidney_contra = possible_contraindications_kidney[i]
@@ -816,7 +815,7 @@ if __name__ == '__main__':
         if patientID in patientID_to_important_diagnoses:
             all_important_dx = patientID_to_important_diagnoses[patientID]
         else:
-            all_important_dx = [0] * 23
+            all_important_dx = [0] * 19
 
         if use_dx == 0:
             therapy_year = patientID_to_first_line_start_date[patientID].year
@@ -842,6 +841,55 @@ if __name__ == '__main__':
     patientID_to_neutrophil_lymph = dict()
 
     if use_dynamic:
+        patientID_to_med_administration = dict()
+        med_administration = pd.read_csv(dir_path + 'MedicationAdministration.csv')
+
+        for i in range(len(med_administration['PatientID'])):
+            patient_ID, date_, drug_name, drug_dose, dose_units = med_administration['PatientID'][i], med_administration['AdministeredDate'][i], med_administration['CommonDrugName'][i], med_administration['AdministeredAmount'][i], med_administration['AdministeredUnits'][i]
+            drug_type = med_administration['DetailedDrugCategory'][i]
+
+            if not isinstance(date_, str):
+                continue
+
+            if dir_path == dir_path2:
+                try:
+                    meds_date_temp = time.strptime(date_, "%m/%d/%y")
+                except:
+                    meds_date_temp = time.strptime(date_, "%Y-%m-%d")
+
+            else:
+                meds_date_temp = time.strptime(date_, "%Y-%m-%d")
+
+            drug_name = drug_name.lower()
+            meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
+            adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
+            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
+
+            if use_dx == 0:
+                if patient_ID not in patientID_to_first_line_start_date:
+                    continue
+                else:
+                    tx_init_date = patientID_to_first_line_start_date[patient_ID]
+                    starting_date = tx_init_date
+            else:
+                starting_date = adv_dx_date
+
+            if starting_date < meds_date:
+                continue
+
+            if patient_ID not in patientID_to_med_administration:
+                patientID_to_med_administration[patient_ID] = dict()
+                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
+            elif meds_date not in patientID_to_med_administration[patient_ID]:
+                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
+            else:
+                patientID_to_med_administration[patient_ID][meds_date][drug_name] = (drug_dose, dose_units)
+
+            if drug_type == "glucocorticoid" and 0 <= (starting_date - meds_date).days <= 28:
+                    patientID_to_steroids[patient_ID] = 1
+            if drug_type == "anti-infective" and 0 <= (starting_date - meds_date).days <= 28:
+                patientID_to_abx[patient_ID] = 1
+
         vitals = pd.read_csv(dir_path + 'Vitals.csv')
         patientID_to_vitals = dict()
 
@@ -952,7 +1000,6 @@ if __name__ == '__main__':
                         if orig_date < labs_date:
                             patientID_to_albumin[patient_ID] = (labs_date, test_result)
 
-
                 if "creatinine, serum" in test_name or "creatinine, whole blood" in test_name:
                     if patient_ID in patientID_to_creatinine:
                         patientID_to_creatinine[patient_ID].append((labs_date, test_result))
@@ -982,55 +1029,6 @@ if __name__ == '__main__':
 
             except:
                 continue
-
-        patientID_to_med_administration = dict()
-        med_administration = pd.read_csv(dir_path + 'MedicationAdministration.csv')
-
-        for i in range(len(med_administration['PatientID'])):
-            patient_ID, date_, drug_name, drug_dose, dose_units = med_administration['PatientID'][i], med_administration['AdministeredDate'][i], med_administration['CommonDrugName'][i], med_administration['AdministeredAmount'][i], med_administration['AdministeredUnits'][i]
-            drug_type = med_administration['DetailedDrugCategory'][i]
-
-            if not isinstance(date_, str):
-                continue
-
-            if dir_path == dir_path2:
-                try:
-                    meds_date_temp = time.strptime(date_, "%m/%d/%y")
-                except:
-                    meds_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-            else:
-                meds_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-            drug_name = drug_name.lower()
-            meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
-            adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
-            patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, meds_date)
-
-            if use_dx == 0:
-                if patient_ID not in patientID_to_first_line_start_date:
-                    continue
-                else:
-                    tx_init_date = patientID_to_first_line_start_date[patient_ID]
-                    starting_date = tx_init_date
-            else:
-                starting_date = adv_dx_date
-
-            if starting_date < meds_date:
-                continue
-
-            if patient_ID not in patientID_to_med_administration:
-                patientID_to_med_administration[patient_ID] = dict()
-                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
-            elif meds_date not in patientID_to_med_administration[patient_ID]:
-                patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
-            else:
-                patientID_to_med_administration[patient_ID][meds_date][drug_name] = (drug_dose, dose_units)
-
-            if drug_type == "glucocorticoid" and 0 <= (meds_date - starting_date).days <= 28:
-                patientID_to_steroids[patient_ID] = 1
-            if drug_type == "anti-infective" and 0 <= (meds_date - starting_date).days <= 28:
-                patientID_to_abx[patient_ID] = 1
 
         med_admin_set, vitals_set, labs_set = [], [], []
         all_dates_for_all_meds_vitals_labs = dict()

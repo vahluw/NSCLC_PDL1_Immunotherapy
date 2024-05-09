@@ -24,8 +24,7 @@ headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosi
                    "three_plus_chemo_drugs",  "carboplatin_only", "cisplatin_only", "pembrolizumab_used", "trk_inhibitor",
                         "met_drug", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
-                    "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis",
-                    "dermatomyositis", "interstitial_lung_disease", "diabetes",
+                    "scleroderma", "lupus", "rheumatoid_arthritis", "interstitial_lung_disease", "diabetes",
                     "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets","steroid", "abx", "albumin",
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]#, "hgb_preds"]
 
@@ -72,8 +71,7 @@ headers = ["in_test_set", "physicianID", "practiceID",  "diag_year", "age_at_dia
                    "three_plus_chemo_drugs",  "carboplatin_only", "cisplatin_only", "pembrolizumab_used", "trk_inhibitor",
                         "met_drug", "days_from_dx_to_tx", "therapy_year", "kidney_failure", "chronic_kidney_disease", "renal_disease",
                     "kidney_transplant", "cirrhosis", "hepatitis", "liver_transplant", "connective_tissue",
-                    "scleroderma", "lupus", "rheumatoid_arthritis", "granulomatosis", "polyangiitis", "polymyositis",
-                    "dermatomyositis", "interstitial_lung_disease", "diabetes",
+                    "scleroderma", "lupus", "rheumatoid_arthritis", "interstitial_lung_disease", "diabetes",
                     "bone_mets", "brain_mets", "cns_mets", "digestive_mets", "adrenal_mets", "unspecified_mets", "steroid", "abx", "albumin",
                     "progression_outcome",  "progression_days", "mortality_days", "mortality_outcome", "censor_days"]
 
