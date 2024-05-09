@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 import keras
 from keras import models, layers, callbacks, regularizers
+import statistics
 from datetime import date
 import time
 from sklearn.utils import shuffle
@@ -328,7 +329,7 @@ if __name__ == '__main__':
               'Stage III': 11, 'Stage IIIA': 12, 'Stage IIIB': 13, 'Stage IIIC': 14, 'Stage IV': 15, 'Stage IVA': 16,
               'Stage IVB': 17,    'Occult': 18}
     smoking_statuses = {'Unknown/Not documented': 0, 'No history of smoking': 1, 'History of smoking': 2}
-    practice_type_to_number = {'ACADEMIC': 1, 'COMMUNITY': 2}
+    practice_type_to_number = {'ACADEMIC': 2, 'COMMUNITY': 1}
 
     practiceIDs_data = dict()
 
@@ -508,25 +509,31 @@ if __name__ == '__main__':
                   biomarkers["PercentStaining"][i]
 
         if patient_ID not in patientID_to_biomarkers:
-            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": -1.0, "PDL1_given": 0}
+            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": [], "PDL1_given": 0}
 
         if biomarker_name == "PDL1":
             if biomarker_status == "Unsuccessful/indeterminate test":
                 continue
             elif "PD-L1 negative/not detected" == biomarker_status:
-                patientID_to_biomarkers[patient_ID]["PDL1"] = 0.0
+                patientID_to_biomarkers[patient_ID]["PDL1"] = [0.0]
             else:
                 try:
                     perc = staining[staining_intensity]
-                    if perc == -1.0 and expression_level == "PD-L1 low expression":
-                        patientID_to_biomarkers[patient_ID]["PDL1"] = 0.01
-                    elif perc == -1.0 and expression_level == "PD-L1 high expression":
-                        patientID_to_biomarkers[patient_ID]["PDL1"] = 0.5
-                    elif perc == -1.0:
-                        continue
-                    else:
-                        patientID_to_biomarkers[patient_ID]["PDL1"] = perc
                 except:
+                    perc = -1.0
+                if perc == -1.0:
+                    if expression_level == "PD-L1 low expression":
+                        perc = 0.01
+                    elif expression_level == "PD-L1 high expression":
+                        perc = 0.5
+                    else:
+                        continue
+
+                if len(patientID_to_biomarkers[patient_ID]["PDL1"]) == 0 and perc >= 0.0:
+                    patientID_to_biomarkers[patient_ID]["PDL1"] = [perc]
+                elif len(patientID_to_biomarkers[patient_ID]["PDL1"]) >= 0 and perc >= 0.0:
+                    patientID_to_biomarkers[patient_ID]["PDL1"].append(perc)
+                else:
                     continue
 
         else:
@@ -537,9 +544,11 @@ if __name__ == '__main__':
 
     for patientID in patientID_to_biomarkers:
         pdl1 = patientID_to_biomarkers[patientID]["PDL1"]
-        if pdl1 == -1.0:
+        if len(pdl1) == 0:
             patientID_to_biomarkers[patientID]["PDL1"] = 0.0
         else:
+            avg = statistics.mean(patientID_to_biomarkers[patientID]["PDL1"])
+            patientID_to_biomarkers[patientID]["PDL1"] = avg
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
 
     diagnosis = pd.read_csv(dir_path + 'Diagnosis.csv')
@@ -630,8 +639,9 @@ if __name__ == '__main__':
     len_static = 0
     total_len_static = 0
     chemotherapy_drugs = ["cisplatin", "carboplatin"]
-    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "cemiplimab": 3, "atezolizumab": 4,
-                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6}
+    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "tremelimumab": 3, "atezolizumab": 4,
+                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6, "cemiplimab": 7,
+                                   "cemiplimab-rwlc": 7}
     first_line_chemotherapy_drugs = ["cisplatin", "carboplatin"]
     egfr_drugs = ["osimertinib", "erlotinib", "gefitinib", "afatinib"]
     alk_drugs = ["alectinib", "ceritinib", "brigatinib"]
@@ -639,7 +649,7 @@ if __name__ == '__main__':
     braf_drugs = ["dabrafenib,trametinib", "binimetinib,encorafenib", "dabrafenib", "trametinib", "binimetinib", "encorafenib"]
     ras_drugs = ["sotorasib", "adagrasib"]
     secondary_chemo_drugs = ["vinorelbine", "docetaxel", "gemcitabine", "pemetrexed", "paclitaxel",
-                             "paclitaxel protein-bound", "etoposide", "vinblastine"]
+                             "paclitaxel protein-bound"]
     trk_inhibitors = ["imatinib", "dasatinib", "nilotinib", "bosutinib"]
     met_inhibitors = ["capmatinib", "tepotinib"]
     patientID_to_first_line_start_date = dict()
@@ -824,21 +834,13 @@ if __name__ == '__main__':
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
                                                all_important_dx))
 
-        len_static = len(x_demos_no_diagnoses)
-        location = x_demos_no_diagnoses.shape[0]
+        static_variables[patientID] = x_demos_no_diagnoses
 
-        x_diagnosis = np.zeros(len(all_diagnoses_to_numbers))
-        if patientID in patientIDs_diagnoses:
-            x_diagnosis = patientIDs_diagnoses[patientID]
-
-        if exclude_diagnoses:
-            x_static = x_demos_no_diagnoses
-        else:
-            x_static = np.concatenate((x_demos_no_diagnoses, x_diagnosis))
-        static_variables[patientID] = x_static
-        total_len_static = x_static.shape[0]
-
-        del x_diagnosis
+    patientID_to_steroids = dict()
+    patientID_to_abx = dict()
+    patientID_to_albumin = dict()
+    patientID_to_bmi = dict()
+    patientID_to_neutrophil_lymph = dict()
 
     if use_dynamic:
         vitals = pd.read_csv(dir_path + 'Vitals.csv')
@@ -895,6 +897,7 @@ if __name__ == '__main__':
 
         for i in range(len(labs['PatientID'])):
             patient_ID, date_, test_name, test_result = labs['PatientID'][i], labs['ResultDate'][i], labs['LabComponent'][i], labs['TestResult'][i]
+            easy_lab_name = labs['TestBaseName'][i]
 
             if not isinstance(date_, str) or test_result == 'nan':
                 continue
@@ -942,6 +945,15 @@ if __name__ == '__main__':
                 if test_result <= 0.0:
                     continue
 
+                if easy_lab_name == "albumin" and labs_date <= starting_date:
+                    if patient_ID not in patientID_to_albumin:
+                        patientID_to_albumin[patient_ID] = (labs_date, test_result)
+                    else:
+                        (orig_date, orig_test_result) = patientID_to_albumin[patient_ID]
+                        if orig_date < labs_date:
+                            patientID_to_albumin[patient_ID] = (labs_date, test_result)
+
+
                 if "creatinine, serum" in test_name or "creatinine, whole blood" in test_name:
                     if patient_ID in patientID_to_creatinine:
                         patientID_to_creatinine[patient_ID].append((labs_date, test_result))
@@ -977,6 +989,7 @@ if __name__ == '__main__':
 
         for i in range(len(med_administration['PatientID'])):
             patient_ID, date_, drug_name, drug_dose, dose_units = med_administration['PatientID'][i], med_administration['AdministeredDate'][i], med_administration['CommonDrugName'][i], med_administration['AdministeredAmount'][i], med_administration['AdministeredUnits'][i]
+            drug_type = med_administration['DetailedDrugCategory'][i]
 
             if not isinstance(date_, str):
                 continue
@@ -1014,6 +1027,11 @@ if __name__ == '__main__':
                 patientID_to_med_administration[patient_ID][meds_date] = {drug_name: (drug_dose, dose_units)}
             else:
                 patientID_to_med_administration[patient_ID][meds_date][drug_name] = (drug_dose, dose_units)
+
+            if drug_type == "glucocorticoid" and 0 <= (meds_date - starting_date).days <= 28:
+                patientID_to_steroids[patient_ID] = 1
+            if drug_type == "anti-infective" and 0 <= (meds_date - starting_date).days <= 28:
+                patientID_to_abx[patient_ID] = 1
 
         med_admin_set, vitals_set, labs_set = [], [], []
         all_dates_for_all_meds_vitals_labs = dict()
@@ -1258,12 +1276,35 @@ if __name__ == '__main__':
         else:
             mortality_days = 0
 
+        steroid_use, abx_use, albumin = 0, 0, 0
+        if patientID in patientID_to_steroids:
+            steroid_use = 1
+        if patientID in patientID_to_abx:
+            abx_use = 1
+        if patientID in patientID_to_albumin:
+            albumin = patientID_to_albumin[patientID][1]
+
+        imp_predictors = [steroid_use, abx_use, albumin]
+        x_demos_no_diagnoses = np.concatenate((vals, imp_predictors))
+        len_static = len(x_demos_no_diagnoses)
+        location = x_demos_no_diagnoses.shape[0]
+
+        x_diagnosis = np.zeros(len(all_diagnoses_to_numbers))
+        if patientID in patientIDs_diagnoses:
+            x_diagnosis = patientIDs_diagnoses[patientID]
+
+        if exclude_diagnoses:
+            x_static_final = x_demos_no_diagnoses
+        else:
+            x_static_final = np.concatenate((x_demos_no_diagnoses, x_diagnosis))
+        total_len_static = x_static_final.shape[0]
+
         if patientID in dynamic_variables:
             dynamic_data = (dynamic_variables[patientID][-1]).flatten()
         else:
             dynamic_data = np.zeros(total_meds_vitals_labs)
 
-        final_vals = np.concatenate((vals, dynamic_data))
+        final_vals = np.concatenate((x_static_final, dynamic_data))
         X_static.append(final_vals)
         y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
 
