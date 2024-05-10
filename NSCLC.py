@@ -129,13 +129,9 @@ def perform_imputation_df(df, columns, type='mode'):
 
     if type=='mode':
         # Perform mode imputation
-        mode_values = df.mode(dropna=True)
-        df.fillna(mode_values, inplace=True)
+        return df.fillna(df.mode().iloc[0])
     else:
-        mean_values = df.mean(skipna=True, numeric_only=True)
-        df.fillna(mean_values, inplace=True)
-
-    return df
+        return df.fillna(df.mean())
 
 def get_final_therapy_type(therapy_info_patient):
     [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
@@ -1399,11 +1395,11 @@ if __name__ == '__main__':
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
 
     if use_imputation:
-        whole_df = pd.DataFrame(data=X_static)
-        whole_df = perform_imputation_df(whole_df, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        whole_df = perform_imputation_df(whole_df, [70, 71, 72, 73, 74], type='mean')
-        X_static = whole_df.values
-        whole_df.to_csv('whole_df_imputed.csv')
+        whole_df1 = pd.DataFrame(data=entire_dataset)
+        whole_df2 = perform_imputation_df(whole_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
+        whole_df3 = perform_imputation_df(whole_df2, [70, 71, 72, 73, 74], type='mean')
+        whole_df3.to_csv('whole_df_imputed.csv')
+        X_static = whole_df3.values
 
     del entire_dataset
 
