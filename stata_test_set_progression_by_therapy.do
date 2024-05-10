@@ -5,12 +5,12 @@
  cd "${path}"
  set scheme cleanplots
 
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_100.csv", clear 
+ import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1001.csv", clear 
  rocreg progression_outcome prog_gb_preds
  
   rocreg mortality_outcome mort_gb_preds
  
-  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_100.csv", clear 
+  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1001.csv", clear 
  gen threshold = 0.5
  gen time_limit = 365
 

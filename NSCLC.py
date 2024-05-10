@@ -1394,13 +1394,6 @@ if __name__ == '__main__':
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
 
-    if use_imputation:
-        whole_df1 = pd.DataFrame(data=entire_dataset)
-        whole_df2 = perform_imputation_df(whole_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        whole_df3 = perform_imputation_df(whole_df2, [70, 71, 72, 73, 74], type='mean')
-        whole_df3.to_csv('whole_df_imputed.csv')
-        X_static = whole_df3.values
-
     del entire_dataset
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
@@ -1422,6 +1415,15 @@ if __name__ == '__main__':
 
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
+
+    if use_imputation:
+        train_df1 = pd.DataFrame(data=X_static_train)
+        train_df2 = perform_imputation_df(train_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
+        X_static_train = perform_imputation_df(train_df2, [70, 71, 72, 73, 74], type='mean')
+
+        test_df1 = pd.DataFrame(data=X_static_test)
+        test_df2 = perform_imputation_df(test_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
+        X_static_test = perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')
 
     X_static_train = X_static_train[:, 2:]
     X_static_test = X_static_test[:, 2:]
