@@ -129,9 +129,9 @@ def perform_imputation_df(df, columns, type='mode'):
 
     if type=='mode':
         # Perform mode imputation
-        return (df.fillna(df.mode().iloc[0])).values
+        return df.fillna(df.mode().iloc[0])
     else:
-        return (df.fillna(df.mean())).values
+        return df.fillna(df.mean())
 
 def get_final_therapy_type(therapy_info_patient):
     [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
@@ -1419,11 +1419,11 @@ if __name__ == '__main__':
     if use_imputation:
         train_df1 = pd.DataFrame(data=X_static_train)
         train_df2 = perform_imputation_df(train_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        X_static_train = perform_imputation_df(train_df2, [70, 71, 72, 73, 74], type='mean')
+        X_static_train = (perform_imputation_df(train_df2, [70, 71, 72, 73, 74], type='mean')).values
 
         test_df1 = pd.DataFrame(data=X_static_test)
         test_df2 = perform_imputation_df(test_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        X_static_test = perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')
+        X_static_test = (perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')).values
 
     X_static_train = X_static_train[:, 2:]
     X_static_test = X_static_test[:, 2:]
