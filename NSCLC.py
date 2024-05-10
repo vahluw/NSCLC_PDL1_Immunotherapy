@@ -129,9 +129,9 @@ def perform_imputation_df(df, columns, type='mode'):
 
     if type=='mode':
         # Perform mode imputation
-        return df.fillna(df.mode().iloc[0])
+        return (df.fillna(df.mode().iloc[0])).values
     else:
-        return df.fillna(df.mean())
+        return (df.fillna(df.mean())).values
 
 def get_final_therapy_type(therapy_info_patient):
     [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
