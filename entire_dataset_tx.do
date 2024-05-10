@@ -12,7 +12,7 @@
 
 
 
- import delimited "all_data_365_100.csv", clear 
+ import delimited "all_data_365_1000.csv", clear 
 
   gen time_limit = 365
  gen outcome = "progression"
@@ -177,7 +177,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  set scheme cleanplots
 
 
- import delimited "all_data_365_100.csv", clear 
+ import delimited "all_data_365_1000.csv", clear 
 
   gen time_limit = 365
  gen outcome = "mortality"
@@ -227,7 +227,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
  logit endpoint i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug
  predict logit_pred
- rocreg endpoint logit_pred
+ //rocreg endpoint logit_pred
  
  
   stset censor_time, failure(endpoint)
@@ -325,12 +325,11 @@ graph export "propensity_post_match_hist_mortality.png", replace
  
  ////// Regression discontinuity ///////////
 
-import delimited "all_data_365_100.csv", clear
+import delimited "all_data_365_1000.csv", clear
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
 replace therapy_type = 1 if io_mono >0
 drop if io_mono_used == 1 | io_mono_used==6
-//keep if io_mono_used==2
 keep if therapy_type>=0
 gen first_line = 0
 replace first_line = 1 if therapy_type ==1
@@ -367,6 +366,8 @@ replace prev_smoker =1 if smoking_status==2
 gen insured = 0
 replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan == 1 | self_pay == 1 
 
+//drop if therapy_year < 2016
+
 rdplot first_line pdl1, c(0.5) 
 graph export "polynomial_fit_RD.png", replace
 binscatter first_line pdl1, rd(0.5) yti("Proportion Receiving IO Monotherapy Treatment") xti("PD-L1") 
@@ -400,13 +401,14 @@ rddensity pdl1 , pl c(0.5)
 /* Actually do statistical analysis for RD without nivolumab for IO vs chemo */
 rddensity pdl1, c(0.5) vce(jackknife) plot
 
-rdwinselect pdl1 days_from_dx_to_tx therapy_year age_at_diagnosis practice_type insured black white asian other_race hispanic male female never_smoker prev_smoker, c(0.5) seed(0) reps(1000) level(0.05) wmass
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.405) wr(0.627)  firststage // Unadjusted
+rdwinselect pdl1 days_from_dx_to_tx therapy_year age_at_diagnosis practice_type insured never_smoker prev_smoker, c(0.5) seed(0) reps(1000) level(0.05) wmass
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.149) wr(0.751)  firststage // Unadjusted
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.0) wr(1) wmass firststage  // Unadjusted
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.405) wr(0.627) wmass firststage // Adjusted
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.4) wr(0.501) wmass firststage  // Adjusted
 
-drop if therapy_year < 2014
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.3) wr(0.7)  firststage // Unadjusted
+
 
 rdplot first_line pdl1, c(0.5) ci(95) p(3)
 graph export "polynomial_fit_RD_after_2014.png", replace
@@ -432,7 +434,7 @@ cd "${path}"
 set scheme cleanplots
 global indiv_covar "i.ecog i.histology  pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare medicaid commercial_health_plan other_no_insurance kras braf pdl1_given albumin abx steroid pembrolizumab_used"
   
-import delimited "all_data_365_100.csv", clear 
+import delimited "all_data_365_1000.csv", clear 
 
 gen therapy_type = -1
 replace therapy_type = 0 if first_line_chemo == 1
@@ -449,4 +451,8 @@ gen over_threshold =(pdl1>=0.5)
 //keep if pdl1_given==1
 ivreg2 progression_outcome (therapy_type=i.practiceid) // Unadjusted regression
 ivreg2 progression_outcome (therapy_type=i.practiceid ) $indiv_covar  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets ast alt creatinine bilirubin // Adjusted regression
+
+keep if pdl1_given==1
+ivreg2 progression_outcome (therapy_type=over_threshold) // Unadjusted regression
+ivreg2 progression_outcome (therapy_type=over_threshold ) $indiv_covar  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets ast alt creatinine bilirubin // Adjusted regression
 
