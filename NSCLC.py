@@ -523,11 +523,13 @@ if __name__ == '__main__':
                   biomarkers["PercentStaining"][i]
 
         if patient_ID not in patientID_to_biomarkers:
-            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": [],
+            patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": -1.0,
                                                    "PDL1_given": 0}
 
         if biomarker_name == "PDL1":
             test_type = biomarkers["TestType"][i]
+            if patientID_to_biomarkers[patient_ID]["PDL1"] != -1.0:
+                continue
             if cell_type != "Tumor cells":
                 continue
             elif test_type != "IHC":
@@ -549,7 +551,7 @@ if __name__ == '__main__':
                     else:
                         continue
                 if perc >= 0.0:
-                    patientID_to_biomarkers[patient_ID]["PDL1"].append(perc)
+                    patientID_to_biomarkers[patient_ID]["PDL1"] = perc
                 else:
                     continue
         else:
@@ -561,12 +563,12 @@ if __name__ == '__main__':
 
     for patientID in patientID_to_biomarkers:
         pdl1 = patientID_to_biomarkers[patientID]["PDL1"]
-        if len(pdl1) == 0:
-            patientID_to_biomarkers[patientID]["PDL1"] = 0.0
-        else:
-            avg = statistics.mean(patientID_to_biomarkers[patientID]["PDL1"])
-            patientID_to_biomarkers[patientID]["PDL1"] = avg
+        if pdl1 >= 0.0:
+            #avg = statistics.mean(patientID_to_biomarkers[patientID]["PDL1"])
+            #patientID_to_biomarkers[patientID]["PDL1"] = avg
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
+        else:
+            patientID_to_biomarkers[patientID]["PDL1"] = 0.0
 
     diagnosis = pd.read_csv(dir_path + 'Diagnosis.csv')
     diagnosis_values = list(map(lambda x: x.lower(), diagnosis["DiagnosisDescription"].values))
@@ -1398,8 +1400,8 @@ if __name__ == '__main__':
 
     if use_imputation:
         whole_df = pd.DataFrame(data=X_static)
-        whole_df = perform_imputation_df(whole_df, [0, 3, 4, 6, 16, 17, 18, 19], type='mode')
-        whole_df = perform_imputation_df(whole_df, [68, 69, 70, 71, 72], type='mean')
+        whole_df = perform_imputation_df(whole_df, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
+        whole_df = perform_imputation_df(whole_df, [70, 71, 72, 73, 74], type='mean')
         X_static = whole_df.values
         whole_df.to_csv('whole_df_imputed.csv')
 

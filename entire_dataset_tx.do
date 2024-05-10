@@ -4,6 +4,8 @@
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
  global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin "
+ 
+  global indiv_covar_no_pdl1 "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin "
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -40,7 +42,7 @@ replace over_threshold = 1 if pdl1>=0.5
  histogram pdl1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
  graph export "PD_L1_distribution_whole_dataset_include_0.png", replace
  
- 
+
  drop if ras_drug==1
  gen therapy_type = -1
  replace therapy_type = 0 if first_line_chemo == 1
@@ -72,27 +74,32 @@ replace over_threshold = 1 if pdl1>=0.5
  graph export "prog_survival_with_mutations_pre_match_prog.png", replace
  sts test therapy_type, logrank
  
- 
+ drop if therapy_type>=2
+ logit endpoint i.therapy_type#c.pdl1 ${indiv_covar_no_pdl1} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  logit endpoint i.therapy_type#c.over_threshold ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+    logit endpoint i.therapy_type#c.over_threshold ${indiv_covar_no_pdl1} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
 
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
- drop if therapy_type>=2
+
  drop if bev_used == 1 | three_plus_chemo_drugs == 1
  drop if clinical_study_drug == 1
- 
+
+
  drop if stage == 1 | stage == 18
  drop if race == 4  | stage == 4
- teffects psmatch (progression_outcome) (therapy_type $indiv_covar pdl1_given)
+ teffects psmatch (progression_outcome) (therapy_type $indiv_covar pdl1_given interaction)
 teffects ipwra (progression_outcome $indiv_covar i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug, logit) (therapy_type $indiv_covar pdl1_given i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug)
 drop if stage ==5
-/*
+
  teffects psmatch (progression_outcome) (therapy_type $indiv_covar) if pdl1>=0.5
-teffects ipwra (progression_outcome $indiv_covar, logit) (therapy_type $indiv_covar) if pdl1>=0.5
+ drop if stage==5
+teffects ipwra (progression_outcome $indiv_covar  , logit) (therapy_type $indiv_covar) if pdl1>=0.5
  teffects psmatch (progression_outcome) (therapy_type $indiv_covar) if pdl1<0.5 & pdl1>0
  drop if stage==14 | ecog ==5
 teffects ipwra (progression_outcome $indiv_covar, logit) (therapy_type $indiv_covar) if pdl1<0.5 & pdl1>0
-*/
+
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
@@ -254,7 +261,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  drop if clinical_study_drug == 1
  
  //drop if stage == 1 | stage == 18
- 
+ gen interaction_term = pdl1*therapy_type
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
@@ -262,7 +269,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  graph export "overall_survival_without_mutations_pre_match_no_combo_mortality.png", replace
  sts test therapy_type, logrank
 
- logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year  therapy_type*pdl1
+ logit therapy_type  ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year  
  
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
