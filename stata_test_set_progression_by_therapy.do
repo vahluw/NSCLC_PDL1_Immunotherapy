@@ -1,6 +1,6 @@
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
 
-
+ global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin "
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -53,6 +53,15 @@
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
+ 
+ logit progression_outcome i.therapy_type#c.prog_pred $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  logit progression_outcome i.therapy_type#i.progressed_prediction  $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  
+   logit progression_outcome i.therapy_type#c.pdl1 $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  logit progression_outcome i.therapy_type#i.pdl1_over_threshold  $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+
+   logit progression_outcome i.therapy_type#c.pdl1 if pdl1_given==1
+  logit progression_outcome i.therapy_type#i.pdl1_over_threshold if pdl1_given==1
  
     stset progression_days, failure(progression_outcome)
  stci, by(progressed_prediction) rmean
@@ -150,6 +159,11 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
+  logit mortality_outcome i.therapy_type#c.prog_pred
+  logit mortality_outcome i.therapy_type#i.endpoint_prediction
+  
+   logit mortality_outcome i.therapy_type#c.pdl1 if pdl1_given==1
+  logit mortality_outcome i.therapy_type#i.pdl1_over_threshold if pdl1_given==1
  
     stset endpoint_days, failure(endpoint)
  stci, by(endpoint_prediction) rmean
