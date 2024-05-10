@@ -1425,7 +1425,7 @@ if __name__ == '__main__':
 
         test_df1 = pd.DataFrame(data=X_static_test)
         test_df2 = perform_imputation_df(test_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        X_static_test_df = (perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')).values
+        X_static_test_df = perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')
         X_static_test_df.to_csv('test_impute.csv')
         X_static_test = X_static_test_df.values
 
