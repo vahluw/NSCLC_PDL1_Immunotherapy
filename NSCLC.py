@@ -91,7 +91,7 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     accuracy = accuracy_score(y_test, y_pred)
     print(f"Accuracy: {accuracy:.4f}")
     with open("clf_" + type + '_' + filename_extender + ".pickle", 'wb') as f:
-        pickle.dump(best_estimator, f)
+        pickle.dump(grid_search, f)
 
     X_train_df.headers = headers_long
     X_test_df.headers = headers_long

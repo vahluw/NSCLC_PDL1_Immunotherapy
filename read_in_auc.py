@@ -11,7 +11,8 @@ all_dataset = np.array(np.load('whole_dataset_' + limit +'_' + extender + '.npy'
 test_dataset = np.array(np.load('test_set_' + limit + '_' + extender + '.npy', allow_pickle=True))
 file = open('clf_xgb_prog_365_1000.pickle', 'rb')
 with open("clf_hgb_prog_365_1000.pickle", 'rb') as f:
-    best_estimator = pickle.load(f)
+    grid_search = pickle.load(f)
+best_estimator = grid_search.best_estimator_
 X_train_df = pd.read_csv('clf_xgb_prog_365_1000_train.csv')
 X_test_df = pd.read_csv('clf_xgb_prog_365_1000_test.csv')
 print(best_estimator)
