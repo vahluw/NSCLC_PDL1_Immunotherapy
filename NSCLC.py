@@ -90,16 +90,22 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     # Evaluate model
     accuracy = accuracy_score(y_test, y_pred)
     print(f"Accuracy: {accuracy:.4f}")
-    pickle.dump(clf, open("clf_" + type + '_' + filename_extender + ".pickle", "wb"))
+    pickle.dump(best_estimator, open("clf_" + type + '_' + filename_extender + ".pickle", "wb"))
 
+    X_train_df.headers = headers_long
+    X_test_df.headers = headers_long
+    X_train_df.to_csv("clf_" + type + '_' + filename_extender + "_train.csv")
+    X_test_df.to_csv("clf_" + type + '_' + filename_extender + "_test.csv")
+
+    return
     explainer = shap.TreeExplainer(best_estimator, X_train_df)
 
     final_shap_values = explainer.shap_values(X_test_df.values)
-    shap.summary_plot(final_shap_values, X_test_df.values, max_display=30, feature_names=headers_long, show=False)
+    shap.summary_plot(final_shap_values, X_test_df.values, max_display=20, feature_names=headers_long, show=False)
     plt.savefig('shap_summary_plot_ci_' + type + '_' + filename_extender + '.png')
     plt.close()
 
-    shap.summary_plot(final_shap_values, X_test_df.values, max_display=30, feature_names=headers_long, plot_type='bar', show=False)
+    shap.summary_plot(final_shap_values, X_test_df.values, max_display=20, feature_names=headers_long, plot_type='bar', show=False)
     plt.savefig('shap_summary_plot_bar_' + type + '_' + filename_extender + '.png')
     plt.close()
 
