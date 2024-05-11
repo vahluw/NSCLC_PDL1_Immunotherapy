@@ -6,15 +6,13 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_curve
+import shap
 
 limit = "365"
 extender = "1000"
 all_dataset = np.array(np.load('whole_dataset_' + limit +'_' + extender + '.npy'))
 test_dataset = np.array(np.load('test_set_' + limit + '_' + extender + '.npy'))
-prog_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_1000_xgb_prog_0.70_365_1000.npy')), axis=1)
-mort_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_1000_xgb_mort_0.74_365_1000.npy')), axis=1)
 
-all_test_data = np.concatenate((test_dataset, prog_gb_preds, mort_gb_preds), axis=1)
 headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosis", "birth_year", "gender", "race",
                     "ethnicity", "state", "other_no_insurance","workers_comp","self_pay","pt_assistance",
                     "other_gov_insurance","medicare", "medicaid", "commercial_health_plan", "practice_type",  "ecog", "stage",
@@ -29,7 +27,10 @@ headers_test_set = [ "physicianID", "practiceID",  "diag_year", "age_at_diagnosi
                      "abx", "albumin", "creatinine", "bilirubin", "ast", "alt", "progression_outcome",
                      "progression_days", "mortality_days", "mortality_outcome", "censor_days", "prog_gb_preds", "mort_gb_preds"]
 
+prog_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_1000_xgb_prog_0.70_365_1000.npy')), axis=1)
+mort_gb_preds = np.expand_dims(np.array(np.load('y_pred_365_1000_xgb_mort_0.74_365_1000.npy')), axis=1)
 
+all_test_data = np.concatenate((test_dataset, prog_gb_preds, mort_gb_preds), axis=1)
 
 data = pd.DataFrame(data=all_test_data)
 

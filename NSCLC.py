@@ -1,40 +1,74 @@
+import copy
+import pickle
+import sys
+import time
+from datetime import date
+from decimal import Decimal
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import sys
-from sklearn.model_selection import train_test_split
-from sklearn.utils import class_weight
-import keras
-from keras import models, layers, callbacks, regularizers
-import statistics
-from datetime import date
-import time
-from sklearn.utils import shuffle
-import copy
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, accuracy_score
-from sklearn.utils.class_weight import compute_sample_weight
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from decimal import Decimal
+import shap
 import xgboost as xgb
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier
+from sklearn.metrics import roc_auc_score, accuracy_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.utils import class_weight
+from sklearn.utils import shuffle
 
-no_progression_date = date(2022, 1, 1)
+no_progression_date = date(2021, 11, 30)
 dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 
+
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
+
+    shap.initjs()
+    X_train_df = pd.DataFrame(data=X_train)
+    X_test_df = pd.DataFrame(data=X_test)
+    X_train_df = X_train_df.astype(float)
+    X_test_df = X_test_df.astype(float)
+
+    headers_long =["Diagnosis Year", "Age At Diagnosis", "Birth Year", "Female", "Male", "White", "Asian", "Other Race",
+                        "Hispanic Race", "Black", "Hispanic Ethnicity", 'WI Residence', 'MN Residence', 'IN Residence',
+                        'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                   'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                   'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                   'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                   'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                   'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                        'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                   'MA Residence', "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
+                   "Other Governmental Insurance", "Medcicare", "Medicaid", "Commercial Health Plan",
+                         "Community Medical Center", "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                   "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
+                   'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
+                   'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
+                        "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "ALK+", "EGFR+", "KRAS+",
+                   "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported", "First-Line Nivolumab Monotherapy",
+                   "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
+                   "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab",
+                         "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
+                   "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
+                   "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
+                   "3+ Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                   "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                   "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
+                    "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
+                    "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
+                    "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
+                   "Adrenal Metastases", "Unspecificed Metastases", "Glucocorticoid Use Prior to Treatment",
+                     "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT"]
+    
+    print(len(headers_long))
 
     # Initialize GridSearchCV
     grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, scoring='roc_auc', n_jobs=-1)
 
     # Perform grid search
     if type=='xgb':
-        grid_search.fit(X_train, y_train, sample_weight=weights)
+        grid_search.fit(X_train_df, y_train, sample_weight=weights)
     else:
-        grid_search.fit(X_train, y_train)
+        grid_search.fit(X_train_df, y_train)
 
     # Best parameters
     best_params = grid_search.best_params_
@@ -49,12 +83,25 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     auc_final = roc_auc_score(y_test_final, y_pred_prob)
     auc_dec = Decimal(str(auc_final))
     rounded_num = round(auc_dec, 2)
+    print("AUC: ", str(rounded_num))
     np.save('y_pred_' + filename_extender + '_' + type + '_' + str(rounded_num) + '_' + file_name_extender + '.npy', y_pred_prob)
-    y_pred = best_estimator.predict(X_test)
+    y_pred = best_estimator.predict(X_test_df)
 
     # Evaluate model
     accuracy = accuracy_score(y_test, y_pred)
     print(f"Accuracy: {accuracy:.4f}")
+    pickle.dump(clf, open("clf_" + type + '_' + filename_extender + ".pickle", "wb"))
+
+    explainer = shap.TreeExplainer(best_estimator, X_train_df)
+
+    final_shap_values = explainer.shap_values(X_test_df.values)
+    shap.summary_plot(final_shap_values, X_test_df.values, max_display=30, feature_names=headers_long, show=False)
+    plt.savefig('shap_summary_plot_ci_' + type + '_' + filename_extender + '.png')
+    plt.close()
+
+    shap.summary_plot(final_shap_values, X_test_df.values, max_display=30, feature_names=headers_long, plot_type='bar', show=False)
+    plt.savefig('shap_summary_plot_bar_' + type + '_' + filename_extender + '.png')
+    plt.close()
 
 def convert_date_to_iso(orig_date):
     ind1 = orig_date.find('/')
@@ -332,7 +379,7 @@ if __name__ == '__main__':
 
     race_to_number = {'': 0, _nan: 0, 'nan': 0, float("nan"): 0, 'White': 1,  'Asian': 2, 'Other Race': 3, 'Hispanic or Latino': 4,
                       'Black or African American': 5}
-    histologies = {'Squamous cell carcinoma': 1, 'Non-squamous cell carcinoma': 2, 'NSCLC histology NOS': 3}
+    histologies = {'Squamous cell carcinoma': 1, 'Non-squamous cell carcinoma': 2, 'NSCLC histology NOS': 0}
     gender_to_number = {'': 0, float("nan"): 0, 'F': 1, 'M': 2}
     stages = {'Group stage is not reported': 0, 'Stage 0': 1, 'Stage I': 2, 'Stage IA': 3, 'Stage IA1': 4,
               'Stage IA2': 5, 'Stage IA3': 6, 'Stage IB': 7, 'Stage II': 8, 'Stage IIA': 9, 'Stage IIB': 10,
@@ -508,9 +555,9 @@ if __name__ == '__main__':
 
     biomarkers = pd.read_csv(dir_path +'Enhanced_AdvNSCLCBiomarkers.csv')
     patientID_to_biomarkers = dict()
-    staining = {"nan": -1.0, float('nan'): -1.0, "": -1.0, "0%": 0.0, "< 1%": 0.0, "1%": 0.01, "2% - 4%": 0.03,
-                "5% - 9%": 0.07,"10% - 19%": 0.15, "20% - 29%": 0.25, "30% - 39%": 0.35,"40% - 49%": 0.45,
-                "50% - 59%": 0.55, "60% - 69%": 0.65, "70% - 79%": 0.75, "80% - 89%": 0.85, "90% - 99%": 0.95, "100%": 1.0}
+    staining = {"nan": -1.0, float('nan'): -1.0, "": -1.0, "0%": 0.0, "< 1%": 0.0, "1%": 0.01, "2% - 4%": 0.02,
+                "5% - 9%": 0.05,"10% - 19%": 0.10, "20% - 29%": 0.2, "30% - 39%": 0.3,"40% - 49%": 0.4,
+                "50% - 59%": 0.5, "60% - 69%": 0.6, "70% - 79%": 0.7, "80% - 89%": 0.8, "90% - 99%": 0.9, "100%": 1.0}
 
     for i in range(len(biomarkers['PatientID'])):
         patient_ID, biomarker_name, cell_type, biomarker_status, expression_level, sample_type, staining_intensity=\
@@ -560,8 +607,6 @@ if __name__ == '__main__':
     for patientID in patientID_to_biomarkers:
         pdl1 = patientID_to_biomarkers[patientID]["PDL1"]
         if pdl1 >= 0.0:
-            #avg = statistics.mean(patientID_to_biomarkers[patientID]["PDL1"])
-            #patientID_to_biomarkers[patientID]["PDL1"] = avg
             patientID_to_biomarkers[patientID]["PDL1_given"] = 1
         else:
             patientID_to_biomarkers[patientID]["PDL1"] = 0.0
@@ -649,13 +694,13 @@ if __name__ == '__main__':
 
     y = []
     static_variables = dict()
-    total_meds_vitals_labs = 700
+    total_meds_vitals_labs = 0
     len_static = 0
     total_len_static = 0
     chemotherapy_drugs = ["cisplatin", "carboplatin"]
-    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "tremelimumab": 3, "atezolizumab": 4,
-                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6, "cemiplimab": 7,
-                                   "cemiplimab-rwlc": 7}
+    first_line_mono_io_to_index = {"nivolumab": 1, "pembrolizumab": 2, "atezolizumab": 4,
+                                   "durvalumab": 5, "ipilimumab,nivolumab": 6, "nivolumab,ipilimumab": 6, "cemiplimab": 3,
+                                   "cemiplimab-rwlc": 3}
     first_line_chemotherapy_drugs = ["cisplatin", "carboplatin"]
     egfr_drugs = ["osimertinib", "erlotinib", "gefitinib", "afatinib"]
     alk_drugs = ["alectinib", "ceritinib", "brigatinib"]
@@ -1182,7 +1227,7 @@ if __name__ == '__main__':
                     if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row+1][col] != 0.0:
                         dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
 
-            dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
+            dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array[:, 0:total_num_vitals]
 
     progressions = pd.read_csv(dir_path+'Enhanced_AdvNSCLCProgression.csv')
     pd1s_progression = []
@@ -1327,7 +1372,8 @@ if __name__ == '__main__':
         total_len_static = x_static_final.shape[0]
 
         if patientID in dynamic_variables:
-            dynamic_data = (dynamic_variables[patientID][-1]).flatten()
+            dynamic_data = np.zeros(total_meds_vitals_labs)
+            #dynamic_data = (dynamic_variables[patientID][-1]).flatten()
         else:
             dynamic_data = np.zeros(total_meds_vitals_labs)
 
@@ -1396,6 +1442,28 @@ if __name__ == '__main__':
 
     del entire_dataset
 
+    X_static = X_static[:, 2:]
+
+    if use_dx == 0:
+        categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
+    else:
+        categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19]
+
+    X_static_df = pd.DataFrame(data=X_static)
+    print(X_static_df.shape)
+    X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True)
+    print(X_static_df_final.shape)
+    X_static = X_static_df_final.values
+
+    print(X_static.shape)
+
+    if use_imputation:
+        df1 = pd.DataFrame(data=X_static)
+        df2 = perform_imputation_df(df1, [3, 4, 6, 16, 17, 18, 19], type='mode')
+        X_static_df = perform_imputation_df(df2, [68, 69, 70, 71, 72], type='mean')
+        X_static_df.to_csv('train_impute.csv')
+        X_static = X_static_df.values
+
     X_final_static, y = shuffle(X_static, y, random_state=0)
     train_len = int(0.8 * len(X_final_static))
     X_static_train = np.array(X_final_static[:train_len])
@@ -1416,22 +1484,6 @@ if __name__ == '__main__':
     del demos_for_analysis_test_set
     del data_for_stata_analysis_test_set
 
-    if use_imputation:
-        train_df1 = pd.DataFrame(data=X_static_train)
-        train_df2 = perform_imputation_df(train_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        X_static_train_df = perform_imputation_df(train_df2, [70, 71, 72, 73, 74], type='mean')
-        X_static_train_df.to_csv('train_impute.csv')
-        X_static_train = X_static_train_df.values
-
-        test_df1 = pd.DataFrame(data=X_static_test)
-        test_df2 = perform_imputation_df(test_df1, [2, 5, 6, 8, 18, 19, 20, 21], type='mode')
-        X_static_test_df = perform_imputation_df(test_df2, [70, 71, 72, 73, 74], type='mean')
-        X_static_test_df.to_csv('test_impute.csv')
-        X_static_test = X_static_test_df.values
-
-    X_static_train = X_static_train[:, 2:]
-    X_static_test = X_static_test[:, 2:]
-
     for mort_outcome in [0, 1]:
         if mort_outcome == 0:
             y_train_final = y_train[:, 0]
@@ -1447,32 +1499,6 @@ if __name__ == '__main__':
         train_class_weights = {i:train_class_weights[i] for i in range(2)}
         print(train_class_weights)
 
-        if use_dx == 0:
-            categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19, 27]
-        else:
-            categorical_indices = [0, 3, 4, 6, 15, 16, 17, 18, 19]
-
-        ###### HGB
-        hgb_clf = HistGradientBoostingClassifier(random_state=0, categorical_features=categorical_indices)
-        params_hgb = {
-            'learning_rate': [0.1, 0.05, 0.2, 0.01],
-            'l2_regularization': [0, 0.01, 0.1],
-            'min_samples_leaf': [10, 32, 50],
-            "max_depth": [2, 5, None],
-            'class_weight': ['balanced', None],
-            'max_features': [0.5, 0.75, 1.0],
-            }
-
-        perform_grid_search(params_hgb, hgb_clf, X_static_train, y_train_final, X_static_test,
-                            y_test_final, file_name_extender, type='hgb' + final_extender)
-
-        X_static_train_df = pd.DataFrame(data=X_static_train)
-        X_static_train_df_final = pd.get_dummies(X_static_train_df, columns=categorical_indices)
-        x_static_train = X_static_train_df_final.values
-        X_static_test_df = pd.DataFrame(data=X_static_test)
-        X_static_test_df_final = pd.get_dummies(X_static_test_df, columns=categorical_indices)
-        x_static_test = X_static_test_df_final.values
-
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
         params_xgb = {
@@ -1480,14 +1506,16 @@ if __name__ == '__main__':
             'gamma': [0.5, 1, 1.5, 2.0],
             'max_depth': [5, 10, 15, None],
             'learning_rate': [0.05, 0.1, 0.2, 1.0],
-            'n_estimators': [200, 300, 400],
-            }
+            'n_estimators': [200, 300, 400]
+        }
+
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb' + final_extender, weights=classes_weights)
 
         ###### GB
         gb_clf = GradientBoostingClassifier(random_state=0)
+
         params_gb = {
                 'loss': ['log_loss', 'exponential'],
                 'learning_rate': [0.1, 0.05],
