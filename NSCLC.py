@@ -90,7 +90,8 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     # Evaluate model
     accuracy = accuracy_score(y_test, y_pred)
     print(f"Accuracy: {accuracy:.4f}")
-    pickle.dump(best_estimator, open("clf_" + type + '_' + filename_extender + ".pickle", "wb"))
+    with open("clf_" + type + '_' + filename_extender + ".pickle", 'wb') as f:
+        pickle.dump(best_estimator, f)
 
     X_train_df.headers = headers_long
     X_test_df.headers = headers_long
@@ -1455,6 +1456,13 @@ if __name__ == '__main__':
     else:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19]
 
+    if use_imputation:
+        df1 = pd.DataFrame(data=X_static)
+        df2 = perform_imputation_df(df1, [3, 4, 6, 16, 17, 18, 19], type='mode')
+        X_static_df = perform_imputation_df(df2, [68, 69, 70, 71, 72], type='mean')
+        X_static_df.to_csv('train_impute.csv')
+        X_static = X_static_df.values
+
     X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
     X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True)
@@ -1463,12 +1471,7 @@ if __name__ == '__main__':
 
     print(X_static.shape)
 
-    if use_imputation:
-        df1 = pd.DataFrame(data=X_static)
-        df2 = perform_imputation_df(df1, [3, 4, 6, 16, 17, 18, 19], type='mode')
-        X_static_df = perform_imputation_df(df2, [68, 69, 70, 71, 72], type='mean')
-        X_static_df.to_csv('train_impute.csv')
-        X_static = X_static_df.values
+
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
     train_len = int(0.8 * len(X_final_static))
