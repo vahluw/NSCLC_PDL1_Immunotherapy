@@ -7,7 +7,7 @@ from decimal import Decimal
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import shap
+#import shap
 import xgboost as xgb
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier
 from sklearn.metrics import roc_auc_score, accuracy_score
@@ -22,7 +22,7 @@ dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
 
-    shap.initjs()
+    #shap.initjs()
     X_train_df = pd.DataFrame(data=X_train)
     X_test_df = pd.DataFrame(data=X_test)
     X_train_df = X_train_df.astype(float)
@@ -98,7 +98,8 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     X_train_df.to_csv("clf_" + type + '_' + filename_extender + "_train.csv")
     X_test_df.to_csv("clf_" + type + '_' + filename_extender + "_test.csv")
 
-    return
+
+    '''
     explainer = shap.TreeExplainer(best_estimator, X_train_df)
 
     final_shap_values = explainer.shap_values(X_test_df.values)
@@ -109,7 +110,8 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     shap.summary_plot(final_shap_values, X_test_df.values, max_display=20, feature_names=headers_long, plot_type='bar', show=False)
     plt.savefig('shap_summary_plot_bar_' + type + '_' + filename_extender + '.png')
     plt.close()
-
+    '''
+    return
 def convert_date_to_iso(orig_date):
     ind1 = orig_date.find('/')
     mo = int(orig_date[:ind1])
@@ -359,6 +361,7 @@ def get_vitals_value(value_temp, units_temp, count_temp, previous_val):
 if __name__ == '__main__':
     min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
     use_imputation = int(sys.argv[10])
+    include_dynamic = int(sys.argv[11])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -1378,13 +1381,16 @@ if __name__ == '__main__':
             x_static_final = np.concatenate((x_demos_no_diagnoses, x_diagnosis))
         total_len_static = x_static_final.shape[0]
 
-        if patientID in dynamic_variables:
-            dynamic_data = np.zeros(total_meds_vitals_labs)
-            #dynamic_data = (dynamic_variables[patientID][-1]).flatten()
-        else:
-            dynamic_data = np.zeros(total_meds_vitals_labs)
+        if include_dynamic:
+            if patientID in dynamic_variables:
+                dynamic_data = (dynamic_variables[patientID][-1]).flatten()
+            else:
+                dynamic_data = np.zeros(total_meds_vitals_labs)
 
-        final_vals = np.concatenate((x_static_final, dynamic_data))
+            final_vals = np.concatenate((x_static_final, dynamic_data))
+        else:
+            final_vals = x_static_final
+
         X_static.append(final_vals)
         y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
 
@@ -1435,6 +1441,11 @@ if __name__ == '__main__':
         file_name_extender += "0"
 
     if use_dx:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
+    if include_dynamic:
         file_name_extender += "1"
     else:
         file_name_extender += "0"
