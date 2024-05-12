@@ -1475,7 +1475,7 @@ if __name__ == '__main__':
 
     X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
-    X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True)
+    X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True, dtype=int)
     X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
     print(X_static_df_final.shape)
     X_static = X_static_df_final.values
