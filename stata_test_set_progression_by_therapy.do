@@ -8,7 +8,7 @@
   rocreg mortality_outcome mort_preds
  
   import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
- gen threshold = 0.661943
+ gen threshold = 0.662
  gen time_limit = 365
 
  
@@ -58,8 +58,8 @@
    logit progression_outcome i.therapy_type#c.pdl1 $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
   logit progression_outcome i.therapy_type#i.pdl1_over_threshold  $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
 
-   logit progression_outcome i.therapy_type#c.pdl1 if pdl1_given==1
-  logit progression_outcome i.therapy_type#i.pdl1_over_threshold if pdl1_given==1
+   logit progression_outcome i.therapy_type#c.pdl1 if pdl1reported==1
+  logit progression_outcome i.therapy_type#i.pdl1_over_threshold if pdl1reported==1
  
     stset progression_days, failure(progression_outcome)
  stci, by(progressed_prediction) rmean
@@ -115,7 +115,7 @@
 
 // Mortality
  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
-  gen threshold = 0.347940
+  gen threshold = 0.348
  gen prog_pred = mort_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
   gen endpoint_prediction = (prog_pred>=threshold)
@@ -160,8 +160,8 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
   logit mortality_outcome i.therapy_type#c.prog_pred
   logit mortality_outcome i.therapy_type#i.endpoint_prediction
   
-   logit mortality_outcome i.therapy_type#c.pdl1 if pdl1_given==1
-  logit mortality_outcome i.therapy_type#i.pdl1_over_threshold if pdl1_given==1
+   logit mortality_outcome i.therapy_type#c.pdl1 if pdl1reported==1
+  logit mortality_outcome i.therapy_type#i.pdl1_over_threshold if pdl1reported==1
  
     stset endpoint_days, failure(endpoint)
  stci, by(endpoint_prediction) rmean
@@ -193,9 +193,6 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
  stcox endpoint_prediction if therapy_type==0
  sts graph if therapy_type==0 , by(endpoint_prediction) title("Overall Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "chemo_only_test_set_xgb_overall.png", replace
- 
- global indiv_covar "ib1.race ib1.ecog ib1.histology ib1.stage pdl1 ib1.practice_type diag_year age_at_diagnosis other_no_insurance  self_pay pt_assistance other_gov_insurance medicare medicaid commercial_health_plan"
-
 
  gen over_pdl1_threshold = 0
  replace over_pdl1_threshold  = 1 if pdl1>=0.5

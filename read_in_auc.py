@@ -10,12 +10,12 @@ extender = "10000"
 test_data = np.array(np.load('test_set_365_10000.npy', allow_pickle=True))[:, -5:]
 
 headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
-                   "Other Governmental Insurance", "Medcicare", "Medicaid", "Commercial Health Plan",
+                   "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
                          "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported",
                          "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
                    "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                    "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
-                   "3+ Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                   "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
                    "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
                    "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                     "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",

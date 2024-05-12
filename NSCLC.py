@@ -1518,27 +1518,23 @@ if __name__ == '__main__':
         print(train_class_weights)
 
         ####XGBoost
-        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-        if include_dynamic == 1 and exclude_diagnoses == 0:
-            params_xgb = {
-                'min_child_weight': [5],
-                'gamma': [1],
-                'max_depth': [5],
-                'learning_rate': [0.05],
-                'n_estimators': [400]
-            }
-        else:
-            params_xgb = {
+        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0, booster='gbtree', base_score=0.5, eval_metric='auc')
+        params_xgb = {
                 'min_child_weight': [1, 5, 10],
-                'gamma': [0.5, 1, 1.5, 2.0],
+                'gamma': [0.5, 1, 1.5, 2.0, 0],
                 'max_depth': [5, 10, 15, None],
                 'learning_rate': [0.05, 0.1, 0.2, 1.0],
-                'n_estimators': [200, 300, 400]
-            }
+                'n_estimators': [200, 300, 400],
+                'reg_lambda': [0, 1],
+                'reg_alpha': [0, 0.001, 0.01, 1],
+                'subsample': [0.5, 1],
+                'scale_pos_weight': [0.5, 1, 2, 4]
+        }
 
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb' + final_extender, weights=classes_weights)
+
         '''
         ###### GB
         gb_clf = GradientBoostingClassifier(random_state=0)
@@ -1569,31 +1565,5 @@ if __name__ == '__main__':
                 }
 
         perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf' + final_extender)
-
-        
-        #######   LR
-        logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
-        logistic_model.fit(X_static_train, y_train_final)
-        logistic_pred = logistic_model.predict_proba(X_static_test)[:, 1]
-        logistic_score = logistic_model.score(X_static_test, y_test_final)
-        auc_final_lr = roc_auc_score(y_test_final, logistic_pred)
-        print("Logistic: ",)
-        print("Score: ", logistic_score)
-        print("AUC: ", auc_final_lr)
-        auc_dec = Decimal(str(auc_final_lr))
-        rounded_num = round(auc_dec, 2)
-        np.save('y_pred_logistic_' + str(rounded_num) + "_" + file_name_extender +  '_'+ final_extender +'.npy', logistic_pred)
-        del logistic_model
-        del logistic_score
-        del logistic_pred
-
-        ###### KNN
-        knn_clf = KNeighborsClassifier()
-        params_knn = {
-            'n_neighbors': [5, 20, 50],
-            'weights': ["uniform", "distance"],
-            'leaf_size': [20, 40]
-            }
-        perform_grid_search(params_knn, knn_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender,  type='knn' + final_extender)
 
         '''

@@ -3,7 +3,7 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 ethnicity  diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecificedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen "
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker communitymedicalcenter academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
@@ -12,7 +12,7 @@
 
 
 
- import delimited "all_data_365_1000.csv", clear 
+ import delimited "all_data_365_10000.csv", clear 
 
   gen time_limit = 365
  gen outcome = "progression"
@@ -25,44 +25,33 @@ replace over_threshold = 1 if pdl1>=0.5
  gen endpoint = progression_outcome
  replace endpoint = mortality_outcome if outcome == "mortality"
  
- sum age_at_diagnosis
- tab gender
- tab race
- tab stage
- tab histology
- tab smoking_status
- tab pdl1
- tab practice_type
+
  tab progression_outcome
  gen insured = 0
- replace insured = 1 if pt_assistance == 1 | other_gov_insurance == 1 | medicare == 1 | medicaid == 1 | commercial_health_plan ==1
+ replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
 
 
  histogram pdl1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
  graph export "PD_L1_distribution_whole_dataset_include_0.png", replace
  
-
- drop if ras_drug==1
- gen therapy_type = -1
- replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono_used > 0
- replace therapy_type = 2 if combo_therapy == 1
- replace therapy_type = 3 if secondary_chemo_drug == 1
- replace therapy_type = 4 if alk_drug == 1
- replace therapy_type = 5 if egfr_drug == 1
- replace therapy_type = 6 if braf_drug == 1
- replace therapy_type = 7 if ros1_drug == 1
- replace therapy_type = 8  if other_first_line_therapy == 1 
- replace therapy_type = 9 if trk_inhibitor == 1
- replace therapy_type = 10 if met_drug== 1
-  replace therapy_type = 11 if carboplatin_only == 1
-  replace therapy_type = 12 if cisplatin_only == 1
- 
+ gen therapy_type = 1
+ replace therapy_type = 0 if firstlinechemotherapy == 1
+ //replace therapy_type = 1 if io_mono_used > 0
+ replace therapy_type = 2 if firstlinecombinationtherapy == 1
+ replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+ replace therapy_type = 4 if antialkdrug == 1
+ replace therapy_type = 5 if antiegfrdrug == 1
+ replace therapy_type = 6 if antibrafdrug == 1
+ replace therapy_type = 7 if antiros1drug == 1
+ replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+ replace therapy_type = 9 if trkinhibitor == 1
+ replace therapy_type = 10 if metinhibitor== 1
+  replace therapy_type = 11 if carboplatinmonotherapy == 1
+  replace therapy_type = 12 if cisplatinmonotherapy == 1
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- logit endpoint i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug
- predict logit_pred
+ logit endpoint i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  
  //rocreg endpoint logit_pred
  
  
@@ -73,22 +62,22 @@ replace over_threshold = 1 if pdl1>=0.5
  graph export "prog_survival_with_mutations_pre_match_prog.png", replace
  sts test therapy_type, logrank
  
-  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
  drop if therapy_type>=2
 
-  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1_given==1
 
 
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
 
- drop if bev_used == 1 | three_plus_chemo_drugs == 1
- drop if clinical_study_drug == 1
+ drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
+ drop if clinicalstudydrugused == 1
  
-   logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+   logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras   if pdl1reported==1
    
-      logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  i.state bev_used   kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year clinical_study_drug if pdl1 > 0
+      logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1 > 0
 
  
  stset censor_time, failure(endpoint)
@@ -99,7 +88,7 @@ replace over_threshold = 1 if pdl1>=0.5
  sts test therapy_type, logrank
 
 
- logit therapy_type ${indiv_covar} braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year  //i.therapy_type##over_threshold
+ logit therapy_type ${indiv_covar} braf kras   //i.therapy_type##over_threshold
  
 predict yhat
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
@@ -114,7 +103,7 @@ graph export "propensity_pre_match_hist_prog.png", replace
 
 pstest ${indiv_covar}, raw treated(therapy_type)
 
-psmatch2 therapy_type  ${indiv_covar} pdl1_given braf kras kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis  interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year, outcome(endpoint) caliper(0.2) //n(1) noreplacement 
+psmatch2 therapy_type  ${indiv_covar} pdl1reported braf kras , outcome(endpoint) caliper(0.2) //n(1) noreplacement 
 count 
 
 
