@@ -5,20 +5,20 @@
  cd "${path}"
  set scheme cleanplots
 
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1000.csv", clear 
- rocreg progression_outcome prog_gb_preds
+ import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
+ rocreg progression_outcome prog_preds
  
-  rocreg mortality_outcome mort_gb_preds
+  rocreg mortality_outcome mort_preds
  
-  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1000.csv", clear 
+  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
  gen threshold = 0.673801
  gen time_limit = 365
 
  
- gen prog_pred = prog_gb_preds
+ gen prog_pred = prog_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
 
- replace diag_year = 2024 - diag_year
+ replace diagnosisyear = 2024 - diagnosisyear
  gen progressed_prediction = (prog_pred>=threshold)
  
  sum progression_days
@@ -218,10 +218,10 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
 
 
  
-  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1000.csv", clear 
+  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
 
  gen threshold = 0.66
- gen prog_pred = prog_gb_preds
+ gen prog_pred = prog_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
  gen progressed_prediction = (prog_pred>=threshold)
  gen incorrect = 0

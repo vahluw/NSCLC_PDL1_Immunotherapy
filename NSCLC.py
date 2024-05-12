@@ -27,26 +27,9 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     X_test_df = pd.DataFrame(data=X_test)
     X_train_df = X_train_df.astype(float)
     X_test_df = X_test_df.astype(float)
-
-    headers_long =["Diagnosis Year", "Age At Diagnosis", "Birth Year", "Female", "Male", "White", "Asian", "Other Race",
-                        "Hispanic Race", "Black", "Hispanic Ethnicity", 'WI Residence', 'MN Residence', 'IN Residence',
-                        'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
-                   'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
-                   'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
-                   'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
-                   'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
-                   'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
-                        'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
-                   'MA Residence', "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
+    headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
                    "Other Governmental Insurance", "Medcicare", "Medicaid", "Commercial Health Plan",
-                         "Community Medical Center", "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
-                   "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
-                   'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
-                   'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
-                        "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "ALK+", "EGFR+", "KRAS+",
-                   "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported", "First-Line Nivolumab Monotherapy",
-                   "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
-                   "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab",
+                         "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported",
                          "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
                    "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                    "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
@@ -57,8 +40,23 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
                     "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
                     "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
                    "Adrenal Metastases", "Unspecificed Metastases", "Glucocorticoid Use Prior to Treatment",
-                     "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT"]
-    
+                     "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
+                "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                        'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                   'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                   'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                   'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                   'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                   'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                        'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                   'MA Residence',  "Community Medical Center", "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                   "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
+                   'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
+                   'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
+                        "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "First-Line Nivolumab Monotherapy",
+                   "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
+                   "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
+
     print(len(headers_long))
 
     # Initialize GridSearchCV
@@ -1477,12 +1475,11 @@ if __name__ == '__main__':
     X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
     X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True)
+    X_static_df_final.to_csv('all_x_static.csv')
     print(X_static_df_final.shape)
     X_static = X_static_df_final.values
 
     print(X_static.shape)
-
-
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
     train_len = int(0.8 * len(X_final_static))
