@@ -1236,7 +1236,7 @@ if __name__ == '__main__':
                     if dynamic_holder_all_dates_single_patient_array[row][col] == 0.0 and dynamic_holder_all_dates_single_patient_array[row+1][col] != 0.0:
                         dynamic_holder_all_dates_single_patient_array[row][col] = dynamic_holder_all_dates_single_patient_array[row+1][col]
 
-            dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array[:, 0:total_num_vitals]
+            dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
 
     progressions = pd.read_csv(dir_path+'Enhanced_AdvNSCLCProgression.csv')
     pd1s_progression = []
@@ -1476,7 +1476,7 @@ if __name__ == '__main__':
     X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
     X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True)
-    X_static_df_final.to_csv('all_x_static.csv')
+    X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
     print(X_static_df_final.shape)
     X_static = X_static_df_final.values
 
@@ -1539,7 +1539,7 @@ if __name__ == '__main__':
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb' + final_extender, weights=classes_weights)
-
+        '''
         ###### GB
         gb_clf = GradientBoostingClassifier(random_state=0)
 
@@ -1570,7 +1570,7 @@ if __name__ == '__main__':
 
         perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf' + final_extender)
 
-        '''
+        
         #######   LR
         logistic_model = LogisticRegression(penalty='l2', class_weight='balanced', random_state=0)
         logistic_model.fit(X_static_train, y_train_final)
