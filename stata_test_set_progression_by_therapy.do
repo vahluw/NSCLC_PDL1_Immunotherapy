@@ -1,6 +1,3 @@
-/*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
-
- global indiv_covar "i.ecog i.histology pdl1 ethnicity i.practice_type diag_year age_at_diagnosis i.race i.gender i.smoking_status days_from_dx_to_tx pt_assistance other_gov_insurance medicare self_pay medicaid commercial_health_plan other_no_insurance i.stage albumin abx steroid creatinine alt ast bilirubin "
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
  set scheme cleanplots
@@ -11,7 +8,7 @@
   rocreg mortality_outcome mort_preds
  
   import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
- gen threshold = 0.673801
+ gen threshold = 0.661943
  gen time_limit = 365
 
  
@@ -32,20 +29,20 @@
  graph export "io_chemo_test_set_ml_mutations_xgb.png", replace
 
  
- gen therapy_type = -1
- replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono_used > 0
- replace therapy_type = 2 if combo_therapy == 1
- replace therapy_type = 3 if secondary_chemo_drug == 1
- replace therapy_type = 4 if alk_drug == 1
- replace therapy_type = 5 if egfr_drug == 1
- replace therapy_type = 6 if braf_drug == 1
- replace therapy_type = 7 if ros1_drug == 1
- replace therapy_type = 8  if other_first_line_therapy == 1 | ras_drug == 1
- replace therapy_type = 9 if trk_inhibitor == 1
- replace therapy_type = 10 if met_drug== 1
-  replace therapy_type = 11 if carboplatin_only == 1
-  replace therapy_type = 12 if cisplatin_only == 1
+ gen therapy_type = 1
+ replace therapy_type = 0 if firstlinechemotherapy == 1
+ //replace therapy_type = 1 if io_mono_used > 0
+ replace therapy_type = 2 if firstlinecombinationtherapy == 1
+ replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+ replace therapy_type = 4 if antialkdrug == 1
+ replace therapy_type = 5 if antiegfrdrug == 1
+ replace therapy_type = 6 if antibrafdrug == 1
+ replace therapy_type = 7 if antiros1drug == 1
+ replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+ replace therapy_type = 9 if trkinhibitor == 1
+ replace therapy_type = 10 if metinhibitor== 1
+  replace therapy_type = 11 if carboplatinmonotherapy == 1
+  replace therapy_type = 12 if cisplatinmonotherapy == 1
  
 
  drop if therapy_type >=2
@@ -82,10 +79,10 @@
  sts graph if therapy_type==1 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "io_only_test_set_pdl1_over50_xgb.png", replace
 
-   stset progression_days if io_mono_used==2 & pdl1>=0.5, failure(progression_outcome)
- stci if io_mono_used==2 & pdl1>=0.5, by(progressed_prediction) rmean 
- stcox progressed_prediction if io_mono_used==2& pdl1>=0.5
- sts graph if io_mono_used==2 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Pembrolizumab Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+   stset progression_days if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, failure(progression_outcome)
+ stci if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, by(progressed_prediction) rmean 
+ stcox progressed_prediction if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5
+ sts graph if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Pembrolizumab Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "pembro_only_test_set_pdl1_over50_xgb_prog.png", replace
  
  
@@ -117,9 +114,9 @@
 
 
 // Mortality
- import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_1000.csv", clear 
-  gen threshold = 0.327240
- gen prog_pred = mort_gb_preds
+ import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
+  gen threshold = 0.347940
+ gen prog_pred = mort_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
   gen endpoint_prediction = (prog_pred>=threshold)
   gen endpoint = mortality_outcome
@@ -127,7 +124,7 @@
 gen endpoint_days = mortality_days
 replace endpoint_days = censor_days if censor_days < mortality_days
 replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_limit
- replace diag_year = 2024 - diag_year
+ replace diagnosisyear = 2024 - diagnosisyear
 
  
  sum endpoint_days
@@ -140,20 +137,20 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
  sts graph, by(endpoint_prediction) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "io_chemo_test_set_ml_mutations_xgb_overall.png", replace
 
- gen therapy_type = -1
- replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono_used > 0
- replace therapy_type = 2 if combo_therapy == 1
- replace therapy_type = 3 if secondary_chemo_drug == 1
- replace therapy_type = 4 if alk_drug == 1
- replace therapy_type = 5 if egfr_drug == 1
- replace therapy_type = 6 if braf_drug == 1
- replace therapy_type = 7 if ros1_drug == 1
- replace therapy_type = 8  if other_first_line_therapy == 1 | ras_drug == 1
- replace therapy_type = 9 if trk_inhibitor == 1
- replace therapy_type = 10 if met_drug== 1
-  replace therapy_type = 11 if carboplatin_only == 1
-  replace therapy_type = 12 if cisplatin_only == 1
+ gen therapy_type = 1
+ replace therapy_type = 0 if firstlinechemotherapy == 1
+ //replace therapy_type = 1 if io_mono_used > 0
+ replace therapy_type = 2 if firstlinecombinationtherapy == 1
+ replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+ replace therapy_type = 4 if antialkdrug == 1
+ replace therapy_type = 5 if antiegfrdrug == 1
+ replace therapy_type = 6 if antibrafdrug == 1
+ replace therapy_type = 7 if antiros1drug == 1
+ replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+ replace therapy_type = 9 if trkinhibitor == 1
+ replace therapy_type = 10 if metinhibitor== 1
+  replace therapy_type = 11 if carboplatinmonotherapy == 1
+  replace therapy_type = 12 if cisplatinmonotherapy == 1
 
  drop if therapy_type >=2
   
@@ -185,10 +182,10 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
  graph export "io_only_test_set_pdl1_over50_xgb_overall.png", replace
 
  
-   stset endpoint_days if io_mono_used==2 & pdl1>=0.5, failure(endpoint)
- stci if io_mono_used==2 & pdl1>=0.5, by(endpoint_prediction) rmean 
- stcox endpoint_prediction if io_mono_used==2& pdl1>=0.5
- sts graph if io_mono_used==2 & pdl1>=0.5, by(endpoint_prediction) title("Progression-Free Survival for Test-Set Patients on Pembrolizumab Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+   stset endpoint_days if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, failure(endpoint)
+ stci if firstlinepembrolizumabmonotherap==1& pdl1>=0.5, by(endpoint_prediction) rmean 
+ stcox endpoint_prediction if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5
+ sts graph if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, by(endpoint_prediction) title("Progression-Free Survival for Test-Set Patients on Pembrolizumab Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "pembro_only_test_set_pdl1_over50_mort.png", replace
  
   stset endpoint_days if therapy_type==0, failure(endpoint)
@@ -227,21 +224,21 @@ replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_li
  gen incorrect = 0
  replace incorrect = 1 if (progressed_prediction != progression_outcome)
  
- gen therapy_type = -1
- replace therapy_type = 0 if first_line_chemo == 1
- replace therapy_type = 1 if io_mono_used > 0
- replace therapy_type = 2 if combo_therapy == 1
- replace therapy_type = 3 if secondary_chemo_drug == 1
- replace therapy_type = 4 if alk_drug == 1
- replace therapy_type = 5 if egfr_drug == 1
- replace therapy_type = 6 if braf_drug == 1
- replace therapy_type = 7 if ros1_drug == 1
- replace therapy_type = 8  if other_first_line_therapy == 1 | ras_drug == 1
- replace therapy_type = 9 if trk_inhibitor == 1
- replace therapy_type = 10 if met_drug== 1
-  replace therapy_type = 11 if carboplatin_only == 1
-  replace therapy_type = 12 if cisplatin_only == 1
+ gen therapy_type = 1
+ replace therapy_type = 0 if firstlinechemotherapy == 1
+ //replace therapy_type = 1 if io_mono_used > 0
+ replace therapy_type = 2 if firstlinecombinationtherapy == 1
+ replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+ replace therapy_type = 4 if antialkdrug == 1
+ replace therapy_type = 5 if antiegfrdrug == 1
+ replace therapy_type = 6 if antibrafdrug == 1
+ replace therapy_type = 7 if antiros1drug == 1
+ replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+ replace therapy_type = 9 if trkinhibitor == 1
+ replace therapy_type = 10 if metinhibitor== 1
+  replace therapy_type = 11 if carboplatinmonotherapy == 1
+  replace therapy_type = 12 if cisplatinmonotherapy == 1
 
  
- logit incorrect i.therapy_type ${indiv_covar} kras  i.state  therapy_year kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets  clinical_study_drug creatinine bilirubin ast alt albumin steroid abx
+ logit incorrect i.therapy_type  kras  therapyyear  chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecificedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen
  

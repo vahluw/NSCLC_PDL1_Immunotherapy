@@ -21,7 +21,7 @@ headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic E
                     "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
                     "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
                     "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
-                   "Adrenal Metastases", "Unspecificed Metastases", "Glucocorticoid Use Prior to Treatment",
+                   "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
                      "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
                 "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                         'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',

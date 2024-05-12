@@ -39,7 +39,7 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
                     "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
                     "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
                     "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
-                   "Adrenal Metastases", "Unspecificed Metastases", "Glucocorticoid Use Prior to Treatment",
+                   "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
                      "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
                 "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                         'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
@@ -56,7 +56,6 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
                         "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "First-Line Nivolumab Monotherapy",
                    "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
                    "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
-
     print(len(headers_long))
 
     # Initialize GridSearchCV
@@ -91,8 +90,10 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     with open("clf_" + type + '_' + filename_extender + ".pickle", 'wb') as f:
         pickle.dump(grid_search, f)
 
-    X_train_df.headers = headers_long
-    X_test_df.headers = headers_long
+    if use_dynamic == 0 and exclude_diagnoses==1:
+        X_train_df.headers = headers_long
+        X_test_df.headers = headers_long
+
     X_train_df.to_csv("clf_" + type + '_' + filename_extender + "_train.csv")
     X_test_df.to_csv("clf_" + type + '_' + filename_extender + "_test.csv")
 
@@ -1518,13 +1519,22 @@ if __name__ == '__main__':
 
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0)
-        params_xgb = {
-            'min_child_weight': [1, 5, 10],
-            'gamma': [0.5, 1, 1.5, 2.0],
-            'max_depth': [5, 10, 15, None],
-            'learning_rate': [0.05, 0.1, 0.2, 1.0],
-            'n_estimators': [200, 300, 400]
-        }
+        if include_dynamic == 1 and exclude_diagnoses == 0:
+            params_xgb = {
+                'min_child_weight': [5],
+                'gamma': [1],
+                'max_depth': [5],
+                'learning_rate': [0.05],
+                'n_estimators': [400]
+            }
+        else:
+            params_xgb = {
+                'min_child_weight': [1, 5, 10],
+                'gamma': [0.5, 1, 1.5, 2.0],
+                'max_depth': [5, 10, 15, None],
+                'learning_rate': [0.05, 0.1, 0.2, 1.0],
+                'n_estimators': [200, 300, 400]
+            }
 
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
