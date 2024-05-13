@@ -8,7 +8,7 @@
   rocreg mortality_outcome mort_preds
  
   import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
- gen threshold = 0.662
+ gen threshold = 0.704
  gen time_limit = 365
 
  
@@ -51,7 +51,7 @@
  drop if egfr==1
  drop if ros1==1
  
- logit progression_outcome i.therapy_type#c.prog_pred prog_pred $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
+ logit progression_outcome i.therapy_type#c.prog_pred prog_pred $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pld==1
  
   logit progression_outcome i.therapy_type#i.progressed_prediction i.progressed_prediction $indiv_covar alk egfr braf  ros1 kras  i.state bev_used three_plus_chemo_drugs  kidney_failure chronic_kidney_disease renal_disease kidney_transplant cirrhosis hepatitis liver_transplant connective_tissue scleroderma lupus rheumatoid_arthritis interstitial_lung_disease diabetes bone_mets brain_mets cns_mets digestive_mets adrenal_mets unspecified_mets therapy_year bev_used clinical_study_drug if pdl1_given==1
   
@@ -115,7 +115,7 @@
 
 // Mortality
  import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
-  gen threshold = 0.348
+  gen threshold = 0.468
  gen prog_pred = mort_preds
  gen pdl1_over_threshold = (pdl1 >=0.5) 
   gen endpoint_prediction = (prog_pred>=threshold)

@@ -95,7 +95,7 @@ print('Best Threshold For Temporal =%f' % (best_thresh))
 del all_dataset
 in_test_set = []
 test_dataset = all_test_data.values
-whole_dataset = pd.read_csv('all_x_static365_10000.csv').values
+whole_dataset = pd.read_csv('all_x_static_365_10000.csv').values
 test_dataset_list = test_dataset.tolist()
 for i in range(whole_dataset.shape[0]):
     row = whole_dataset[i].tolist()
@@ -106,12 +106,13 @@ for i in range(whole_dataset.shape[0]):
 
 in_test_set = np.array(in_test_set)
 in_test_set = np.expand_dims(in_test_set, axis=1)
-headers_all = ["in_test_set"] + test_set_columns[:-2]
+headers_all = ["physicianid", "practiceid"] + test_set_columns[:-2]
 
-whole_dataset_pickle = np.array(np.load('whole_dataset_365_10000.npy', allow_pickle=True))[:, -5:]
+whole_dataset_pickle = np.array(np.load('whole_dataset_365_10000.npy', allow_pickle=True))
+whole_dataset_labels  = whole_dataset_pickle[:, -5:]
+whole_dataset_ids  = whole_dataset_pickle[:, 0:2]
 
-all_data = np.concatenate((in_test_set, whole_dataset, whole_dataset_pickle), axis=1)
-all_data  = all_data[:, 1:]
+all_data = np.concatenate((whole_dataset_ids, whole_dataset[:,1:], whole_dataset_labels), axis=1)
 data = pd.DataFrame(data=all_data)
 data.columns = headers_all
 data.to_csv('all_data_' + limit + '_' + extender + '.csv')
