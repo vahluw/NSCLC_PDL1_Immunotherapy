@@ -31,11 +31,11 @@ headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic E
                    'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
                    'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
                         'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
-                   'MA Residence',  "Community Medical Center", "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                   'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
                    "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
                    'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
                    'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
-                        "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "First-Line Nivolumab Monotherapy",
+                        "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker", "First-Line Nivolumab Monotherapy",
                    "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
                    "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
 
@@ -112,7 +112,7 @@ whole_dataset_pickle = np.array(np.load('whole_dataset_365_10000.npy', allow_pic
 whole_dataset_labels  = whole_dataset_pickle[:, -5:]
 whole_dataset_ids  = whole_dataset_pickle[:, 0:2]
 
-all_data = np.concatenate((whole_dataset_ids, whole_dataset[:,1:], whole_dataset_labels), axis=1)
+all_data = np.concatenate((whole_dataset_ids, whole_dataset[:, 1:], whole_dataset_labels), axis=1)
 data = pd.DataFrame(data=all_data)
 data.columns = headers_all
 data.to_csv('all_data_' + limit + '_' + extender + '.csv')

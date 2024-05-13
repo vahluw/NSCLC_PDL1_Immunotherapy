@@ -28,12 +28,12 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     X_train_df = X_train_df.astype(float)
     X_test_df = X_test_df.astype(float)
     headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
-                   "Other Governmental Insurance", "Medcicare", "Medicaid", "Commercial Health Plan",
+                   "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
                          "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported",
                          "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
                    "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                    "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
-                   "3+ Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                   "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
                    "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
                    "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                     "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
@@ -49,13 +49,14 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
                    'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
                    'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
                         'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
-                   'MA Residence',  "Community Medical Center", "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                   'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
                    "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
                    'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
                    'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
-                        "Nonsquamous Cell Carcinoma", "Never Smoker" "Previous Smoker", "First-Line Nivolumab Monotherapy",
+                        "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker", "First-Line Nivolumab Monotherapy",
                    "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
                    "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
+
     print(len(headers_long))
 
     # Initialize GridSearchCV
