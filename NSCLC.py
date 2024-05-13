@@ -1519,17 +1519,31 @@ if __name__ == '__main__':
 
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0, booster='gbtree', base_score=0.5, eval_metric='auc')
-        params_xgb = {
-                'min_child_weight': [1, 5, 10],
-                'gamma': [0.5, 1, 1.5, 2.0, 0],
-                'max_depth': [5, 10, 15, None],
-                'learning_rate': [0.05, 0.1, 0.2, 1.0],
-                'n_estimators': [200, 300, 400],
-                'reg_lambda': [0, 1],
-                'reg_alpha': [0, 0.001, 0.01, 1],
-                'subsample': [0.5, 1],
-                'scale_pos_weight': [0.5, 1, 2, 4]
-        }
+
+        if include_dynamic==1 and exclude_diagnoses==0:
+            params_xgb = {
+                    'min_child_weight': [10],
+                    'gamma': [1],
+                    'max_depth': [5, None],
+                    'learning_rate': [0.05],
+                    'n_estimators': [400],
+                    'reg_lambda': [0, 1],
+                    'reg_alpha': [0, 1],
+                    'scale_pos_weight': [0.5, 1, 1.8]
+            }
+
+        else:
+            params_xgb = {
+                    'min_child_weight': [1, 5, 10],
+                    'gamma': [0.5, 1, 1.5, 2.0, 0],
+                    'max_depth': [5, 10, 15, None],
+                    'learning_rate': [0.05, 0.1, 0.2, 1.0],
+                    'n_estimators': [200, 300, 400],
+                    'reg_lambda': [0, 1],
+                    'reg_alpha': [0, 0.001, 0.01, 1],
+                    'subsample': [0.5, 1],
+                    'scale_pos_weight': [0.5, 1, 2, 4]
+            }
 
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
