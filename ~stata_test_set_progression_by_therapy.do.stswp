@@ -56,7 +56,7 @@ logit progression_outcome i.therapy_type pdl1 i.therapy_type#c.pdl1 if pdl1repor
 logit progression_outcome i.therapy_type i.pdl1_over_threshold i.therapy_type#i.pdl1_over_threshold if pdl1reported==1
 logit progression_outcome i.therapy_type progressed_prediction i.therapy_type#i.progressed_prediction if pdl1reported==1
  
- stset progression_days, failure(progression_outcome)
+    stset progression_days, failure(progression_outcome)
  stci, by(progressed_prediction) rmean
  stcox progressed_prediction
  sts graph, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))

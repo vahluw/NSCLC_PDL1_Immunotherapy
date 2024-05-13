@@ -3,7 +3,7 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused wiresidence mnresidence inresidence varesidence prresidence dcresidence utresidence idresidence moresidence ctresidence nhresidence caresidence arresidence nvresidence deresidence mdresidence tnresidence alresidence njresidence paresidence nyresidence neresidence waresidence wvresidence waresidence azresidence laresidence orresidence okresidence txresidence coresidence iaresidence msresidence riresidence ohresidence scresidence garesidence miresidence ncresidence meresidence flresidence ilresidence nmresidence hiresidence ksresidence kyresidence maresidence"
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
@@ -14,6 +14,51 @@
 
  import delimited "all_data_365_10000.csv", clear 
 
+ tab progression_outcome
+ tab mortality_outcome
+ sum ageatdiagnosis
+ tab male
+ tab female
+ count if male==0 & female==0
+ tab white
+ tab black
+ tab asian
+ tab otherrace
+ tab hispanicethnicity
+ tab stage0
+ count if stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 
+ count if stageii==1 | stageiia ==1 | stageiib ==1  
+ count if stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1
+ count if stageiv ==1 | stageiva ==1 | stageivb == 1
+ count if occult==1
+ tab ecog0
+ tab ecog1
+ tab ecog2
+ tab ecog3
+ tab ecog4
+ count if ecog0==0 & ecog1==0 & ecog2==0 & ecog3 == 0 & ecog4==0
+ tab academicmedicalcenter
+ tab previoussmoker
+ tab neversmoker
+ tab squamouscellcarcinoma
+ tab nonsquamouscellcarcinoma
+ count if pdl1>=0.5
+ count if pdl1<0.5 & pdl1reported==1
+ count if pdl1reported==0
+ count if medicare==1
+ count if medicaid==1
+ count if commercialhealthplan==1
+ count if noinsurance==1
+ count if selfpay==1
+ tab firstlinechemotherapy
+ tab firstlinecombinationtherapy
+ count if firstlinenivolumabmonotherapy ==1 | firstlinepembrolizumabmonotherap == 1 | firstlineatezolizumabmonotherapy == 1 | firstlinecemiplimabmonotherapy  == 1 | firstlinedurvalumabmonotherapy  == 1  | firstlineipilimumabnivolumab == 1
+ tab alk
+ tab egfr
+ tab ros1
+
+ 
+ 
   gen time_limit = 365
  gen outcome = "progression"
 
@@ -36,7 +81,6 @@ replace over_threshold = 1 if pdl1>=0.5
  
  gen therapy_type = 1
  replace therapy_type = 0 if firstlinechemotherapy == 1
- //replace therapy_type = 1 if io_mono_used > 0
  replace therapy_type = 2 if firstlinecombinationtherapy == 1
  replace therapy_type = 3 if nonfirstlinechemotherapy == 1
  replace therapy_type = 4 if antialkdrug == 1
@@ -51,8 +95,13 @@ replace over_threshold = 1 if pdl1>=0.5
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- logit endpoint i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  
- //rocreg endpoint logit_pred
+ logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  
+ predict logit_pred
+ rocreg endpoint logit_pred
+ 
+  logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
+    logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#over_threshold alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
+
  
  
   stset censor_time, failure(endpoint)
@@ -62,23 +111,19 @@ replace over_threshold = 1 if pdl1>=0.5
  graph export "prog_survival_with_mutations_pre_match_prog.png", replace
  sts test therapy_type, logrank
  
-  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
  drop if therapy_type>=2
-
-  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
-
-
  drop if alk==1
  drop if egfr==1
  drop if ros1==1
-
  drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
  drop if clinicalstudydrugused == 1
  
-   logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras   if pdl1reported==1
-   
-      logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1 > 0
+ logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
+ logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
+ logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1>0
+ logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} alk egfr braf  ros1 kras  if pdl1>0
 
+ 
  
  stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
@@ -88,9 +133,9 @@ replace over_threshold = 1 if pdl1>=0.5
  sts test therapy_type, logrank
 
 
- logit therapy_type ${indiv_covar} braf kras   //i.therapy_type##over_threshold
- 
+logit therapy_type ${indiv_covar} braf kras  pdl1reported
 predict yhat
+
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
 graph export "propensity_score_pre_matching_progression.png", replace
 graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
@@ -165,7 +210,7 @@ graph export "propensity_post_match_hist_prog.png", replace
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused wiresidence mnresidence inresidence varesidence prresidence dcresidence utresidence idresidence moresidence ctresidence nhresidence caresidence arresidence nvresidence deresidence mdresidence tnresidence alresidence njresidence paresidence nyresidence neresidence waresidence wvresidence waresidence azresidence laresidence orresidence okresidence txresidence coresidence iaresidence msresidence riresidence ohresidence scresidence garesidence miresidence ncresidence meresidence flresidence ilresidence nmresidence hiresidence ksresidence kyresidence maresidence"
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
  cd "${path}"
@@ -196,7 +241,6 @@ graph export "propensity_post_match_hist_prog.png", replace
  
  gen therapy_type = 1
  replace therapy_type = 0 if firstlinechemotherapy == 1
- //replace therapy_type = 1 if io_mono_used > 0
  replace therapy_type = 2 if firstlinecombinationtherapy == 1
  replace therapy_type = 3 if nonfirstlinechemotherapy == 1
  replace therapy_type = 4 if antialkdrug == 1
@@ -211,9 +255,9 @@ graph export "propensity_post_match_hist_prog.png", replace
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- //logit endpoint i.therapy_type ${indiv_covar} alk egfr braf  ros1 kras   
- //rocreg endpoint logit_pred
- 
+ logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  
+ predict logit_pred
+ rocreg endpoint logit_pred
  
   stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
@@ -319,7 +363,7 @@ graph export "propensity_post_match_hist_prog_overall.png", replace
   
  ////// Regression discontinuity ///////////
 
-  global indiv_covar_no_pdl1 "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma  hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
+  global indiv_covar_no_pdl1 "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma  hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
 import delimited "all_data_365_10000.csv", clear
  gen therapy_type = 1
  replace therapy_type = 0 if firstlinechemotherapy == 1
@@ -407,12 +451,11 @@ rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(unif
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused wiresidence mnresidence inresidence varesidence prresidence dcresidence utresidence idresidence moresidence ctresidence nhresidence caresidence arresidence nvresidence deresidence mdresidence tnresidence alresidence njresidence paresidence nyresidence neresidence waresidence wvresidence waresidence azresidence laresidence orresidence okresidence txresidence coresidence iaresidence msresidence riresidence ohresidence scresidence garesidence miresidence ncresidence meresidence flresidence ilresidence nmresidence hiresidence ksresidence kyresidence maresidence"
 import delimited "all_data_365_10000.csv", clear 
 
  gen therapy_type = 1
  replace therapy_type = 0 if firstlinechemotherapy == 1
- //replace therapy_type = 1 if io_mono_used > 0
  replace therapy_type = 2 if firstlinecombinationtherapy == 1
  replace therapy_type = 3 if nonfirstlinechemotherapy == 1
  replace therapy_type = 4 if antialkdrug == 1

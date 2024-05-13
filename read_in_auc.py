@@ -5,6 +5,24 @@ import shap
 import matplotlib.pyplot as plt
 import pickle
 
+
+'''
+'WI Residence', 'MN Residence', 'IN Residence',
+                        'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                   'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                   'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                   'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                   'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                   'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                        'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                   'MA Residence', 
+                   wiresidence mnresidence inresidence varesidence prresidence dcresidence utresidence idresidence
+                   moresidence ctresidence nhresidence caresidence arresidence nvresidence deresidence mdresidence
+                   tnresidence alresidence njresidence paresidence nyresidence neresidence waresidence wvresidence
+                   waresidence azresidence laresidence orresidence okresidence txresidence coresidence iaresidence
+                   msresidence riresidence ohresidence scresidence garesidence miresidence ncresidence
+                   meresidence flresidence ilresidence nmresidence hiresidence ksresidence kyresidence maresidence
+'''
 limit = "365"
 extender = "10000"
 test_data = np.array(np.load('test_set_365_10000.npy', allow_pickle=True))[:, -5:]
