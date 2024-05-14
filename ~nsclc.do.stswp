@@ -119,7 +119,7 @@ replace over_threshold = 1 if pdl1>=0.5
  drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
  drop if clinicalstudydrugused == 1
  
- logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} braf  kras  if pdl1reported==1
+ logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk braf  ros1 kras  if pdl1reported==1
  logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar}  braf   kras  if pdl1reported==1
  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} braf  kras  if pdl1>0
  logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} braf   kras  if pdl1>0
