@@ -133,8 +133,13 @@ replace over_threshold = 1 if pdl1>=0.5
  graph export "prog_survival_without_mutations_pre_match_no_combo_prog.png", replace
  sts test therapy_type, logrank
 
+teffects ipwra (endpoint $indiv_covar pdl1reported)  (therapy_type $indiv_covar pdl1reported)
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1>=0.5
+teffects psmatch (endpoint) (therapy_type $indiv_covar) if pdl1>=0.5
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1>=0.01 & pdl1<0.5
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1==0.0 & pdl1reported==1
 
-logit therapy_type ${indiv_covar} braf kras  pdl1reported
+logit therapy_type ${indiv_covar}   pdl1reported
 predict yhat
 
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
@@ -342,8 +347,14 @@ replace over_threshold = 1 if pdl1>=0.5
  graph export "prog_survival_without_mutations_pre_match_no_combo_overall.png", replace
  sts test therapy_type, logrank
 
+ drop if hispanicrace==1 | stageia1==1 | connectivetissuedisease==1 | scleroderma == 1| othercnsmetastases == 1 | mnresidence == 1 | dcresidence == 1 | coresidence == 1 | riresidence == 1 | kyresidence == 1 | maresidence == 1 | stage0==1 | occult == 1 | priorkidneytransplant == 1 | priorlivertransplant == 1 | wiresidence == 1 | wvresidence== 1 | orresidence == 1 | deresidence == 1
+ teffects ipwra (endpoint $indiv_covar pdl1reported)  (therapy_type $indiv_covar pdl1reported)
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1>=0.5
+teffects psmatch (endpoint) (therapy_type $indiv_covar) if pdl1>=0.5
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1>=0.01 & pdl1<0.5
+teffects ipwra (endpoint $indiv_covar)  (therapy_type $indiv_covar) if pdl1==0.0 & pdl1reported==1
 
-logit therapy_type ${indiv_covar} braf kras  pdl1reported
+logit therapy_type ${indiv_covar}  pdl1reported
 predict yhat
 
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density Pre-Matching") xtitle("Propensity Score") legend(label (1 "First-Line Chemotherapy") label(2 "First-Line IO Monotherapy"))
