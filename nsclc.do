@@ -113,7 +113,23 @@ replace over_threshold = 1 if pdl1>=0.5
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  
+
+ logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs pdl1reported  
+ logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  pdl1reported
+ 
+  logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs if pdl1reported==1 
+ logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
+ 
+   logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1  bevacizumabused threeormorechemotherapydrugs if pdl1reported==1 & alk==0 & egfr==0 & ros1==0
+   estimates store progression_model
+
+   outreg2 using "progression_logistic.txt", replace
+ logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1  & alk==0 & egfr==0 & ros1==0
+    estimates store mortality_model
+
+   outreg2 using "mortality_logistic.txt", replace
+ 
+
  predict logit_pred
  
   logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
@@ -134,6 +150,11 @@ replace over_threshold = 1 if pdl1>=0.5
  drop if ros1==1
  drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
  drop if clinicalstudydrugused == 1
+ 
+ logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1    if pdl1reported==1
+ logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1   bevacizumabused   if pdl1reported==1  
+ logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#i.over_threshold    if pdl1reported==1
+ logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#i.over_threshold      if pdl1reported==1  
  
  logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} braf  kras  if pdl1reported==1
  logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar}  braf   kras  if pdl1reported==1
