@@ -8,6 +8,65 @@
   rocreg mortality_outcome mort_preds
  
   import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
+  
+   tab progression_outcome
+ tab mortality_outcome
+ sum ageatdiagnosis
+ tab male
+ tab female
+ count if male==0 & female==0
+ tab white
+ tab black
+ tab asian
+ tab otherrace
+ tab hispanicethnicity
+ tab stage0
+ count if stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 
+ count if stageii==1 | stageiia ==1 | stageiib ==1  
+ count if stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1
+ count if stageiv ==1 | stageiva ==1 | stageivb == 1
+ count if occult==1
+ tab ecog0
+ tab ecog1
+ tab ecog2
+ tab ecog3
+ tab ecog4
+ count if ecog0==0 & ecog1==0 & ecog2==0 & ecog3 == 0 & ecog4==0
+ tab academicmedicalcenter
+ tab previoussmoker
+ tab neversmoker
+ tab squamouscellcarcinoma
+ tab nonsquamouscellcarcinoma
+ count if pdl1>=0.5
+ count if pdl1<0.5 & pdl1reported==1
+ count if pdl1reported==0
+ count if medicare==1
+ count if medicaid==1
+ count if commercialhealthplan==1
+ count if noinsurance==1
+ count if selfpay==1
+ tab firstlinechemotherapy
+ tab firstlinecombinationtherapy
+ count if firstlinenivolumabmonotherapy ==1 | firstlinepembrolizumabmonotherap == 1 | firstlineatezolizumabmonotherapy == 1 | firstlinecemiplimabmonotherapy  == 1 | firstlinedurvalumabmonotherapy  == 1  | firstlineipilimumabnivolumab == 1
+ tab alk
+ tab egfr
+ tab ros1
+ tab egfr
+ tab kras
+ tab diabetes
+ count if connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1
+ count if chronickidneydisease == 1 |  priorkidneytransplant == 1 
+ count if interstitiallungdisease == 1
+ count if cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1
+ tab brainmetastases
+ tab bonemetastases
+ tab othercnsmetastases
+ tab digestivesystemmetastases
+ tab adrenalmetastases 
+ tab unspecifiedmetastases 
+ tab glucocorticoidusepriortotreatmen
+ tab antiinfectiveusepriortotreatment
+ 
  gen threshold = 0.704
  gen time_limit = 365
 

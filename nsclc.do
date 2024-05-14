@@ -61,8 +61,21 @@
  tab alk
  tab egfr
  tab ros1
-
- 
+ tab egfr
+ tab kras
+ tab diabetes
+ count if connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1
+ count if chronickidneydisease == 1 |  priorkidneytransplant == 1 
+ count if interstitiallungdisease == 1
+ count if cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1
+ tab brainmetastases
+ tab bonemetastases
+ tab othercnsmetastases
+ tab digestivesystemmetastases
+ tab adrenalmetastases 
+ tab unspecifiedmetastases 
+ tab glucocorticoidusepriortotreatmen
+ tab antiinfectiveusepriortotreatment
  
   gen time_limit = 365
  gen outcome = "progression"
