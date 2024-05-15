@@ -86,6 +86,10 @@ gen liver_bool = (cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1)
  tab glucocorticoidusepriortotreatmen
  tab antiinfectiveusepriortotreatment
  replace otherfirstlinetherapy = 1 if antirasdrug==1
+ replace daysfromadvanceddiagnosistotreat = log(daysfromadvanceddiagnosistotreat)
+ replace ageatdiagnosis = log(ageatdiagnosis)
+ replace diagnosisyear = 2022 - diagnosisyear
+  
  
   gen time_limit = 365
  gen outcome = "progression"
@@ -128,22 +132,22 @@ replace over_threshold = 1 if pdl1>=0.5
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
 
  // alk egfr ros1 kras braf 
-putexcel set "progression_odds_all.xlsx"
+putexcel set "progression_odds_all.xlsx", replace
 logistic progression_outcome  ${indiv_covar_logistic}  pdl1reported  
 putexcel (A1) = etable
 putexcel clear
  
-putexcel set "mortality_odds_all.xlsx"
+putexcel set "mortality_odds_all.xlsx", replace
 logistic mortality_outcome   ${indiv_covar_logistic}   pdl1reported  
 putexcel (A1) = etable
 putexcel clear
 
-putexcel set "progression_odds_only_pdl1.xlsx"
+putexcel set "progression_odds_only_pdl1.xlsx", replace
 logistic progression_outcome  ${indiv_covar_logistic} if pdl1reported==1
 putexcel (A1) = etable
 putexcel clear
  
-putexcel set "mortality_odds_only_pdl1.xlsx"
+putexcel set "mortality_odds_only_pdl1.xlsx", replace
 logistic mortality_outcome  ${indiv_covar_logistic}     if pdl1reported==1
 putexcel (A1) = etable
 putexcel clear
