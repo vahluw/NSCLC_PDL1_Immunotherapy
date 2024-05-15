@@ -222,7 +222,25 @@ teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type $
 teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50, osample(new_var3)
 teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50
 
-drop if antialkdrug
+drop if antiinfectiveusepriortotreatment==1
 teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1, osample(new_var4)
+teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1
+
+replace censor_time = mortality_days
+ replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
+ 
+ 
+ teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}), osample(new_var)
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported})
+
+teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5, osample(new_var2)
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5
+
+
+teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50, osample(new_var3)
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50
+
+drop if antiinfectiveusepriortotreatment==1
+teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1, osample(new_var4)
 teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1
 
