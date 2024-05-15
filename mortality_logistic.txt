@@ -1,0 +1,161 @@
+	(1)
+VARIABLES	mortality_outcome
+	
+1.therapy_type	0.246*
+	(0.132)
+ecog0	-0.930***
+	(0.124)
+ecog1	-0.531***
+	(0.103)
+ecog2	-0.0157
+	(0.106)
+ecog3	0.319***
+	(0.117)
+ecog4	0.660***
+	(0.246)
+squamouscellcarcinoma	-0.332**
+	(0.153)
+nonsquamouscellcarcinoma	-0.526***
+	(0.148)
+pdl1	-0.591***
+	(0.128)
+hispanicethnicity	0.0334
+	(0.188)
+diagnosisyear	0.149***
+	(0.0215)
+ageatdiagnosis	-0.00187
+	(0.00365)
+white	-0.108
+	(0.104)
+asian	-0.397
+	(0.263)
+black	-0.298**
+	(0.142)
+otherrace	-0.306**
+	(0.141)
+o.hispanicrace	-
+	
+male	0.171***
+	(0.0633)
+daysfromadvanceddiagnosistotreat	-0.000269
+	(0.000659)
+patientassistanceprogram	-0.246***
+	(0.0937)
+othergovernmentalinsurance	-0.139
+	(0.122)
+medicare	-0.233***
+	(0.0658)
+selfpay	0.0213
+	(0.153)
+medicaid	-0.209*
+	(0.124)
+commercialhealthplan	-0.0612
+	(0.0626)
+noinsurance	-0.189***
+	(0.0664)
+o.stage0	-
+	
+stageia	-0.664***
+	(0.238)
+stageia1	-1.209
+	(1.158)
+stageia2	0.238
+	(0.552)
+stageia3	-1.384**
+	(0.652)
+stageib	-0.344
+	(0.244)
+stageii	-0.00704
+	(0.437)
+stageiia	-0.105
+	(0.253)
+stageiib	-0.157
+	(0.227)
+stageiii	0.510*
+	(0.298)
+stageiiia	0.0670
+	(0.190)
+stageiiib	-0.514***
+	(0.185)
+stageiiic	-0.331
+	(0.294)
+stageiv	0.416**
+	(0.169)
+stageiva	0.134
+	(0.211)
+stageivb	0.308
+	(0.237)
+o.occult	-
+	
+neversmoker	-0.0880
+	(0.131)
+academicmedicalcenter	-0.298**
+	(0.134)
+chronickidneydisease	0.129
+	(0.186)
+o.priorkidneytransplant	-
+	
+cirrhosis	0.0418
+	(0.636)
+hepatitis	0.418
+	(0.416)
+o.priorlivertransplant	-
+	
+o.connectivetissuedisease	-
+	
+o.scleroderma	-
+	
+lupus	0.645
+	(0.746)
+rheumatoidarthritis	0.0478
+	(0.342)
+o.interstitiallungdisease	-
+	
+diabetes	0.117
+	(0.132)
+bonemetastases	0.138
+	(0.165)
+brainmetastases	-0.171
+	(0.211)
+o.othercnsmetastases	-
+	
+digestivesystemmetastases	0.359
+	(0.255)
+adrenalmetastases	0.0812
+	(0.431)
+unspecifiedmetastases	-0.730***
+	(0.221)
+o.clinicalstudydrugused	-
+	
+creatinine	0.0311
+	(0.0730)
+bilirubin	0.508***
+	(0.134)
+ast	0.00632**
+	(0.00310)
+alt	0.000869
+	(0.00200)
+albumin	-0.133***
+	(0.0301)
+antiinfectiveusepriortotreatment	0.0415
+	(0.271)
+glucocorticoidusepriortotreatmen	0.0833
+	(0.103)
+braf	-0.283
+	(0.173)
+kras	-0.163*
+	(0.0833)
+0b.therapy_type#co.pdl1	0
+	(0)
+1.therapy_type#c.pdl1	-0.161
+	(0.184)
+o.bevacizumabused	-
+	
+o.threeormorechemotherapydrugs	-
+	
+Constant	-299.5***
+	(43.28)
+	
+Observations	5,937
+Standard errors in parentheses	
+*** p<0.01, ** p<0.05, * p<0.1	

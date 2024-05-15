@@ -5,9 +5,11 @@
  ****************************
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
-  global indiv_covar_no_state "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+  global indiv_covar_no_state "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+  
+    global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy   io_mono#c.pdl1 nonfirstlinechemotherapy#c.pdl1 firstlinecombinationtherapy#c.pdl1 firstlinechemotherapy#c.pdl1 antialkdrug#c.pdl1 antiegfrdrug#c.pdl1 antiros1drug#c.pdl1 antibrafdrug#c.pdl1 trkinhibitor#c.pdl1 metinhibitor#c.pdl1 carboplatinmonotherapy#c.pdl1 cisplatinmonotherapy#c.pdl1 i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -32,8 +34,12 @@
  tab hispanicethnicity
  tab stage0
  count if stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 
+ gen stage1 = (stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 )
  count if stageii==1 | stageiia ==1 | stageiib ==1  
+ gen stage2 = (stageii==1 | stageiia ==1 | stageiib ==1)
  count if stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1
+ gen stage3 = (stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1)
+ gen stage4 = (stageiv ==1 | stageiva ==1 | stageivb == 1)
  count if stageiv ==1 | stageiva ==1 | stageivb == 1
  count if occult==1
  tab ecog0
@@ -68,6 +74,9 @@
  count if chronickidneydisease == 1 |  priorkidneytransplant == 1 
  count if interstitiallungdisease == 1
  count if cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1
+gen connective_tissue_bool = ( connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1)
+gen kidney_bool = (chronickidneydisease == 1 |  priorkidneytransplant == 1)
+gen liver_bool = (cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1)
  tab brainmetastases
  tab bonemetastases
  tab othercnsmetastases
@@ -76,6 +85,7 @@
  tab unspecifiedmetastases 
  tab glucocorticoidusepriortotreatmen
  tab antiinfectiveusepriortotreatment
+ replace otherfirstlinetherapy = 1 if antirasdrug==1
  
   gen time_limit = 365
  gen outcome = "progression"
@@ -95,6 +105,7 @@ replace over_threshold = 1 if pdl1>=0.5
 
 
  histogram pdl1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
+ window manage forward results
  graph export "PD_L1_distribution_whole_dataset_include_0_prog.png", replace
  
  gen therapy_type = 1
@@ -110,34 +121,35 @@ replace over_threshold = 1 if pdl1>=0.5
  replace therapy_type = 10 if metinhibitor== 1
   replace therapy_type = 11 if carboplatinmonotherapy == 1
   replace therapy_type = 12 if cisplatinmonotherapy == 1
+  
+  gen io_mono = (therapy_type==1)
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
 
- logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs pdl1reported  
- logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  pdl1reported
+ // alk egfr ros1 kras braf 
+putexcel set "progression_odds_all.xlsx"
+logistic progression_outcome  ${indiv_covar_logistic}  pdl1reported  
+putexcel (A1) = etable
+putexcel clear
  
-  logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs if pdl1reported==1 
- logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
- 
-   logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1  bevacizumabused threeormorechemotherapydrugs if pdl1reported==1 & alk==0 & egfr==0 & ros1==0
-   estimates store progression_model
+putexcel set "mortality_odds_all.xlsx"
+logistic mortality_outcome   ${indiv_covar_logistic}   pdl1reported  
+putexcel (A1) = etable
+putexcel clear
 
-   outreg2 using "progression_logistic.txt", replace
- logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1  & alk==0 & egfr==0 & ros1==0
-    estimates store mortality_model
-
-   outreg2 using "mortality_logistic.txt", replace
+putexcel set "progression_odds_only_pdl1.xlsx"
+logistic progression_outcome  ${indiv_covar_logistic} if pdl1reported==1
+putexcel (A1) = etable
+putexcel clear
  
-
- predict logit_pred
+putexcel set "mortality_odds_only_pdl1.xlsx"
+logistic mortality_outcome  ${indiv_covar_logistic}     if pdl1reported==1
+putexcel (A1) = etable
+putexcel clear
+  
  
-  logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
-    logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#over_threshold alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
-
- 
- 
-  stset censor_time, failure(endpoint)
+ stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
  stcox therapy_type
  sts graph, by(therapy_type) title("Progression-Free Survival for All Patients in Dataset") subtitle("by Therapy, Pre-Matching") xtitle ("Survival Time from Treatment Initiation (Days)") ytitle("Proportion at Risk") legend(order(1 "Platinum-Based Chemotherapy" 2 "First-Line IO Monotherapy" 3 "Combination Therapy" 4 "Other Chemotherapy" 5 "ALK Drug" 6 "EGFR Drug" 7 "BRAF Drug" 8 "ROS1 Drug" 9  "Other First-Line Therapy" 10 "TRK Inhibitor" 11 "MET Drug" 12 "Carboplatin Only" 13 "Cisplatin Only"))
@@ -150,17 +162,6 @@ replace over_threshold = 1 if pdl1>=0.5
  drop if ros1==1
  drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
  drop if clinicalstudydrugused == 1
- 
- logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1    if pdl1reported==1
- logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1   bevacizumabused   if pdl1reported==1  
- logit progression_outcome i.therapy_type ${indiv_covar} i.therapy_type#i.over_threshold    if pdl1reported==1
- logit mortality_outcome i.therapy_type ${indiv_covar} i.therapy_type#i.over_threshold      if pdl1reported==1  
- 
- logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} braf  kras  if pdl1reported==1
- logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar}  braf   kras  if pdl1reported==1
- logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} braf  kras  if pdl1>0
- logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} braf   kras  if pdl1>0
-
  
  
  stset censor_time, failure(endpoint)
@@ -238,7 +239,7 @@ graph export "propensity_post_match_hist_prog.png", replace
 
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -314,6 +315,7 @@ replace over_threshold = 1 if pdl1>=0.5
 
  histogram pdl1, percent bin(9) xtitle("PD-L1 Intensity") color(ebblue)
  graph export "PD_L1_distribution_whole_dataset_include_0_overall.png", replace
+
  
  gen therapy_type = 1
  replace therapy_type = 0 if firstlinechemotherapy == 1
@@ -331,14 +333,7 @@ replace over_threshold = 1 if pdl1>=0.5
 
  
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
- logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr  ros1  bevacizumabused threeormorechemotherapydrugs  
- predict logit_pred
- //rocreg endpoint logit_pred
- 
-  logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#c.pdl1 alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
-    logit endpoint i.therapy_type ${indiv_covar} i.therapy_type#over_threshold alk egfr braf  ros1 kras   bevacizumabused threeormorechemotherapydrugs  if pdl1reported==1
 
- 
  
   stset censor_time, failure(endpoint)
  stci, by(therapy_type) rmean
@@ -354,10 +349,6 @@ replace over_threshold = 1 if pdl1>=0.5
  drop if bevacizumabused == 1 | threeormorechemotherapydrugs == 1
  drop if clinicalstudydrugused == 1
  
- logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
- logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} alk egfr braf  ros1 kras  if pdl1reported==1
- logit endpoint i.therapy_type  i.therapy_type#c.pdl1 ${indiv_covar} alk egfr braf  ros1 kras  if pdl1>0
- logit endpoint i.therapy_type  i.therapy_type#i.over_threshold ${indiv_covar} alk egfr braf  ros1 kras  if pdl1>0
 
  
  
@@ -429,7 +420,7 @@ graph export "propensity_post_match_hist_overall.png", replace
   
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused  braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused  braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -538,7 +529,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
 ///////////////////
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused  braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused  braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -638,7 +629,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
   ///////////////////
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -739,7 +730,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
   ///////////////////
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -844,7 +835,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
     /////////////////// 1<PDL1<50
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -945,7 +936,7 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
   ///////////////////
 
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
- global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+ global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
