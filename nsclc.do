@@ -7,13 +7,17 @@
 /*  Chemo therapy vs. first-line IO monotherapy Kaplan-Meier (PDL1 and non-PDL1) */
  global indiv_covar "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
  
-  global indiv_covar_no_state "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
+global indiv_covar_no_state "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
   
-    global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy    i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
+global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy    i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
 	
-    global indiv_covar_psm " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras"
-	
-	    global indiv_covar_psm_reported " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
+global indiv_covar_psm " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras"
+
+global indiv_covar_psm_reported "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
+
+global covar_psm_logit_treatment "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1   diagnosisyear ageatdiagnosis daysfromadvanceddiagnosistotreat stage0 stage1 stage2 stage3 stage4 occult   academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported braf kras"
+
+global indiv_covar_psm_reported_outcome " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -211,35 +215,35 @@ window manage forward results
 graph export "propensity_pre_match_hist_prog.png", replace
 
 drop if stage0==1 | occult==1
-teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}), osample(new_var)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported})
+teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}), osample(new_var) nneighbor(4)
+teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment})
 
 drop if hispanicrace==1 | othercnsmetastases==1
-teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5, osample(new_var2)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5
+teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5, osample(new_var2)
+teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
 
 
-teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50, osample(new_var3)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50
+teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50, osample(new_var3)
+teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
 
 drop if antiinfectiveusepriortotreatment==1
-teffects psmatch (progression_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1, osample(new_var4)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1
+teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1, osample(new_var4)
+teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
 
 replace censor_time = mortality_days
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
  
  
- teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}), osample(new_var)
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported})
+ teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment})
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment})
 
-teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5, osample(new_var2)
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.5
+teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
 
 
-teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50, osample(new_var3)
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1>=0.01 & pdl1 < 0.50
+teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
 
-teffects psmatch (mortality_outcome ) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1, osample(new_var4)
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported}) (therapy_type ${indiv_covar_psm_reported}) if pdl1==0.0 & pdl1reported==1
+teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
+teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
 
