@@ -9,7 +9,7 @@
  
   global indiv_covar_no_state "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
   
-    global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy   io_mono#c.pdl1 nonfirstlinechemotherapy#c.pdl1 firstlinecombinationtherapy#c.pdl1 firstlinechemotherapy#c.pdl1 antialkdrug#c.pdl1 antiegfrdrug#c.pdl1 antiros1drug#c.pdl1 antibrafdrug#c.pdl1 trkinhibitor#c.pdl1 metinhibitor#c.pdl1 carboplatinmonotherapy#c.pdl1 cisplatinmonotherapy#c.pdl1 i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
+    global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy    i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -143,12 +143,12 @@ putexcel (A1) = etable
 putexcel clear
 
 putexcel set "progression_odds_only_pdl1.xlsx", replace
-logistic progression_outcome  ${indiv_covar_logistic} if pdl1reported==1
+logistic progression_outcome  ${indiv_covar_logistic} io_mono#c.pdl1 nonfirstlinechemotherapy#c.pdl1 firstlinecombinationtherapy#c.pdl1 firstlinechemotherapy#c.pdl1 antialkdrug#c.pdl1 antiegfrdrug#c.pdl1 antiros1drug#c.pdl1 antibrafdrug#c.pdl1 trkinhibitor#c.pdl1 metinhibitor#c.pdl1 carboplatinmonotherapy#c.pdl1 cisplatinmonotherapy#c.pdl1 if pdl1reported==1
 putexcel (A1) = etable
 putexcel clear
  
 putexcel set "mortality_odds_only_pdl1.xlsx", replace
-logistic mortality_outcome  ${indiv_covar_logistic}     if pdl1reported==1
+logistic mortality_outcome  ${indiv_covar_logistic}   io_mono#c.pdl1 nonfirstlinechemotherapy#c.pdl1 firstlinecombinationtherapy#c.pdl1 firstlinechemotherapy#c.pdl1 antialkdrug#c.pdl1 antiegfrdrug#c.pdl1 antiros1drug#c.pdl1 antibrafdrug#c.pdl1 trkinhibitor#c.pdl1 metinhibitor#c.pdl1 carboplatinmonotherapy#c.pdl1 cisplatinmonotherapy#c.pdl1  if pdl1reported==1
 putexcel (A1) = etable
 putexcel clear
   
