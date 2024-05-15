@@ -9,7 +9,7 @@
  
   import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
   
-   tab progression_outcome
+ tab progression_outcome
  tab mortality_outcome
  sum ageatdiagnosis
  tab male
@@ -22,8 +22,12 @@
  tab hispanicethnicity
  tab stage0
  count if stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 
+ gen stage1 = (stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 )
  count if stageii==1 | stageiia ==1 | stageiib ==1  
+ gen stage2 = (stageii==1 | stageiia ==1 | stageiib ==1)
  count if stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1
+ gen stage3 = (stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1)
+ gen stage4 = (stageiv ==1 | stageiva ==1 | stageivb == 1)
  count if stageiv ==1 | stageiva ==1 | stageivb == 1
  count if occult==1
  tab ecog0
@@ -40,7 +44,7 @@
  count if pdl1>=0.5
  count if pdl1<0.5 & pdl1reported==1
  count if pdl1reported==0
- count if medicare==1
+ count if medicare==1 
  count if medicaid==1
  count if commercialhealthplan==1
  count if noinsurance==1
@@ -54,10 +58,19 @@
  tab egfr
  tab kras
  tab diabetes
+ gen kappa = 0.9
+ replace kappa = 0.7 if female==1
+ gen alpha = -0.302
+ replace alpha = -0.241 if female ==1 
+ gen extra_term = 1
+ replace extra_term = 1.012 if female==1
+ gen estimated_gfr = 142 * min(creatinine/kappa, 1)^(alpha) * max(creatinine/kappa, 1)^(-1.2) * 0.9938^(ageatdiagnosis) * extra_term
+ 
  count if connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1
  count if chronickidneydisease == 1 |  priorkidneytransplant == 1 
  count if interstitiallungdisease == 1
  count if cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1
+
  tab brainmetastases
  tab bonemetastases
  tab othercnsmetastases
@@ -66,6 +79,20 @@
  tab unspecifiedmetastases 
  tab glucocorticoidusepriortotreatmen
  tab antiinfectiveusepriortotreatment
+
+ gen connective_tissue_bool = ( connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1)
+gen kidney_bool = (chronickidneydisease == 1 |  priorkidneytransplant == 1 | (estimated_gfr < 60 & creatinine > 0))
+gen liver_bool = (cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1 | ast >=109 | alt >=97 | bilirubin >= 2.0)
+ replace otherfirstlinetherapy = 1 if antirasdrug==1
+ replace daysfromadvanceddiagnosistotreat = log(daysfromadvanceddiagnosistotreat)
+ replace ageatdiagnosis = log(ageatdiagnosis)
+ replace diagnosisyear = 2022 - diagnosisyear
+ 
+ tab connective_tissue_bool
+ tab kidney_bool
+ tab liver_bool
+ 
+  
  
  gen threshold = 0.704
  gen time_limit = 365

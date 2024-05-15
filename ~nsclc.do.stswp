@@ -233,7 +233,7 @@ drop if _support==0
 count if _treated==1
 count if _treated==0
 
-pstest ${indiv_covar} , treated(therapy_type)
+pstest ${indiv_covar_psm} , treated(therapy_type)
 
 graph twoway (kdensity yhat if therapy_type==0) (kdensity yhat if therapy_type==1) ,ytitle("Propensity Score Density") xtitle("Propensity Score") legend(label (1 "Chemotherapy") label(2 "IO Monotherapy"))
 graph export "propensity_post_match.png", replace
