@@ -17,7 +17,11 @@ global indiv_covar_psm_reported "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarci
 
 global covar_psm_logit_treatment "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1   diagnosisyear ageatdiagnosis daysfromadvanceddiagnosistotreat stage0 stage1 stage2 stage3 stage4 occult   academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported braf kras"
 
-global indiv_covar_psm_reported_outcome " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
+global indiv_covar_psm_reported_outcome " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1   diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
+
+global indiv_covar_psm_prog_outcome " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1   diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter  diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported"
+
+global indiv_covar_psm_mort_outcome " ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1   diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter  diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen braf kras pdl1reported kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes"
  
 
  global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
@@ -200,6 +204,8 @@ putexcel clear
  graph export "prog_survival_without_mutations_pre_match_no_combo_prog.png", replace
  sts test therapy_type, logrank
 
+//replace ageatdiagnosis = exp(ageatdiagnosis)
+ //replace daysfromadvanceddiagnosistotreat = exp(daysfromadvanceddiagnosistotreat)
 logit therapy_type ${indiv_covar_psm_reported}    
 predict yhat
 
@@ -214,36 +220,45 @@ graph twoway (histogram yhat if therapy_type==0, fcolor(blue%25) ///
 window manage forward results
 graph export "propensity_pre_match_hist_prog.png", replace
 
+
+//teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}), nneighbor(1) caliper(0.05) control(0) generate(var6) 
 drop if stage0==1 | occult==1
-teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) //nneighbor(4)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment})
+tab therapy_type
+teffects ipwra (progression_outcome) (therapy_type)
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${covar_psm_logit_treatment}) 
+
 
 drop if hispanicrace==1 | othercnsmetastases==1
-teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5 // osample(new_var2)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
+tab therapy_type
+teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.5 
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5 
 
-
-teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50, // osample(new_var3)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
+tab therapy_type
+teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.01 & pdl1<0.5
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
 
 drop if antiinfectiveusepriortotreatment==1
-teffects psmatch (progression_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1 //, osample(new_var4)
-teffects ipwra (progression_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
+tab therapy_type
+teffects ipwra (progression_outcome) (therapy_type) if pdl1==0.0 & pdl1reported==1
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
 
 replace censor_time = mortality_days
  replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
  
- 
- teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment})
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment})
 
-teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
+tab therapy_type
+tab therapy_type
+teffects ipwra (mortality_outcome ) (therapy_type )
+teffects ipwra (mortality_outcome ${indiv_covar_psm_mort_outcome}) (therapy_type ${covar_psm_logit_treatment})
 
+drop if othercnsmetastases==1
+tab therapy_type
+teffects ipwra (mortality_outcome ) (therapy_type) if pdl1>=0.5
+teffects ipwra (mortality_outcome ${indiv_covar_psm_mort_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.5
 
-teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
+teffects ipwra (mortality_outcome ) (therapy_type) if pdl1>=0.01 & pdl1 < 0.50
+teffects ipwra (mortality_outcome ${indiv_covar_psm_mort_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1>=0.01 & pdl1 < 0.50
 
-teffects psmatch (mortality_outcome ) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
-teffects ipwra (mortality_outcome ${indiv_covar_psm_reported_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
+teffects ipwra (mortality_outcome ) (therapy_type) if pdl1==0.0 & pdl1reported==1
+teffects ipwra (mortality_outcome ${indiv_covar_psm_mort_outcome}) (therapy_type ${covar_psm_logit_treatment}) if pdl1==0.0 & pdl1reported==1
 

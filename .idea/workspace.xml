@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2fZZFm1j4DrVfjWdFI0NcrqkkI4" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/vahluw&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Python.read_in_auc">
+    <configuration name="NSCLC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC.py" />
+      <option name="PARAMETERS" value="365 0.005 1 1 365 0 1 0 0 0 0" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="NSCLC_auc84_original_therapy" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC_auc84_original_therapy.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="NSCLC_test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC_test.py" />
+      <option name="PARAMETERS" value="365 0.0005 1 0 182 0 1 0" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="NSCLC_test2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC_test2.py" />
+      <option name="PARAMETERS" value="365 0.0005 1 0 1" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="read_in_auc" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/read_in_auc.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.read_in_auc" />
+        <item itemvalue="Python.NSCLC_test2" />
+        <item itemvalue="Python.NSCLC_auc84_original_therapy" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="" />
+      <created>1714010461084</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1714010461084</updated>
+    </task>
+    <task id="LOCAL-00036" summary="fixed dummies">
+      <created>1715207536414</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1715207536414</updated>
+    </task>
+    <task id="LOCAL-00037" summary="fixed dummies">
+      <created>1715225648740</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1715225648740</updated>
+    </task>
+    <task id="LOCAL-00038" summary="fixed dummies">
+      <created>1715225891143</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1715225891143</updated>
+    </task>
+    <task id="LOCAL-00039" summary="fixed dummies">
+      <created>1715227555429</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1715227555429</updated>
+    </task>
+    <task id="LOCAL-00040" summary="fixed pdl1">
+      <created>1715266680235</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1715266680235</updated>
+    </task>
+    <task id="LOCAL-00041" summary="fixed steroids/abx">
+      <created>1715269784376</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1715269784376</updated>
+    </task>
+    <task id="LOCAL-00042" summary="added creatinine, bili, ast, alt">
+      <created>1715286234550</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1715286234550</updated>
+    </task>
+    <task id="LOCAL-00043" summary="added creatinine, bili, ast, alt">
+      <created>1715298359208</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1715298359208</updated>
+    </task>
+    <task id="LOCAL-00044" summary="added creatinine, bili, ast, alt">
+      <created>1715300774749</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1715300774749</updated>
+    </task>
+    <task id="LOCAL-00045" summary="interaction term">
+      <created>1715303595263</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1715303595263</updated>
+    </task>
+    <task id="LOCAL-00046" summary="interaction term">
+      <created>1715303913905</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1715303913905</updated>
+    </task>
+    <task id="LOCAL-00047" summary="fixed impute">
+      <created>1715306802203</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1715306802203</updated>
+    </task>
+    <task id="LOCAL-00048" summary="fixed info leak">
+      <created>1715310893898</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1715310893898</updated>
+    </task>
+    <task id="LOCAL-00049" summary="fixed imputation">
+      <created>1715343070329</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1715343070329</updated>
+    </task>
+    <task id="LOCAL-00050" summary="fixed imputation">
+      <created>1715345334175</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1715345334176</updated>
+    </task>
+    <task id="LOCAL-00051" summary="fixed imputation again">
+      <created>1715345639336</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1715345639337</updated>
+    </task>
+    <task id="LOCAL-00052" summary="fixed imputation again">
+      <created>1715348940739</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1715348940739</updated>
+    </task>
+    <task id="LOCAL-00053" summary="fixed imputation again">
+      <created>1715361131934</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1715361131934</updated>
+    </task>
+    <task id="LOCAL-00054" summary="shapley">
+      <created>1715399791777</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1715399791777</updated>
+    </task>
+    <task id="LOCAL-00055" summary="shapley">
+      <created>1715401930879</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1715401930879</updated>
+    </task>
+    <task id="LOCAL-00056" summary="shapley">
+      <created>1715441901371</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1715441901371</updated>
+    </task>
+    <task id="LOCAL-00057" summary="shapley">
+      <created>1715442229655</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1715442229656</updated>
+    </task>
+    <task id="LOCAL-00058" summary="shapley fixed bug">
+      <created>1715483874557</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1715483874557</updated>
+    </task>
+    <task id="LOCAL-00059" summary="shapley fixed bug">
+      <created>1715536947081</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1715536947081</updated>
+    </task>
+    <task id="LOCAL-00060" summary="shapley fixed bug">
+      <created>1715538264632</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1715538264632</updated>
+    </task>
+    <task id="LOCAL-00061" summary="shapley fixed bug">
+      <created>1715548966046</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1715548966046</updated>
+    </task>
+    <task id="LOCAL-00062" summary="shapley fixed bug">
+      <created>1715552328032</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1715552328032</updated>
+    </task>
+    <task id="LOCAL-00063" summary="shapley fixed bug">
+      <created>1715552947936</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1715552947936</updated>
+    </task>
+    <task id="LOCAL-00064" summary="shapley fixed bug">
+      <created>1715559945666</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1715559945666</updated>
+    </task>
+    <task id="LOCAL-00065" summary="shapley fixed bug">
+      <created>1715565201753</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1715565201753</updated>
+    </task>
+    <task id="LOCAL-00066" summary="stata updates">
+      <created>1715571667006</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1715571667006</updated>
+    </task>
+    <task id="LOCAL-00067" summary="stata updates">
+      <created>1715574118962</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1715574118962</updated>
+    </task>
+    <task id="LOCAL-00068" summary="stata updates">
+      <created>1715599380949</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1715599380950</updated>
+    </task>
+    <task id="LOCAL-00069" summary="stata updates">
+      <created>1715616879799</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1715616879799</updated>
+    </task>
+    <task id="LOCAL-00070" summary="stata updates">
+      <created>1715630231798</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1715630231799</updated>
+    </task>
+    <task id="LOCAL-00071" summary="stata updates">
+      <created>1715630246713</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1715630246713</updated>
+    </task>
+    <task id="LOCAL-00072" summary="stata updates">
+      <created>1715651082176</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1715651082176</updated>
+    </task>
+    <task id="LOCAL-00073" summary="stata updates">
+      <created>1715651595244</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1715651595245</updated>
+    </task>
+    <task id="LOCAL-00074" summary="manuscript updates">
+      <created>1715710767989</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1715710767989</updated>
+    </task>
+    <task id="LOCAL-00075" summary="manuscript updates">
+      <created>1715712892046</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1715712892046</updated>
+    </task>
+    <task id="LOCAL-00076" summary="manuscript updates">
+      <created>1715714613962</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1715714613962</updated>
+    </task>
+    <task id="LOCAL-00077" summary="manuscript updates">
+      <created>1715717411917</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1715717411918</updated>
+    </task>
+    <task id="LOCAL-00078" summary="manuscript updates">
+      <created>1715783219791</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1715783219792</updated>
+    </task>
+    <task id="LOCAL-00079" summary="manuscript updates">
+      <created>1715784423459</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1715784423459</updated>
+    </task>
+    <task id="LOCAL-00080" summary="manuscript updates">
+      <created>1715793760612</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1715793760613</updated>
+    </task>
+    <task id="LOCAL-00081" summary="manuscript updates">
+      <created>1715802034325</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1715802034325</updated>
+    </task>
+    <task id="LOCAL-00082" summary="manuscript updates">
+      <created>1715804207575</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1715804207575</updated>
+    </task>
+    <task id="LOCAL-00083" summary="manuscript updates">
+      <created>1715805404137</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1715805404137</updated>
+    </task>
+    <task id="LOCAL-00084" summary="manuscript updates">
+      <created>1715812189920</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1715812189920</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="update" />
+    <MESSAGE value="AUC 81 gradient boost with good scientific method" />
+    <MESSAGE value="fixed censor update" />
+    <MESSAGE value="fixed dummy" />
+    <MESSAGE value="fixed to baseline auc 76" />
+    <MESSAGE value="added IV/RD" />
+    <MESSAGE value="24 month survival" />
+    <MESSAGE value="6 month survival" />
+    <MESSAGE value="6 month survival fix negative progression days" />
+    <MESSAGE value="fix negative progression days" />
+    <MESSAGE value="fixed dummies" />
+    <MESSAGE value="fixed pdl1" />
+    <MESSAGE value="fixed steroids/abx" />
+    <MESSAGE value="added creatinine, bili, ast, alt" />
+    <MESSAGE value="interaction term" />
+    <MESSAGE value="fixed impute" />
+    <MESSAGE value="fixed info leak" />
+    <MESSAGE value="fixed imputation" />
+    <MESSAGE value="fixed imputation again" />
+    <MESSAGE value="shapley" />
+    <MESSAGE value="shapley fixed bug" />
+    <MESSAGE value="stata updates" />
+    <MESSAGE value="manuscript updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="manuscript updates" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/read_in_auc.py</url>
+          <line>134</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/read_in_auc.py</url>
+          <line>132</line>
+          <option name="timeStamp" value="28" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
