@@ -198,7 +198,9 @@ predict yhat
 tab therapy_type
 drop if interstitiallungdisease==1
 teffects ipwra (progression_outcome) (therapy_type)
-teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${psm}) 
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome}), osample(new_var)
+drop if new_var==1
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})
 tebalance summarize
 tebalance summarize, baseline
 
@@ -218,6 +220,8 @@ teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_ty
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.8
 
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.9
+
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.3
 
@@ -225,13 +229,18 @@ teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_ty
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.1
 
-teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.01
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type 
+${indiv_covar_psm_prog_outcome})  if pdl1>=0.01
+
+drop if hispanicrace==1 | connective_tissue_bool==1 | braf==1
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.9
 
 tab therapy_type if pdl1>=0.01 & pdl1 < 0.50
 teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.01 & pdl1<0.5
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome}) if pdl1>=0.01 & pdl1 < 0.50, osample(lol3)
 drop if lol3==1
+
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome}) if pdl1>=0.01 & pdl1 < 0.50
 tebalance summarize
 tebalance summarize, baseline
