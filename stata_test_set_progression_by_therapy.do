@@ -147,17 +147,39 @@ logit progression_outcome i.therapy_type progressed_prediction i.therapy_type#i.
  sts graph, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "io_chemo_test_set_ml_no_mutations_xgb_prog.png", replace
 
+  teffects ipw (progression_outcome) (progressed_prediction)
+
  stset progression_days if therapy_type==1, failure(progression_outcome)
  stci if therapy_type==1, by(progressed_prediction) rmean 
  stcox progressed_prediction if therapy_type==1
  sts graph if therapy_type==1 , by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "io_only_test_set_xgb_prog.png", replace
  
+   teffects ipw (progression_outcome) (progressed_prediction) if therapy_type==1
+ 
   stset progression_days if therapy_type==1 & pdl1>=0.5, failure(progression_outcome)
  stci if therapy_type==1 & pdl1>=0.5, by(progressed_prediction) rmean 
  stcox progressed_prediction if therapy_type==1 & pdl1>=0.5
  sts graph if therapy_type==1 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
  graph export "io_only_test_set_pdl1_over50_xgb_prog.png", replace
+ 
+   teffects ipw (progression_outcome) (progressed_prediction) if therapy_type==1 & pdl1>=0.5
+   
+ 
+ gen stratum = -1
+ 
+ replace stratum = 0 if (therapy_type==0 & progressed_prediction==1)
+ replace stratum = 1 if (therapy_type==0 & progressed_prediction==0)
+ replace stratum = 2 if (therapy_type==1 & progressed_prediction==1)
+ replace stratum = 3 if (therapy_type==1 & progressed_prediction==0)
+
+ 
+  stset progression_days if therapy_type<=1, failure(progression_outcome)
+ stci if therapy_type<=1, by(stratum) rmean 
+ stcox progressed_prediction if therapy_type<=1
+ sts graph if therapy_type<=1, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemo Unresponsive" 2 "Chemo Responsive" 3 "IO Unreponsive" 4 "IO Responsive"))
+ graph export "io_chemo_test_set_predictive.png", replace
+
 
    stset progression_days if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, failure(progression_outcome)
  stci if firstlinepembrolizumabmonotherap==1 & pdl1>=0.5, by(progressed_prediction) rmean 
@@ -166,6 +188,8 @@ logit progression_outcome i.therapy_type progressed_prediction i.therapy_type#i.
  graph export "pembro_only_test_set_pdl1_over50_xgb_prog.png", replace
  
  
+
+
   stset progression_days if therapy_type==0, failure(progression_outcome)
  stci if therapy_type==0, by(progressed_prediction) rmean 
  stcox progressed_prediction if therapy_type==0
