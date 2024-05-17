@@ -200,7 +200,10 @@ capture teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit
 drop if violator1==1
 tab therapy_type
 
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1reported==1, vce(robust) control(0)
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1reported==1, vce(robust) control(2)
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1reported==1, vce(robust) control(0)
+tebalance summarize
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1reported==1, vce(robust) control(2)
 
 /*
@@ -208,19 +211,29 @@ teffects ipw (progression_outcome) (therapy_type $psm) if pdl1reported==1, vce(r
 teffects ipw (progression_outcome) (therapy_type $psm) if pdl1reported==1, vce(robust) control(2)
 */
 
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>0, vce(robust) control(0)
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>0, vce(robust) control(2)
 tab therapy_type if pdl1>0
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>0, vce(robust) control(0)
+tebalance summarize
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>0, vce(robust) control(2)
 
+
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>=0.5, vce(robust) control(0)
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>=0.5, vce(robust) control(2)
 tab therapy_type if pdl1>=0.5
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>=0.5, vce(robust) control(0)
+tebalance summarize
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>=0.5, vce(robust) control(2)
 
 
+capture teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>=0.01 & pdl1<0.5, vce(robust) control(0) 
+capture teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1>=0.01 & pdl1<0.5, vce(robust) control(2) 
 drop if digestivesystemmetastases==1 | ecog4==1
 capture teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>=0.01 & pdl1<0.5, vce(robust) control(0) 
 tab therapy_type if pdl1>=0.01 & pdl1<0.5
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>=0.01 & pdl1<0.5, vce(robust) control(0) 
+tebalance summarize
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1>=0.01 & pdl1<0.5, vce(robust) control(2) 
 
 drop if     1.therapy_type#1.selfpay != 0  |    1.therapy_type#1.brainmetastases != 0 
@@ -228,5 +241,8 @@ capture teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit
 drop if violator3==1
 
 tab therapy_type if pdl1reported==1 & pdl1==0
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1reported==1 & pdl1==0, vce(robust) control(0)
+teffects ipwra (progression_outcome, logit) (therapy_type) if pdl1reported==1 & pdl1==0, vce(robust) control(2)
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1reported==1 & pdl1==0, vce(robust) control(0)
+tebalance summarize
 teffects ipwra (progression_outcome $indiv_covar_psm_prog_outcome, logit) (therapy_type $psm) if pdl1reported==1 & pdl1==0, vce(robust) control(2)

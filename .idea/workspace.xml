@@ -186,13 +186,6 @@
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
     </task>
-    <task id="LOCAL-00048" summary="fixed info leak">
-      <created>1715310893898</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1715310893898</updated>
-    </task>
     <task id="LOCAL-00049" summary="fixed imputation">
       <created>1715343070329</created>
       <option name="number" value="00049" />
@@ -529,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1715983904414</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="manuscript updates">
+      <created>1715987365014</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1715987365015</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
