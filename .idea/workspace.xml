@@ -186,20 +186,6 @@
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
     </task>
-    <task id="LOCAL-00045" summary="interaction term">
-      <created>1715303595263</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1715303595263</updated>
-    </task>
-    <task id="LOCAL-00046" summary="interaction term">
-      <created>1715303913905</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1715303913905</updated>
-    </task>
     <task id="LOCAL-00047" summary="fixed impute">
       <created>1715306802203</created>
       <option name="number" value="00047" />
@@ -529,7 +515,21 @@
       <option name="project" value="LOCAL" />
       <updated>1715963556082</updated>
     </task>
-    <option name="localTasksCounter" value="94" />
+    <task id="LOCAL-00094" summary="manuscript updates">
+      <created>1715982151018</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1715982151019</updated>
+    </task>
+    <task id="LOCAL-00095" summary="manuscript updates">
+      <created>1715982159262</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1715982159262</updated>
+    </task>
+    <option name="localTasksCounter" value="96" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
