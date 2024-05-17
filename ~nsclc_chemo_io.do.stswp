@@ -193,7 +193,7 @@ putexcel clear
  graph export "prog_survival_without_mutations_pre_match_no_combo_prog.png", replace
  sts test therapy_type, logrank
 
-logit therapy_type ${psm}    
+logit therapy_type ${indiv_covar_psm_prog_outcome}    
 predict yhat
 tab therapy_type
 drop if interstitiallungdisease==1
@@ -205,31 +205,49 @@ tebalance summarize, baseline
 
 
 tab therapy_type if pdl1>=0.5
-teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.5 
+
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.5, osample(violators)
 drop if violators==1
+teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.5 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.5
 //teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}, logit) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.5 
 tebalance summarize
 tebalance summarize, baseline
 
 tab therapy_type if pdl1>=0.01 & pdl1 < 0.50
-teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.01 & pdl1<0.5
+
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome}) if pdl1>=0.01 & pdl1 < 0.50, osample(lol3)
 drop if lol3==1
+teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.01 & pdl1<0.5
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome}) if pdl1>=0.01 & pdl1 < 0.50
 
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.4
 
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=0.6
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.6
 
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=0.7
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.7
 
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=0.8
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.8
 
+drop if connective_tissue_bool==1 | adrenalmetastases==1
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=0.9
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.9
+
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=1
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=1
+
+
+drop if hispanicrace==1 | antiinfectiveusepriortotreatment==1
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1==0 & pdl1reported==1
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1==0 & pdl1reported==1
+
+teffects ipwra (progression_outcome ) (therapy_type )  if pdl1>=0.01
+teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0
 
 
 teffects ipwra (progression_outcome ${indiv_covar_psm_prog_outcome}) (therapy_type ${indiv_covar_psm_prog_outcome})  if pdl1>=0.3

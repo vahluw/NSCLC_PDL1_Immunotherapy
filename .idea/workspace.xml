@@ -5,20 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
-      <change afterPath="$PROJECT_DIR$/nsclc_chemo_io.do" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nsclc_combo_io.do" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/~nsclc_chemo_io.do.stswp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/discontinuity_treat.png" beforeDir="false" afterPath="$PROJECT_DIR$/discontinuity_treat.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mortality_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_all.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nsclc.do" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/polynomial_fit_RD.png" beforeDir="false" afterPath="$PROJECT_DIR$/polynomial_fit_RD.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prog_survival_with_mutations_pre_match_prog.png" beforeDir="false" afterPath="$PROJECT_DIR$/prog_survival_with_mutations_pre_match_prog.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prog_survival_without_mutations_pre_match_no_combo_prog.png" beforeDir="false" afterPath="$PROJECT_DIR$/prog_survival_without_mutations_pre_match_no_combo_prog.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/progression_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_all.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rd_iv.do" beforeDir="false" afterPath="$PROJECT_DIR$/rd_iv.do" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/~$L1_Manuscript.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PDL1_Manuscript.docx" beforeDir="false" afterPath="$PROJECT_DIR$/PDL1_Manuscript.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nsclc_chemo_io.do" beforeDir="false" afterPath="$PROJECT_DIR$/nsclc_chemo_io.do" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/~nsclc_chemo_io.do.stswp" beforeDir="false" afterPath="$PROJECT_DIR$/~nsclc_chemo_io.do.stswp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -200,13 +190,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00042" summary="added creatinine, bili, ast, alt">
-      <created>1715286234550</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1715286234550</updated>
     </task>
     <task id="LOCAL-00043" summary="added creatinine, bili, ast, alt">
       <created>1715298359208</created>
@@ -544,7 +527,14 @@
       <option name="project" value="LOCAL" />
       <updated>1715920632248</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="manuscript updates">
+      <created>1715952747815</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1715952747815</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
