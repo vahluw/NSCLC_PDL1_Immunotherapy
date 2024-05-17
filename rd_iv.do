@@ -3,9 +3,9 @@
 
   global indiv_covar_no_pdl1 "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
 import delimited "all_data_365_10000.csv", clear
- gen therapy_type = 1
+ gen therapy_type = 2
  replace therapy_type = 0 if firstlinechemotherapy == 1
- replace therapy_type = 2 if firstlinecombinationtherapy == 1
+ replace therapy_type = 1 if firstlinecombinationtherapy == 1
  replace therapy_type = 3 if nonfirstlinechemotherapy == 1
  replace therapy_type = 4 if antialkdrug == 1
  replace therapy_type = 5 if antiegfrdrug == 1
@@ -75,7 +75,7 @@ rddensity pdl1, c(0.5) vce(jackknife) plot
 rdplot progression_outcome  pdl1, c(0.5) 
 rdwinselect pdl1 $indiv_covar_no_pdl1, c(0.5) seed(0) reps(1000) level(0.05) wmass
 
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.4) wr(0.51)  firststage 
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.1) wr(0.9)  firststage 
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.1) wr(0.8)  firststage 
 
 
