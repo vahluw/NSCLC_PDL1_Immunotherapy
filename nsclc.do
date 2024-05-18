@@ -1,3 +1,7 @@
+
+
+global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
+cd "${path}"
 import delimited final_ates, clear
 matrix data = (-0.0235371, -0.0342324, 0.0208469, 0.0985585, -0.0013313, 0.0081028, 0.0311615, 0.0005488, -0.1044369,-0.0864428, -0.2307692 \ 0.0383542, 0.0331886,0.0490791,0.0377369,0.0509651,0.0478314,0.0560242,0.03431,0.0216731,0.0519238, 0.0641405)
 set scheme cleanplots
@@ -205,6 +209,8 @@ graph export "prog_survival_without_mutations_pre_match_no_combo_prog.png", repl
 sts test therapy_type, logrank
 
 drop if hispanicrace==1
+
+
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>0, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.09, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.19, vce(robust) caliper(0.2)
@@ -231,6 +237,137 @@ teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.69, vce(ro
 teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.79, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.89, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.99, vce(robust) caliper(0.2)
+
+
+
+
+
+
+////// IV  ///////////
+
+
+
+global psm "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease  bonemetastases brainmetastases digestivesystemmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen bevacizumabused"
+
+
+import delimited "all_data_365_10000.csv", clear
+tab progression_outcome
+tab mortality_outcome
+sum ageatdiagnosis
+tab male
+tab female
+count if male==0 & female==0
+tab white
+tab black
+tab asian
+tab otherrace
+tab hispanicethnicity
+tab stage0
+count if stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 
+gen stage1 = (stagei==1 | stageia ==1 | stageia1 ==1 | stageia2 ==1 | stageia3 ==1 | stageib ==1 )
+count if stageii==1 | stageiia ==1 | stageiib ==1  
+gen stage2 = (stageii==1 | stageiia ==1 | stageiib ==1)
+count if stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1
+gen stage3 = (stageiii ==1 | stageiiia ==1 | stageiiib | stageiiic ==1)
+gen stage4 = (stageiv ==1 | stageiva ==1 | stageivb == 1)
+count if stageiv ==1 | stageiva ==1 | stageivb == 1
+count if occult==1
+tab ecog0
+tab ecog1
+tab ecog2
+tab ecog3
+tab ecog4
+count if ecog0==0 & ecog1==0 & ecog2==0 & ecog3 == 0 & ecog4==0
+tab academicmedicalcenter
+tab previoussmoker
+tab neversmoker
+tab squamouscellcarcinoma
+tab nonsquamouscellcarcinoma
+count if pdl1>=0.5
+count if pdl1<0.5 & pdl1reported==1
+count if pdl1reported==0
+count if medicare==1 
+count if medicaid==1
+count if commercialhealthplan==1
+count if noinsurance==1
+count if selfpay==1
+tab firstlinechemotherapy
+tab firstlinecombinationtherapy
+count if firstlinenivolumabmonotherapy ==1 | firstlinepembrolizumabmonotherap == 1 | firstlineatezolizumabmonotherapy == 1 | firstlinecemiplimabmonotherapy  == 1 | firstlinedurvalumabmonotherapy  == 1  | firstlineipilimumabnivolumab == 1
+tab alk
+tab egfr
+tab ros1
+tab egfr
+tab kras
+tab diabetes
+gen kappa = 0.9
+replace kappa = 0.7 if female==1
+gen alpha = -0.302
+replace alpha = -0.241 if female ==1 
+gen extra_term = 1
+replace extra_term = 1.012 if female==1
+gen estimated_gfr = 142 * min(creatinine/kappa, 1)^(alpha) * max(creatinine/kappa, 1)^(-1.2) * 0.9938^(ageatdiagnosis) * extra_term
+
+count if connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1
+count if chronickidneydisease == 1 |  priorkidneytransplant == 1 
+count if interstitiallungdisease == 1
+count if cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1
+
+tab brainmetastases
+tab bonemetastases
+tab othercnsmetastases
+tab digestivesystemmetastases
+tab adrenalmetastases 
+tab unspecifiedmetastases 
+tab glucocorticoidusepriortotreatmen
+tab antiinfectiveusepriortotreatment
+
+gen connective_tissue_bool = ( connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1)
+gen kidney_bool = (chronickidneydisease == 1 |  priorkidneytransplant == 1 | (estimated_gfr < 60 & creatinine > 0))
+gen liver_bool = (cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1 | ast >=109 | alt >=97 | bilirubin >= 2.0)
+replace otherfirstlinetherapy = 1 if antirasdrug==1
+replace diagnosisyear = 2022 - diagnosisyear
+
+tab connective_tissue_bool
+tab kidney_bool
+tab liver_bool
+gen therapy_type = 1
+replace therapy_type = 0 if firstlinechemotherapy == 1
+replace therapy_type = 2 if firstlinecombinationtherapy == 1
+replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+replace therapy_type = 4 if antialkdrug == 1
+replace therapy_type = 5 if antiegfrdrug == 1
+replace therapy_type = 6 if antibrafdrug == 1
+replace therapy_type = 7 if antiros1drug == 1
+replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+replace therapy_type = 9 if trkinhibitor == 1
+replace therapy_type = 10 if metinhibitor== 1
+replace therapy_type = 11 if carboplatinmonotherapy == 1
+replace therapy_type = 12 if cisplatinmonotherapy == 1
+
+keep if therapy_type == 0 | therapy_type==1
+
+
+drop if alk==1
+drop if egfr==1
+drop if ros1==1
+
+gen first_line = 0
+replace first_line = 1 if therapy_type ==1
+gen over_threshold = 0
+replace over_threshold = 1 if pdl1>=0.5
+
+gen insured = 0
+replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
+
+keep if pdl1reported==1
+biprobit (progression_outcome = therapy_type  ) (therapy_type = i.over_threshold  $psm)
+
+
+biprobit (progression_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61
+
+biprobit (mortality_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61
+
 
 
 
