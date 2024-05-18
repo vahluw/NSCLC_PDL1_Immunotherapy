@@ -238,7 +238,7 @@ teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.99, vce(ro
 
 
 
-global psm "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease  bonemetastases brainmetastases digestivesystemmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen"
+global psm "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease  bonemetastases brainmetastases digestivesystemmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen bevacizumabused "
 
 
 import delimited "all_data_365_10000.csv", clear
@@ -337,9 +337,9 @@ replace therapy_type = 9 if trkinhibitor == 1
 replace therapy_type = 10 if metinhibitor== 1
 replace therapy_type = 11 if carboplatinmonotherapy == 1
 replace therapy_type = 12 if cisplatinmonotherapy == 1
+
 keep if therapy_type == 0 | therapy_type==1
-drop if firstlinenivolumabmonotherapy==1
-drop if firstlineipilimumabnivolumab ==1
+
 
 drop if alk==1
 drop if egfr==1
@@ -348,11 +348,7 @@ gen first_line = 0
 replace first_line = 1 if therapy_type ==1
 gen over_threshold = 0
 replace over_threshold = 1 if pdl1>=0.5
-
 drop if glucocorticoidusepriortotreatmen==1
-drop if threeormorechemotherapydrugs == 1
-drop if bevacizumabused==1
-keep if pdl1>0
 
 gen insured = 0
 replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
@@ -362,7 +358,7 @@ replace ageatdiagnosis = log(ageatdiagnosis)
 binscatter squamouscellcarcinoma pdl1, yti("Proportion with Squamous Cell Carcinoma") xti("PD-L1") 
 graph export "squamous_pdl1.png", replace */
 
-rdplot first_line pdl1, c(0.5) 
+rdplot first_line pdl1, c(0.5) masspoints p(1)
 graph export "polynomial_fit_RD.png", replace
 binscatter first_line pdl1, rd(0.5) yti("Proportion Receiving IO Monotherapy Treatment") xti("PD-L1") 
 graph export "discontinuity_treat.png", replace 
@@ -395,11 +391,9 @@ rddensity pdl1, c(0.5) vce(jackknife) plot
 
 rdplot progression_outcome  pdl1, c(0.5) 
 rdwinselect pdl1 $psm, c(0.5) seed(0) reps(1000) level(0.05) wmass
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)   wmass
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)   wmass
 
-
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.29) wr(0.61)  firststage wmass
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.29) wr(0.61)  firststage wmass
 rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)  firststage wmass
 rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)  firststage wmass
-
 

@@ -4,7 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates" />
+    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
+      <change beforePath="$PROJECT_DIR$/PDL1_Manuscript_ML_only.docx" beforeDir="false" afterPath="$PROJECT_DIR$/PDL1_Manuscript_ML_only.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PD_L1_distribution_whole_dataset_include_0_prog.png" beforeDir="false" afterPath="$PROJECT_DIR$/PD_L1_distribution_whole_dataset_include_0_prog.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/discontinuity_treat.png" beforeDir="false" afterPath="$PROJECT_DIR$/discontinuity_treat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mortality_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_all.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nsclc.do" beforeDir="false" afterPath="$PROJECT_DIR$/nsclc.do" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/polynomial_fit_RD.png" beforeDir="false" afterPath="$PROJECT_DIR$/polynomial_fit_RD.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prog_survival_without_mutations_pre_match_no_combo_prog.png" beforeDir="false" afterPath="$PROJECT_DIR$/prog_survival_without_mutations_pre_match_no_combo_prog.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/progression_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_all.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/~nsclc.do.stswp" beforeDir="false" afterPath="$PROJECT_DIR$/~nsclc.do.stswp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -185,13 +198,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00054" summary="shapley">
-      <created>1715399791777</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1715399791777</updated>
     </task>
     <task id="LOCAL-00055" summary="shapley">
       <created>1715401930879</created>
@@ -529,7 +535,14 @@
       <option name="project" value="LOCAL" />
       <updated>1716062869538</updated>
     </task>
-    <option name="localTasksCounter" value="103" />
+    <task id="LOCAL-00103" summary="manuscript updates">
+      <created>1716065390817</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1716065390818</updated>
+    </task>
+    <option name="localTasksCounter" value="104" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
