@@ -234,13 +234,13 @@ teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.99, vce(ro
 
 
 
- ////// Regression discontinuity ///////////
+////// Regression discontinuity ///////////
 
-  global indiv_covar_no_pdl1 "ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stageia stageia1 stageia2 stageia3 stageib stageii stageiia stageiib stageiii stageiiia stageiiib stageiiic stageiv stageiva stageivb occult neversmoker  academicmedicalcenter chronickidneydisease  priorkidneytransplant cirrhosis hepatitis priorlivertransplant connectivetissue scleroderma lupus rheumatoidarthritis interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases  clinicalstudydrug creatinine bilirubin ast alt albumin antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused braf kras"
-  
-  global psm "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease  bonemetastases brainmetastases digestivesystemmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen"
-  
-  
+
+
+global psm "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease  bonemetastases brainmetastases digestivesystemmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen"
+
+
 import delimited "all_data_365_10000.csv", clear
 tab progression_outcome
 tab mortality_outcome
@@ -324,24 +324,24 @@ replace diagnosisyear = 2022 - diagnosisyear
 tab connective_tissue_bool
 tab kidney_bool
 tab liver_bool
- gen therapy_type = 1
- replace therapy_type = 0 if firstlinechemotherapy == 1
- replace therapy_type = 2 if firstlinecombinationtherapy == 1
- replace therapy_type = 3 if nonfirstlinechemotherapy == 1
- replace therapy_type = 4 if antialkdrug == 1
- replace therapy_type = 5 if antiegfrdrug == 1
- replace therapy_type = 6 if antibrafdrug == 1
- replace therapy_type = 7 if antiros1drug == 1
- replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
- replace therapy_type = 9 if trkinhibitor == 1
- replace therapy_type = 10 if metinhibitor== 1
- replace therapy_type = 11 if carboplatinmonotherapy == 1
- replace therapy_type = 12 if cisplatinmonotherapy == 1
- keep if therapy_type == 0 | therapy_type==1
- //drop if firstlinenivolumabmonotherapy==1
- //drop if firstlineipilimumabnivolumab ==1
+gen therapy_type = 1
+replace therapy_type = 0 if firstlinechemotherapy == 1
+replace therapy_type = 2 if firstlinecombinationtherapy == 1
+replace therapy_type = 3 if nonfirstlinechemotherapy == 1
+replace therapy_type = 4 if antialkdrug == 1
+replace therapy_type = 5 if antiegfrdrug == 1
+replace therapy_type = 6 if antibrafdrug == 1
+replace therapy_type = 7 if antiros1drug == 1
+replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
+replace therapy_type = 9 if trkinhibitor == 1
+replace therapy_type = 10 if metinhibitor== 1
+replace therapy_type = 11 if carboplatinmonotherapy == 1
+replace therapy_type = 12 if cisplatinmonotherapy == 1
+keep if therapy_type == 0 | therapy_type==1
+drop if firstlinenivolumabmonotherapy==1
+drop if firstlineipilimumabnivolumab ==1
 
- drop if alk==1
+drop if alk==1
 drop if egfr==1
 drop if ros1==1
 gen first_line = 0
@@ -350,16 +350,16 @@ gen over_threshold = 0
 replace over_threshold = 1 if pdl1>=0.5
 
 drop if glucocorticoidusepriortotreatmen==1
-//drop if threeormorechemotherapydrugs == 1
-//drop if bevacizumabused==1
-keep if pdl1 > 0
+drop if threeormorechemotherapydrugs == 1
+drop if bevacizumabused==1
+keep if pdl1>0
 
- gen insured = 0
- replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
+gen insured = 0
+replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
 replace daysfromadvanceddiagnosistotreat = log(daysfromadvanceddiagnosistotreat)
 replace ageatdiagnosis = log(ageatdiagnosis)
 /*
- binscatter squamouscellcarcinoma pdl1, yti("Proportion with Squamous Cell Carcinoma") xti("PD-L1") 
+binscatter squamouscellcarcinoma pdl1, yti("Proportion with Squamous Cell Carcinoma") xti("PD-L1") 
 graph export "squamous_pdl1.png", replace */
 
 rdplot first_line pdl1, c(0.5) 
@@ -379,7 +379,7 @@ binscatter never_smoker pdl1, rd(0.5) yti("Proportion Never Smoker") xti("PD-L1"
 graph export "discontinuity_never_smoker.png", replace
 binscatter prev_smoker pdl1, rd(0.5) yti("Proportion Previous Smoker") xti("PD-L1") 
 graph export "discontinuity_prev_smoker.png", replace
- */
+*/
 
 kdensity pdl1 , xline(0.5)
 
@@ -395,11 +395,11 @@ rddensity pdl1, c(0.5) vce(jackknife) plot
 
 rdplot progression_outcome  pdl1, c(0.5) 
 rdwinselect pdl1 $psm, c(0.5) seed(0) reps(1000) level(0.05) wmass
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.3) wr(0.6)   
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.3) wr(0.6)   
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)   wmass
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line ) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)   wmass
 
 
-rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.3) wr(0.6)  firststage 
-rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.3) wr(0.6)  firststage 
+rdrandinf progression_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)  firststage wmass
+rdrandinf mortality_outcome pdl1, cutoff(0.5) fuzzy(first_line tsls) kernel(uniform) seed(0)  ci(.05) wl (0.39) wr(0.51)  firststage wmass
 
 
