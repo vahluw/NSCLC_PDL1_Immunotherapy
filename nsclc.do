@@ -364,9 +364,9 @@ keep if pdl1reported==1
 biprobit (progression_outcome = therapy_type  ) (therapy_type = i.over_threshold  $psm)
 
 
-biprobit (progression_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61
+biprobit (progression_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61, vce(robust)
 
-biprobit (mortality_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61
+biprobit (mortality_outcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm) if pdl1>0.29 & pdl1<0.61, vce(robust)
 
 
 
