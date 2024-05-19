@@ -251,6 +251,10 @@ stcox progressed_prediction if therapy_type<=1 & pdl1>=0.5
 sts graph if therapy_type<=1  & pdl1>=0.5, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction, PD-L1 >=50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive")) 
 graph export "io_chemo_test_set_predictive_over50.png", replace
 
+gen new_var = 0
+replace new_var =1 if progression_outcome==0
+rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
+rocreg progression_outcome prog_pred  if pdl1reported ==1 & therapy_type ==1
 
 // Mortality
 import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
@@ -369,4 +373,9 @@ stci if therapy_type<=1 & pdl1>=0.5, by(stratum) rmean
 stcox endpoint_prediction if therapy_type<=1 & pdl1>=0.5
 sts graph if therapy_type<=1 & pdl1>=0.5, by(stratum) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction, PD-L1 >=50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unresponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive"))
 graph export "io_chemo_test_set_predictive_overall_over50.png", replace
+
+gen new_var = 0
+replace new_var =1 if endpoint==0
+rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
+rocreg endpoint mort_preds  if pdl1reported ==1 & therapy_type ==1
 
