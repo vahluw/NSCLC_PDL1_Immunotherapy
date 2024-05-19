@@ -211,6 +211,30 @@ sts test therapy_type, logrank
 drop if hispanicrace==1
 
 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>0, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.09, vce(robust)
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.19, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.29, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type) if pdl1>=0.39, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.49, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.59, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.69, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.79, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.89, vce(robust) 
+teffects ipw (progression_outcome) (therapy_type ) if pdl1>=0.99, vce(robust) 
+
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>0, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.09, vce(robust)
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.19, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.29, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type) if pdl1>=0.39, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.49, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.59, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.69, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.79, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.89, vce(robust) 
+teffects ipwra (progression_outcome) (therapy_type ) if pdl1>=0.99, vce(robust) 
+
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>0, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.09, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.19, vce(robust) caliper(0.2)

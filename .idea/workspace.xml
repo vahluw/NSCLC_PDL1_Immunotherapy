@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates" />
+    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
+      <change beforePath="$PROJECT_DIR$/PDL1_Manuscript_ML_only.docx" beforeDir="false" afterPath="$PROJECT_DIR$/PDL1_Manuscript_ML_only.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/io_odds_only_pdl1_interaction.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mortality_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_all.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/mortality_odds_only_pdl1.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nsclc.do" beforeDir="false" afterPath="$PROJECT_DIR$/nsclc.do" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/progression_odds_all.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_all.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/progression_odds_only_pdl1.xlsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -185,13 +193,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00058" summary="shapley fixed bug">
-      <created>1715483874557</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1715483874557</updated>
     </task>
     <task id="LOCAL-00059" summary="shapley fixed bug">
       <created>1715536947081</created>
@@ -529,7 +530,14 @@
       <option name="project" value="LOCAL" />
       <updated>1716076411982</updated>
     </task>
-    <option name="localTasksCounter" value="107" />
+    <task id="LOCAL-00107" summary="manuscript updates">
+      <created>1716082443818</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1716082443818</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
