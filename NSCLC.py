@@ -20,43 +20,68 @@ dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 
 
-def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None):
+def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None, io_only=0):
 
     #shap.initjs()
     X_train_df = pd.DataFrame(data=X_train)
     X_test_df = pd.DataFrame(data=X_test)
     X_train_df = X_train_df.astype(float)
     X_test_df = X_test_df.astype(float)
-    headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
-                   "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                         "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1+", "PDL1 Reported",
-                         "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
-                   "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
-                   "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
-                   "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
-                   "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
-                   "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
-                    "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
-                    "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
-                    "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
-                   "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
-                     "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
-                "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
-                        'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
-                   'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
-                   'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
-                   'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
-                   'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
-                   'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
-                        'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
-                   'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
-                   "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
-                   'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
-                   'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
-                        "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker", "First-Line Nivolumab Monotherapy",
-                   "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
-                   "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
-
+    if io_only == 0:
+        headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
+                       "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
+                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                             "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
+                       "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
+                       "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
+                       "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                       "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                       "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
+                        "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
+                        "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
+                        "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
+                       "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
+                         "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
+                    "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                            'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                       'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                       'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                       'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                       'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                       'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                            'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                       'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                       "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
+                       'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
+                       'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
+                            "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker", "First-Line Nivolumab Monotherapy",
+                       "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
+                       "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
+    else:
+        headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance",
+                       "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
+                       "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
+                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                       "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                       "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
+                        "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
+                        "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
+                        "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
+                       "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
+                         "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
+                    "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                            'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                       'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                       'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                       'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                       'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                       'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                            'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                       'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                       "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
+                       'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
+                       'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
+                            "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker"]
     print(len(headers_long))
 
     # Initialize GridSearchCV
@@ -362,6 +387,7 @@ if __name__ == '__main__':
     min_time, lr, dir, exclude_diagnoses, tx_interval, use_dl, tx_start, use_dynamic, use_dx = int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), int(sys.argv[9])
     use_imputation = int(sys.argv[10])
     include_dynamic = int(sys.argv[11])
+    io_only = int(sys.argv[12])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -807,6 +833,8 @@ if __name__ == '__main__':
                     if therapy_name in approved_first_line_immunomonotherapies:
                         io_mono = 1
                         io_mono_used = first_line_mono_io_to_index[therapy_name]
+
+
                     elif therapy_name == "carboplatin":
                         carboplatin_only = 1
                     elif therapy_name == "cisplatin":
@@ -873,10 +901,10 @@ if __name__ == '__main__':
                         else:
                             other_first_line_therapy = 1
 
-        if patientID not in patientID_to_first_line_start_date and use_dx==0:
+        if patientID not in patientID_to_first_line_start_date and use_dx == 0:
             continue
 
-        if days_from_dx_to_tx > tx_interval and use_dx==0:
+        if days_from_dx_to_tx > tx_interval and use_dx == 0:
             continue
 
         if patientID in patientID_to_important_diagnoses:
@@ -890,6 +918,11 @@ if __name__ == '__main__':
                         braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
                         three_plus_chemo_drugs, carboplatin_only, cisplatin_only, pembrolizumab_used, trk_inhibitor,
                         met_drug, days_from_dx_to_tx, therapy_year]
+            if io_only:
+                if io_mono != 1:
+                    continue
+                else:
+                    therapy_info = [days_from_dx_to_tx, therapy_year]
 
             x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
@@ -1455,6 +1488,11 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
+    if io_only:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
 
@@ -1462,7 +1500,7 @@ if __name__ == '__main__':
 
     X_static = X_static[:, 2:]
 
-    if use_dx == 0:
+    if use_dx == 0 and io_only == 0:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
     else:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19]
@@ -1530,7 +1568,7 @@ if __name__ == '__main__':
                     'n_estimators': [400],
                     'reg_lambda': [0, 1],
                     'reg_alpha': [0, 1],
-                    'scale_pos_weight': [0.5, 1, 1.8]
+                    'scale_pos_weight': [0.5, 1, 1.8, 2.0]
             }
 
         else:
@@ -1543,12 +1581,12 @@ if __name__ == '__main__':
                     'reg_lambda': [0, 1],
                     'reg_alpha': [0, 1],
                     'subsample': [0.5, 1],
-                    'scale_pos_weight': [0.5, 1, 1.8]
+                    'scale_pos_weight': [0.5, 1, 1.8, 2.0]
             }
 
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                            file_name_extender,  type='xgb' + final_extender, weights=classes_weights)
+                            file_name_extender,  type='xgb' + final_extender, weights=classes_weights, io_only=io_only)
 
         '''
         ###### GB

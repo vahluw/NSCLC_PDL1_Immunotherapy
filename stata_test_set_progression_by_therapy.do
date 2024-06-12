@@ -139,6 +139,10 @@ drop if alk==1
 drop if egfr==1
 drop if ros1==1
 
+logistic progression_outcome i.therapy_type prog_pred c.prog_pred#i.therapy_type if therapy_type < 2
+
+logistic progression_outcome i.therapy_type pdl1 c.pdl1#i.therapy_type if therapy_type < 2
+
 
 capture stset progression_days if therapy_type==1 & pdl1reported==1, failure(progression_outcome)
 stci if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) rmean
@@ -234,15 +238,15 @@ graph export "chemo_only_test_set_pdl1_xgb_prog_over50.png", replace
 gen stratum = -1
 
 replace stratum = 0 if (therapy_type==0 & progressed_prediction==1)
-replace stratum = 1 if (therapy_type==0 & progressed_prediction==0)
-replace stratum = 2 if (therapy_type==1 & progressed_prediction==1)
+replace stratum = 1 if (therapy_type==1 & progressed_prediction==1) 
+replace stratum = 2 if (therapy_type==0 & progressed_prediction==0)
 replace stratum = 3 if (therapy_type==1 & progressed_prediction==0)
 
 
 capture stset progression_days if therapy_type<=1, failure(progression_outcome)
 stci if therapy_type<=1, by(stratum) rmean 
-stcox progressed_prediction if therapy_type<=1
-sts graph if therapy_type<=1, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive")) 
+stcox progressed_prediction if therapy_type<=1 
+sts graph if therapy_type<=1 & stratum <=1, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive")) 
 graph export "io_chemo_test_set_predictive.png", replace
 
 capture stset progression_days if therapy_type<=1 & pdl1>=0.5, failure(progression_outcome)
@@ -254,7 +258,8 @@ graph export "io_chemo_test_set_predictive_over50.png", replace
 gen new_var = 0
 replace new_var =1 if progression_outcome==0
 rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
-rocreg progression_outcome prog_pred  if pdl1reported ==1 & therapy_type ==1
+gen new_pred = 1-prog_pred
+rocreg new_var new_pred  if pdl1reported ==1 & therapy_type ==1
 
 // Mortality
 import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 

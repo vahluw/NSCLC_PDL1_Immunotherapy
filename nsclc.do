@@ -165,6 +165,29 @@ gen io_mono = (therapy_type==1)
 
 replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
 
+logistic io_mono $indiv_covar_psm_prog_outcome pdl1 pdl1reported if pdl1reported ==1 & therapy_type<=1 & alk==0 & egfr==0 & ros1==0
+logistic io_mono $indiv_covar_psm_prog_outcome pdl1 pdl1reported if pdl1>=0.5 & therapy_type<=1 & alk==0 & egfr==0 & ros1==0
+
+logistic progression_outcome  $indiv_covar_psm_prog_outcome if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+predict pred_io if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+rocreg progression_outcome pred_io if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+
+logistic progression_outcome  $indiv_covar_psm_prog_outcome pdl1 pdl1reported if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+predict pred_io_pdl1 if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+rocreg progression_outcome pred_io_pdl1 if therapy_type==1 & alk==0 & egfr==0 & ros1==0
+
+logistic progression_outcome  $indiv_covar_psm_prog_outcome if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+predict pred_chemo if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+rocreg progression_outcome pred_chemo if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+
+logistic progression_outcome  $indiv_covar_psm_prog_outcome pdl1 pdl1reported if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+predict pred_chemo_pdl1 if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+rocreg progression_outcome pred_chemo_pdl1 if therapy_type==0 & alk==0 & egfr==0 & ros1==0
+
+logistic progression_outcome  $indiv_covar_psm_prog_outcome pdl1 pdl1reported alk egfr ros1 i.therapy_type
+predict pred_all
+rocreg progression_outcome pred_all
+
 // alk egfr ros1 kras braf 
 putexcel set "progression_odds_all.xlsx", replace
 logistic progression_outcome  ${indiv_covar_logistic}  pdl1reported  
