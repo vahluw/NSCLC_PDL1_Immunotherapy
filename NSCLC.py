@@ -19,7 +19,43 @@ no_progression_date = date(2021, 11, 30)
 dir_path1 = '/origdata/Parikh_Flatirons/edm_nsclc_oral_lot_182021/'
 dir_path2 = '/Users/vahluw/PycharmProjects/Flatiron/edm_nsclc_oral_lot_182021/'
 
+headers_all =  ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
+                       "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
+                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                             "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
+                       "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
+                       "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
+                       "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                       "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                       "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
+                        "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
+                        "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
+                        "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
+                       "Adrenal Metastases", "Unspecified Metastases", "Glucocorticoid Use Prior to Treatment",
+                         "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
+                    "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                            'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
+                       'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
+                       'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
+                       'NE Residence', 'WA Residence', 'WV Residence', 'AZ Residence', 'LA Residence', 'OR Residence',
+                       'OK Residence', 'TX Residence', 'CO Residence', 'IA Residence', 'MS Residence', 'RI Residence',
+                       'OH Residence', 'SC Residence', 'GA Residence', 'MI Residence', 'NC Residence', 'ME Residence',
+                            'FL Residence', 'IL Residence', 'NM Residence', 'HI Residence', 'KS Residence', 'KY Residence',
+                       'MA Residence', "Academic Medical Center", "ECOG 0", "ECOG 1", "ECOG 2", "ECOG 3",
+                       "ECOG 4", 'Stage 0','Stage I', 'Stage IA', 'Stage IA1', 'Stage IA2', 'Stage IA3', 'Stage IB',
+                       'Stage II', 'Stage IIA', 'Stage IIB', 'Stage III', 'Stage IIIA', 'Stage IIIB', 'Stage IIIC',
+                       'Stage IV', 'Stage IVA', 'Stage IVB', 'Occult',  "Squamous Cell Carcinoma",
+                            "Nonsquamous Cell Carcinoma", "Never Smoker", "Previous Smoker", "First-Line Nivolumab Monotherapy",
+                       "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
+                       "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
 
+headers_to_drop = ["First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
+                       "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
+                       "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
+                       "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                       "TRK Inhibitor", "MET Inhibitor",  "First-Line Nivolumab Monotherapy",
+                       "First-Line Pembrolizumab Monotherapy", "First-Line Cemiplimab Monotherapy",
+                       "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
 def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filename_extender, type='rf', weights=None, io_only=0):
 
     #shap.initjs()
@@ -394,7 +430,7 @@ if __name__ == '__main__':
         dir_path = dir_path1
     else:
         dir_path = dir_path2
-
+    print(len(headers_to_drop))
     diagnosis_dates = pd.read_csv(dir_path+'Enhanced_AdvancedNSCLC.csv')
     patientID_to_advanced_diagnosis_date = dict()
 
@@ -918,11 +954,6 @@ if __name__ == '__main__':
                         braf_drug, ros1_drug, ras_drug, other_first_line_therapy, clinical_study_drug, bevacizumab_used,
                         three_plus_chemo_drugs, carboplatin_only, cisplatin_only, pembrolizumab_used, trk_inhibitor,
                         met_drug, days_from_dx_to_tx, therapy_year]
-            if io_only:
-                if io_mono != 1:
-                    continue
-                else:
-                    therapy_info = [days_from_dx_to_tx, therapy_year]
 
             x_demos_no_diagnoses = np.concatenate(([x_practice[2], x_practice[0]], age_diagnosis_stats, x_demos,
                                                insurance_patient, [x_practice[1]], ecog_, cancer_vec, all_biomarkers,
@@ -1500,7 +1531,7 @@ if __name__ == '__main__':
 
     X_static = X_static[:, 2:]
 
-    if use_dx == 0 and io_only == 0:
+    if use_dx == 0:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
     else:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19]
@@ -1515,6 +1546,20 @@ if __name__ == '__main__':
     X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
     X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True, dtype=int)
+    X_static_df_final.columns = headers_all
+
+    io_conditions = ['First-Line Nivolumab Monotherapy',
+                     'First-Line Pembrolizumab Monotherapy',
+                     'First-Line Cemiplimab Monotherapy',
+                     'First-Line Atezolizumab Monotherapy',
+                     'First-Line Durvalumab Monotherapy',
+                     'First-Line Ipilimumab/Nivolumab']
+    if io_only:
+        condition = (X_static_df_final[io_conditions] < 1).all(axis=1)
+        # Deleting rows based on the condition
+        X_static_df_final = X_static_df_final[~condition]
+        X_static_df_final = X_static_df_final.drop(headers_to_drop, axis=1)
+
     X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
     print(X_static_df_final.shape)
     X_static = X_static_df_final.values
@@ -1587,36 +1632,3 @@ if __name__ == '__main__':
         classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb' + final_extender, weights=classes_weights, io_only=io_only)
-
-        '''
-        ###### GB
-        gb_clf = GradientBoostingClassifier(random_state=0)
-
-        params_gb = {
-                'loss': ['log_loss', 'exponential'],
-                'learning_rate': [0.1, 0.05],
-                'n_estimators': [200, 300, 400],
-                'max_features': ["sqrt", None],
-                "criterion": ["friedman_mse",  "squared_error"],
-                "max_depth": [5, None]
-                }
-
-        perform_grid_search(params_gb, gb_clf, X_static_train, y_train_final, X_static_test, y_test_final,
-                            file_name_extender, type='gb' + final_extender)
-
-
-        ##### RF
-        rf_clf = RandomForestClassifier(random_state=0)
-
-        params_rf = {
-                'n_estimators': [100, 200],
-                'max_depth': [80, 100],
-                'criterion': ["entropy", "log_loss"],
-                'min_samples_leaf': [1, 2],
-                'class_weight': ["balanced", None],
-                'max_features': [None, "sqrt"]
-                }
-
-        perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final, file_name_extender, type='rf' + final_extender)
-
-        '''

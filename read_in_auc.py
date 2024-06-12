@@ -85,6 +85,7 @@ for io_extender in io_extenders:
         X_test_df = pd.read_csv(folder + 'clf_xgb_prog_365_10000' + io_extender + '_test.csv')
         X_test_df = X_test_df.drop('Unnamed: 0', axis=1)
         X_train_df = X_train_df.drop('Unnamed: 0', axis=1)
+        print(X_train_df.shape)
         print(best_estimator)
         explainer = shap.TreeExplainer(best_estimator, X_train_df)
 
@@ -105,8 +106,11 @@ for io_extender in io_extenders:
         mort_gb_preds = np.expand_dims(np.array(np.load(folder + 'y_pred_365_100001_xgb_mort_0.66_365_100001.npy')), axis=1)
 
     all_test_data = np.concatenate((test_dataset.values, test_data, prog_gb_preds, mort_gb_preds), axis=1)
+    print(all_test_data.shape)
+    print(len(headers))
     test_set_columns = headers + ["progression_outcome",  "progression_days", "mortality_days", "mortality_outcome",
                                            "censor_days", "prog_preds", "mort_preds"]
+    print(len(test_set_columns))
 
     all_test_data = pd.DataFrame(data=all_test_data)
     all_test_data.columns = test_set_columns
