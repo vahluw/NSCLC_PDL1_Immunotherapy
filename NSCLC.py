@@ -1556,9 +1556,18 @@ if __name__ == '__main__':
                      'First-Line Ipilimumab/Nivolumab']
     if io_only:
         condition = (X_static_df_final[io_conditions] < 1).all(axis=1)
+        y_new = []
+        count = 0
+        for index, row in X_static_df_final.iterrows():
+            sum_ = row['First-Line Nivolumab Monotherapy'] + row['First-Line Pembrolizumab Monotherapy'] + row['First-Line Cemiplimab Monotherapy'] + \
+                row['First-Line Atezolizumab Monotherapy'] +  row['First-Line Durvalumab Monotherapy'] +  row['First-Line Ipilimumab/Nivolumab']
+            if sum_ > 0:
+                y_new.append(y[count])
+            count += 1
         # Deleting rows based on the condition
         X_static_df_final = X_static_df_final[~condition]
         X_static_df_final = X_static_df_final.drop(headers_to_drop, axis=1)
+        y = y_new
 
     X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
     print(X_static_df_final.shape)
