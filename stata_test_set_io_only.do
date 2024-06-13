@@ -1,13 +1,13 @@
-global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
+global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/"
 cd "${path}"
 set scheme cleanplots
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_100001.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
 rocreg progression_outcome prog_preds
 
 rocreg mortality_outcome mort_preds
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_100001.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
 
 tab progression_outcome
 tab mortality_outcome
@@ -49,9 +49,7 @@ count if medicaid==1
 count if commercialhealthplan==1
 count if noinsurance==1
 count if selfpay==1
-tab firstlinechemotherapy
-tab firstlinecombinationtherapy
-count if firstlinenivolumabmonotherapy ==1 | firstlinepembrolizumabmonotherap == 1 | firstlineatezolizumabmonotherapy == 1 | firstlinecemiplimabmonotherapy  == 1 | firstlinedurvalumabmonotherapy  == 1  | firstlineipilimumabnivolumab == 1
+
 tab alk
 tab egfr
 tab ros1
@@ -83,7 +81,7 @@ tab antiinfectiveusepriortotreatment
 gen connective_tissue_bool = ( connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1)
 gen kidney_bool = (chronickidneydisease == 1 |  priorkidneytransplant == 1 | (estimated_gfr < 60 & creatinine > 0))
 gen liver_bool = (cirrhosis == 1 | hepatitis == 1 | priorlivertransplant  == 1 | ast >=109 | alt >=97 | bilirubin >= 2.0)
-replace otherfirstlinetherapy = 1 if antirasdrug==1
+
 replace daysfromadvanceddiagnosistotreat = log(daysfromadvanceddiagnosistotreat)
 replace ageatdiagnosis = log(ageatdiagnosis)
 replace diagnosisyear = 2022 - diagnosisyear
@@ -94,7 +92,7 @@ tab liver_bool
 
 
 
-gen threshold = 0.5 // change
+gen threshold = 0.686
 gen time_limit = 365
 
 
@@ -113,274 +111,144 @@ replace mortality_days = time_limit if mortality_days == 0 | mortality_days >tim
 
 
 capture stset progression_days, failure(progression_outcome)
-stci, by(progressed_prediction) rmean
+stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_chemo_test_set_ml_mutations_xgb_prog_io.png", replace
-
-
-gen therapy_type = 1
-replace therapy_type = 0 if firstlinechemotherapy == 1
-replace therapy_type = 2 if firstlinecombinationtherapy == 1
-replace therapy_type = 3 if nonfirstlinechemotherapy == 1
-replace therapy_type = 4 if antialkdrug == 1
-replace therapy_type = 5 if antiegfrdrug == 1
-replace therapy_type = 6 if antibrafdrug == 1
-replace therapy_type = 7 if antiros1drug == 1
-replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
-replace therapy_type = 9 if trkinhibitor == 1
-replace therapy_type = 10 if metinhibitor== 1
-replace therapy_type = 11 if carboplatinmonotherapy == 1
-replace therapy_type = 12 if cisplatinmonotherapy == 1
-
+sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "test_set_ml_mutations_xgb_prog_io.png", replace
 
 
 drop if alk==1
 drop if egfr==1
 drop if ros1==1
 
-logistic progression_outcome i.therapy_type prog_pred c.prog_pred#i.therapy_type if therapy_type < 2
 
-logistic progression_outcome i.therapy_type pdl1 c.pdl1#i.therapy_type if therapy_type < 2
-
-
-capture stset progression_days if therapy_type==1 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==1 & pdl1reported==1
-sts graph if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "io_test_set_pdl1_prog.png", replace
-
-capture stset progression_days if therapy_type==1 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==1 & pdl1reported==1
-sts graph if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "io_test_set_pdl1_prog_pdl1reported.png", replace
-
-capture stset progression_days if therapy_type==0 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==0 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==0 & pdl1reported==1
-sts graph if therapy_type==0 & pdl1reported==1, by(pdl1_over_threshold) title("Progression-Free Survival for Test-Set Patients on Chemotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "chemo_test_set_pdl1_prog.png", replace
-
-capture stset progression_days if therapy_type==2 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==2 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==2 & pdl1reported==1
-sts graph if therapy_type==2 & pdl1reported==1, by(pdl1_over_threshold) title("Progression-Free Survival for Test-Set Patients on Combination Therapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "combo_test_set_pdl1_prog.png", replace
-
-
-capture stset mortality_days if therapy_type==1 & pdl1reported==1, failure(mortality_outcome)
-stci if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==1 & pdl1reported==1
-sts graph if therapy_type==1 & pdl1reported==1, by(pdl1_over_threshold) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "io_test_set_pdl1_overall.png", replace
-
-capture stset mortality_days if therapy_type==0 & pdl1reported==1, failure(mortality_outcome)
-stci if therapy_type==0 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==0 & pdl1reported==1
-sts graph if therapy_type==0 & pdl1reported==1, by(pdl1_over_threshold) title("Overall Survival for Test-Set Patients on Chemotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "chemo_test_set_pdl1_overall.png", replace
-
-capture stset mortality_days if therapy_type==2 & pdl1reported==1, failure(mortality_outcome)
-stci if therapy_type==2 & pdl1reported==1, by(pdl1_over_threshold) rmean
-stcox pdl1_over_threshold if therapy_type==2 & pdl1reported==1
-sts graph if therapy_type==2 & pdl1reported==1, by(pdl1_over_threshold) title("Overall Survival for Test-Set Patients on Combination Therapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
-graph export "combo_test_set_pdl1_overall.png", replace
-
-
-drop if therapy_type >=2
-
-logit progression_outcome i.therapy_type pdl1 i.therapy_type#c.pdl1 if pdl1reported==1
-logit progression_outcome i.therapy_type i.pdl1_over_threshold i.therapy_type#i.pdl1_over_threshold if pdl1reported==1
-logit progression_outcome i.therapy_type progressed_prediction i.therapy_type#i.progressed_prediction if pdl1reported==1
-
-
+capture stset progression_days if pdl1reported==1, failure(progression_outcome)
+stci if  pdl1reported==1, by(pdl1_over_threshold) rmean
+stcox pdl1_over_threshold if  pdl1reported==1
+sts graph if  pdl1reported==1, by(pdl1_over_threshold) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
+graph export "io_test_set_pdl1_prog_io.png", replace
 
 capture stset progression_days, failure(progression_outcome)
-stci, by(progressed_prediction) rmean
+stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_chemo_test_set_ml_no_mutations_xgb_prog.png", replace
+sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "test_set_ml_no_mutations_xgb_prog_io.png", replace
 
-capture stset progression_days if therapy_type==1 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==1 & pdl1reported==1, by(progressed_prediction) rmean 
-stcox hazard_prediction if therapy_type==1 & pdl1reported==1
-sts graph if therapy_type==1 , by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_xgb_prog_pdl1reported.png", replace
-
-
-capture stset progression_days if therapy_type==1 & pdl1>=0.5, failure(progression_outcome)
-stci if therapy_type==1 & pdl1>=0.5, by(progressed_prediction) rmean 
-stcox hazard_prediction if therapy_type==1 & pdl1>=0.5
-sts graph if therapy_type==1 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_pdl1_over50_xgb_prog.png", replace
-
-capture stset progression_days if therapy_type==1 & pdl1<0.5 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==1 & pdl1<0.5 & pdl1reported==1, by(progressed_prediction) rmean 
-stcox hazard_prediction if therapy_type==1 & pdl1<0.5 & pdl1reported==1
-sts graph if therapy_type==1 & pdl1<0.5 & pdl1reported==1, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_pdl1_under50_xgb_prog.png", replace
+capture stset progression_days if  pdl1reported==1, failure(progression_outcome)
+stci if  pdl1reported==1, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1reported==1
+sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_xgb_prog_pdl1reported_io.png", replace
 
 
-capture stset progression_days if therapy_type==0 & pdl1reported==1, failure(progression_outcome)
-stci if therapy_type==0 & pdl1reported==1, by(progressed_prediction) rmean 
-stcox hazard_prediction if therapy_type==0 & pdl1reported==1
-sts graph if therapy_type==0 & pdl1reported==1, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "chemo_only_test_set_pdl1_xgb_prog.png", replace
+capture stset progression_days if  pdl1>=0.5, failure(progression_outcome)
+stci if  pdl1>=0.5, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1>=0.5
+sts graph if  pdl1>=0.5, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_pdl1_over50_xgb_prog_io.png", replace
 
-capture stset progression_days if therapy_type==0 & pdl1reported==1 & pdl1>=0.5, failure(progression_outcome)
-stci if therapy_type==0 & pdl1reported==1 & pdl1>=0.5, by(progressed_prediction) rmean 
-stcox hazard_prediction if therapy_type==0 & pdl1reported==1 & pdl1>=0.5
-sts graph if therapy_type==0 & pdl1>=0.5, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "chemo_only_test_set_pdl1_xgb_prog_over50.png", replace
+capture stset progression_days if  pdl1<0.5 & pdl1reported==1, failure(progression_outcome)
+stci if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1<0.5 & pdl1reported==1
+sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_pdl1_under50_xgb_prog_io.png", replace
 
+capture stset progression_days, failure(progression_outcome)
+stci, by(hazard_prediction) rmean 
+stcox hazard_prediction
+sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Unresponsive" 2 "IO Monotherapy Responsive")) 
+graph export "test_set_predictive_io.png", replace
 
-gen stratum = -1
-
-replace stratum = 0 if (therapy_type==0 & progressed_prediction==1)
-replace stratum = 1 if (therapy_type==1 & progressed_prediction==1) 
-replace stratum = 2 if (therapy_type==0 & progressed_prediction==0)
-replace stratum = 3 if (therapy_type==1 & progressed_prediction==0)
-
-
-capture stset progression_days if therapy_type<=1, failure(progression_outcome)
-stci if therapy_type<=1, by(stratum) rmean 
-stcox progressed_prediction if therapy_type<=1 
-sts graph if therapy_type<=1 & stratum <=1, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive")) 
-graph export "io_chemo_test_set_predictive.png", replace
-
-capture stset progression_days if therapy_type<=1 & pdl1>=0.5, failure(progression_outcome)
-stci if therapy_type<=1  & pdl1>=0.5, by(stratum) rmean 
-stcox progressed_prediction if therapy_type<=1 & pdl1>=0.5
-sts graph if therapy_type<=1  & pdl1>=0.5, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction, PD-L1 >=50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive")) 
-graph export "io_chemo_test_set_predictive_over50.png", replace
+capture stset progression_days if pdl1>=0.5, failure(progression_outcome)
+stci if pdl1>=0.5, by(hazard_prediction) rmean 
+stcox progressed_prediction if pdl1>=0.5
+sts graph if pdl1>=0.5, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Prediction, PD-L1 >= 50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Unresponsive" 2 "IO Monotherapy Responsive")) 
+graph export "test_set_predictive_over50_io.png", replace
 
 gen new_var = 0
 replace new_var =1 if progression_outcome==0
-rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
+rocreg new_var pdl1 if pdl1reported ==1 
 gen new_pred = 1-prog_pred
-rocreg new_var new_pred  if pdl1reported ==1 & therapy_type ==1
+rocreg new_var new_pred  if pdl1reported ==1 
 
 // Mortality
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb_prog_365_10000_io/test_set_365_10000.csv", clear 
-gen threshold = 0.468 //0.5
-gen prog_pred = mort_preds
-gen pdl1_over_threshold = (pdl1 >=0.5) 
-gen endpoint_prediction = (prog_pred>=threshold)
-gen endpoint = mortality_outcome
+global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/"
+cd "${path}"
+set scheme cleanplots
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
+
+gen threshold = 0.132
 gen time_limit = 365
-gen endpoint_days = mortality_days
-replace endpoint_days = censor_days if censor_days < mortality_days
-replace endpoint_days = censor_days if mortality_days==0 & censor_days < time_limit
+
+
+gen mort_pred = mort_preds
+gen pdl1_over_threshold = (pdl1 >=0.5) 
+
 replace diagnosisyear = 2024 - diagnosisyear
-
-
-sum endpoint_days
-replace endpoint_days = time_limit if endpoint_days == 0 | endpoint_days >time_limit
-
+gen mortality_prediction = (mort_pred>=threshold)
 gen hazard_prediction  = 0
-replace hazard_prediction = 1 if endpoint_prediction==0
-capture stset endpoint_days, failure(endpoint)
-stci, by(endpoint_prediction) rmean
+replace hazard_prediction = 1 if mortality_prediction==0
+replace mortality_days = time_limit if mortality_days == 0 | mortality_days >time_limit
+
+
+
+capture stset mortality_days, failure(mortality_outcome)
+stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(endpoint_prediction) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_chemo_test_set_ml_mutations_xgb_overall.png", replace
+sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "test_set_ml_mutations_xgb_mort_io.png", replace
 
-gen therapy_type = 1
-replace therapy_type = 0 if firstlinechemotherapy == 1
-replace therapy_type = 2 if firstlinecombinationtherapy == 1
-replace therapy_type = 3 if nonfirstlinechemotherapy == 1
-replace therapy_type = 4 if antialkdrug == 1
-replace therapy_type = 5 if antiegfrdrug == 1
-replace therapy_type = 6 if antibrafdrug == 1
-replace therapy_type = 7 if antiros1drug == 1
-replace therapy_type = 8  if otherfirstlinetherapy == 1 | antirasdrug == 1
-replace therapy_type = 9 if trkinhibitor == 1
-replace therapy_type = 10 if metinhibitor== 1
-replace therapy_type = 11 if carboplatinmonotherapy == 1
-replace therapy_type = 12 if cisplatinmonotherapy == 1
-
-drop if therapy_type >=2
 
 drop if alk==1
 drop if egfr==1
 drop if ros1==1
-logit mortality_outcome i.therapy_type#c.prog_pred
-logit mortality_outcome i.therapy_type#i.endpoint_prediction
 
-logit mortality_outcome i.therapy_type#c.pdl1 if pdl1reported==1
-logit mortality_outcome i.therapy_type#i.pdl1_over_threshold if pdl1reported==1
 
-capture stset endpoint_days, failure(endpoint)
-stci, by(endpoint_prediction) rmean
+capture stset mortality_days if pdl1reported==1, failure(mortality_outcome)
+stci if  pdl1reported==1, by(pdl1_over_threshold) rmean
+stcox pdl1_over_threshold if  pdl1reported==1
+sts graph if  pdl1reported==1, by(pdl1_over_threshold) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by PD-L1 Status; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "PD-L1 <50%" 2 "PD-L1 >=50%"))
+graph export "io_test_set_pdl1_mort_io.png", replace
+
+capture stset mortality_days, failure(mortality_outcome)
+stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(endpoint_prediction) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Risk; Driver Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_chemo_test_set_ml_no_mutations_xgb_overall.png", replace
+sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk; Driver-Mutation Negative")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "test_set_ml_no_mutations_xgb_mort_io.png", replace
 
-capture stset endpoint_days if therapy_type==1, failure(endpoint)
-stci if therapy_type==1, by(endpoint_prediction) rmean 
-stcox hazard_prediction if therapy_type==1
-
-stset endpoint_days if therapy_type==1 & pdl1reported==1, failure(endpoint)
-stci if therapy_type==1 & pdl1reported==1, by(endpoint_prediction) rmean 
-stcox hazard_prediction if therapy_type==1  & pdl1reported==1
-sts graph if therapy_type==1 & pdl1reported==1, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_xgb_overall.png", replace
-
-capture stset endpoint_days if therapy_type==1 & pdl1>=0.5, failure(endpoint)
-stci if therapy_type==1 & pdl1>=0.5, by(endpoint_prediction) rmean 
- stcox hazard_prediction if therapy_type==1 & pdl1>=0.5
-sts graph if therapy_type==1 & pdl1>=0.5, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_pdl1_over50_xgb_overall.png", replace
-
-capture stset endpoint_days if therapy_type==1 & pdl1reported==1 & pdl1<0.5, failure(endpoint)
-stci if therapy_type==1 &  pdl1reported==1 & pdl1<0.5, by(endpoint_prediction) rmean 
- stcox hazard_prediction if therapy_type==1 & pdl1reported==1 & pdl1<0.5
-sts graph if therapy_type==1  & pdl1reported==1 & pdl1<0.5, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "io_only_test_set_pdl1_over50_xgb_overall.png", replace
+capture stset mortality_days if  pdl1reported==1, failure(mortality_outcome)
+stci if  pdl1reported==1, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1reported==1
+sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_xgb_mort_pdl1reported_io.png", replace
 
 
-capture stset endpoint_days if therapy_type==0 & pdl1reported==1, failure(endpoint)
-stci if therapy_type==0 & pdl1reported==1, by(endpoint_prediction) rmean 
-stcox hazard_prediction if therapy_type==0 & pdl1reported==1
-sts graph if therapy_type==0 & pdl1reported==1, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "chemo_only_test_set_xgb_overall.png", replace
+capture stset mortality_days if  pdl1>=0.5, failure(mortality_outcome)
+stci if  pdl1>=0.5, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1>=0.5
+sts graph if  pdl1>=0.5, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_pdl1_over50_xgb_mort_io.png", replace
 
-capture stset endpoint_days if therapy_type==0 & pdl1reported==1 & pdl1>=0.5, failure(endpoint)
-stci if therapy_type==0 & pdl1reported==1 & pdl1>=0.5, by(endpoint_prediction) rmean 
-stcox hazard_prediction if therapy_type==0 & pdl1>=0.5
-sts graph if therapy_type==0 & pdl1>=0.5, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "chemo_only_test_set_xgb_overall.png", replace
+capture stset mortality_days if  pdl1<0.5 & pdl1reported==1, failure(mortality_outcome)
+stci if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) rmean 
+stcox hazard_prediction if  pdl1<0.5 & pdl1reported==1
+sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "io_only_test_set_pdl1_under50_xgb_mort_io.png", replace
 
+capture stset mortality_days, failure(mortality_outcome)
+stci, by(hazard_prediction) rmean 
+stcox hazard_prediction
+sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Unresponsive" 2 "IO Monotherapy Responsive")) 
+graph export "test_set_predictive_io_mort.png", replace
 
-capture stset endpoint_days if therapy_type==0 & pdl1reported==1  & pdl1<0.5, failure(endpoint)
-stci if therapy_type==0 & pdl1reported==1  & pdl1<0.5, by(endpoint_prediction) rmean 
-stcox hazard_prediction if therapy_type==0 & pdl1reported==1  & pdl1<0.5
-sts graph if therapy_type==0 & pdl1reported==1  & pdl1<0.5, by(endpoint_prediction) title("Overall Survival for Test-Set Patients on Chemotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
-graph export "chemo_only_test_set_xgb_overall.png", replace
-
-
-gen stratum=-1
-replace stratum = 0 if (therapy_type==0 & endpoint_prediction==1)
-replace stratum = 1 if (therapy_type==0 & endpoint_prediction==0)
-replace stratum = 2 if (therapy_type==1 & endpoint_prediction==1)
-replace stratum = 3 if (therapy_type==1 & endpoint_prediction==0)
-
-
-capture stset endpoint_days if therapy_type<=1, failure(endpoint)
-stci if therapy_type<=1, by(stratum) rmean 
-stcox endpoint_prediction if therapy_type<=1
-sts graph if therapy_type<=1, by(stratum) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unresponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive"))
-graph export "io_chemo_test_set_predictive_overall.png", replace
-
-capture stset endpoint_days if therapy_type<=1 & pdl1>=0.5, failure(endpoint)
-stci if therapy_type<=1 & pdl1>=0.5, by(stratum) rmean 
-stcox endpoint_prediction if therapy_type<=1 & pdl1>=0.5
-sts graph if therapy_type<=1 & pdl1>=0.5, by(stratum) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction, PD-L1 >=50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unresponsive" 2 "Chemotherapy Responsive" 3 "IO Monotherapy Unreponsive" 4 "IO Monotherapy Responsive"))
-graph export "io_chemo_test_set_predictive_overall_over50.png", replace
+capture stset mortality_days if pdl1>=0.5, failure(mortality_outcome)
+stci if pdl1>=0.5, by(hazard_prediction) rmean 
+stcox hazard_prediction if pdl1>=0.5
+sts graph if pdl1>=0.5, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Prediction, PD-L1 >= 50%")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Unresponsive" 2 "IO Monotherapy Responsive")) 
+graph export "test_set_predictive_over50_io_mort.png", replace
 
 gen new_var = 0
-replace new_var =1 if endpoint==0
-rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
-rocreg endpoint mort_preds  if pdl1reported ==1 & therapy_type ==1
-
+replace new_var =1 if mortality_outcome==0
+rocreg new_var pdl1 if pdl1reported ==1 
+gen new_pred = 1-mort_pred
+rocreg new_var new_pred  if pdl1reported ==1 

@@ -114,7 +114,7 @@ for io_extender in io_extenders:
 
     all_test_data = pd.DataFrame(data=all_test_data)
     all_test_data.columns = test_set_columns
-    all_test_data.to_csv('test_set_' + limit + '_' + extender + '.csv')
+    all_test_data.to_csv(folder + 'test_set_' + limit + '_' + extender + '_' + io_extender + '.csv')
 
     progression_true_outcomes = all_test_data['progression_outcome'].values.astype(int)
     mortality_true_outcomes = all_test_data['progression_outcome'].values.astype(int)
