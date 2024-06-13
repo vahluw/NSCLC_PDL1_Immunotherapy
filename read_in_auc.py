@@ -9,7 +9,7 @@ import pickle
 limit = "365"
 extender = "10000"
 folder = 'clf_xgb/'
-io_extenders = ['1', '0']
+io_extenders = ['0', '1']
 for io_extender in io_extenders:
     test_data = np.array(np.load(folder + 'test_set_365_10000' + io_extender + '.npy', allow_pickle=True))[:, -5:]
 
@@ -91,11 +91,11 @@ for io_extender in io_extenders:
 
         final_shap_values = explainer.shap_values(X_test_df.values)
         shap.summary_plot(final_shap_values, X_test_df.values, max_display=10, feature_names=headers, show=False)
-        plt.savefig(folder + 'shap_summary_plot_ci_' + objective + '.png')
+        plt.savefig(folder + 'shap_summary_plot_ci_' + objective + '_'+ io_extender + '.png')
         plt.close()
 
         shap.summary_plot(final_shap_values, X_test_df.values, max_display=10, feature_names=headers, plot_type='bar', show=False)
-        plt.savefig(folder + 'shap_summary_plot_bar_' + objective + '.png')
+        plt.savefig(folder + 'shap_summary_plot_bar_' + objective + '_'+ io_extender + '.png')
         plt.close()
 
     if io_extender == '0':
@@ -154,8 +154,9 @@ for io_extender in io_extenders:
     whole_dataset_labels  = whole_dataset_pickle[:, -5:]
     whole_dataset_ids  = whole_dataset_pickle[:, 0:2]
 
-    all_data = np.concatenate((whole_dataset_ids, whole_dataset[:, 1:], whole_dataset_labels), axis=1)
-    data = pd.DataFrame(data=all_data)
-    data.columns = headers_all
-    data.to_csv('all_data_' + limit + '_' + extender + '.csv')
+    if io_extender=='0':
+        all_data = np.concatenate((whole_dataset_ids, whole_dataset[:, 1:], whole_dataset_labels), axis=1)
+        data = pd.DataFrame(data=all_data)
+        data.columns = headers_all
+        data.to_csv('all_data_' + limit + '_' + extender + '.csv')
 

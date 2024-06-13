@@ -2,12 +2,12 @@ global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb_prog_365_10000_io/test_set_365_10000.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_100001.csv", clear 
 rocreg progression_outcome prog_preds
 
 rocreg mortality_outcome mort_preds
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb_prog_365_10000_io/test_set_365_10000.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_100001.csv", clear 
 
 tab progression_outcome
 tab mortality_outcome

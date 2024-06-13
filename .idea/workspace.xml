@@ -5,8 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
+      <change afterPath="$PROJECT_DIR$/all_data_365_10000.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/all_x_static_365_100000.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/all_x_static_365_100001.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100000.pickle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100000_test.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100000_train.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100001.pickle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100001_test.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_100001_train.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100000.pickle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100000_test.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100000_train.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100001.pickle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100001_test.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_100001_train.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_0.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_0.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_0.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_0.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/test_set_365_100000.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/test_set_365_100001.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/whole_dataset_365_100000.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/whole_dataset_365_100001.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/y_pred_365_100000_xgb_mort_0.74_365_100000.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/y_pred_365_100000_xgb_prog_0.70_365_100000.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/y_pred_365_100001_xgb_mort_0.66_365_100001.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clf_xgb/y_pred_365_100001_xgb_prog_0.66_365_100001.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test_set_365_10000.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/~stata_test_set_io_only.do.stswp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NSCLC.py" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_in_auc.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_in_auc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stata_test_set_io_only.do" beforeDir="false" afterPath="$PROJECT_DIR$/stata_test_set_io_only.do" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +70,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.NSCLC">
+  <component name="RunManager" selected="Python.read_in_auc">
     <configuration name="NSCLC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -188,13 +222,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00065" summary="shapley fixed bug">
-      <created>1715565201753</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1715565201753</updated>
     </task>
     <task id="LOCAL-00066" summary="stata updates">
       <created>1715571667006</created>
@@ -532,7 +559,14 @@
       <option name="project" value="LOCAL" />
       <updated>1718241597624</updated>
     </task>
-    <option name="localTasksCounter" value="114" />
+    <task id="LOCAL-00114" summary="manuscript updates">
+      <created>1718244386076</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1718244386077</updated>
+    </task>
+    <option name="localTasksCounter" value="115" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
