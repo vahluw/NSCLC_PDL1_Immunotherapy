@@ -5,8 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
-      <change afterPath="$PROJECT_DIR$/all_x_static_365_100001.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/whole_dataset_365_100001.npy" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NSCLC.py" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC.py" afterDir="false" />
     </list>
@@ -190,13 +188,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00064" summary="shapley fixed bug">
-      <created>1715559945666</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1715559945666</updated>
     </task>
     <task id="LOCAL-00065" summary="shapley fixed bug">
       <created>1715565201753</created>
@@ -534,7 +525,14 @@
       <option name="project" value="LOCAL" />
       <updated>1718230974260</updated>
     </task>
-    <option name="localTasksCounter" value="113" />
+    <task id="LOCAL-00113" summary="manuscript updates">
+      <created>1718241597624</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1718241597624</updated>
+    </task>
+    <option name="localTasksCounter" value="114" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -587,6 +585,11 @@
           <url>file://$PROJECT_DIR$/read_in_auc.py</url>
           <line>71</line>
           <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/NSCLC.py</url>
+          <line>1573</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

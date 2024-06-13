@@ -1569,6 +1569,8 @@ if __name__ == '__main__':
         X_static_df_final = X_static_df_final.drop(headers_to_drop, axis=1)
         y = y_new
 
+    y = np.array(y)
+    y = y.astype('float32')
     X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
     print(X_static_df_final.shape)
     X_static = X_static_df_final.values
