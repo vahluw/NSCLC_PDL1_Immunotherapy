@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
-      <change afterPath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_0.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_1.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_0.png" beforeDir="false" afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_0.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_1.png" beforeDir="false" afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_0.png" beforeDir="false" afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_0.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_1.png" beforeDir="false" afterPath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_in_auc.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_in_auc.py" afterDir="false" />
-    </list>
+    <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -194,13 +185,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714010461084</updated>
-    </task>
-    <task id="LOCAL-00067" summary="stata updates">
-      <created>1715574118962</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1715574118962</updated>
     </task>
     <task id="LOCAL-00068" summary="stata updates">
       <created>1715599380949</created>
@@ -538,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1718280866225</updated>
     </task>
-    <option name="localTasksCounter" value="116" />
+    <task id="LOCAL-00116" summary="manuscript updates">
+      <created>1718289114334</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1718289114335</updated>
+    </task>
+    <option name="localTasksCounter" value="117" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

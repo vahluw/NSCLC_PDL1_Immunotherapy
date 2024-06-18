@@ -6,7 +6,12 @@ import delimited final_ates, clear
 matrix data = (-0.0235371, -0.0342324, 0.0208469, 0.0985585, -0.0013313, 0.0081028, 0.0311615, 0.0005488, -0.1044369,-0.0864428, -0.2307692 \ 0.0383542, 0.0331886,0.0490791,0.0377369,0.0509651,0.0478314,0.0560242,0.03431,0.0216731,0.0519238, 0.0641405)
 set scheme cleanplots
 coefplot (mat(data)), se(2) vertical xlab(1 "1%" 2 "10%" 3 "20%" 4 "30%" 5 "40%" 6 "50%" 7 "60%" 8 "70%" 9 "80%" 10 "90%" 11 "100%") title("Average Treatment Effect Based on PD-L1 Threshold")
+graph export "pdl1_psm_threshold.png", replace
 
+matrix data = (-0.0262348, -0.0290284, -0.0273703, -0.036005, -0.0239999, -0.0283898, -0.0437642, -0.0530949, -0.0663532, -0.0853753, -0.0939475\ 0.0151082, 0.016903, 0.0179088, 0.0189017, 0.0198551, 0.0203688, 0.0221938, 0.0240966, 0.0271149, 0.031685, 0.0567087)
+set scheme cleanplots
+coefplot (mat(data)), se(2) vertical xlab(1 "1%" 2 "10%" 3 "20%" 4 "30%" 5 "40%" 6 "50%" 7 "60%" 8 "70%" 9 "80%" 10 "90%" 11 "100%") title("Average Treatment Effect Based on PD-L1 Threshold")
+graph export "pdl1_no_psm_threshold.png", replace
 
 **************************** 
 /* Propensity score matching with all DAG factors --> but this time, kaplan-meier curves show days from treatment initiation until progression*/
@@ -269,9 +274,6 @@ teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.69
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.79, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.89, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm_no_pdl1) if pdl1>=0.99, vce(robust) caliper(0.2)
-
-
-
 
 teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>0, vce(robust) caliper(0.2)
 teffects psmatch (progression_outcome) (therapy_type $psm) if pdl1>=0.09, vce(robust) caliper(0.2)
