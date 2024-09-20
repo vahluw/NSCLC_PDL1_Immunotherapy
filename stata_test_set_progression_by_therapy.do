@@ -1,3 +1,5 @@
+
+
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
 cd "${path}"
 set scheme cleanplots
@@ -9,6 +11,12 @@ rocreg mortality_outcome mort_preds
 
 import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 
 
+global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/"
+cd "${path}"
+set scheme cleanplots
+
+
+global psm "i.braf i.ecog0 i.ecog1 i.ecog2 i.ecog3 i.ecog4 i.nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis i.white i.asian i.black i.otherrace i.hispanicrace i.patientassistanceprogram i.othergovernmentalinsurance i.medicare i.selfpay i.medicaid i.commercialhealthplan i.noinsurance i.academicmedicalcenter i.brainmetastases i.antiinfectiveusepriortotreatment i.glucocorticoidusepriortotreatmen pdl1"
 tab progression_outcome
 tab mortality_outcome
 sum ageatdiagnosis
@@ -260,6 +268,111 @@ replace new_var =1 if progression_outcome==0
 rocreg new_var pdl1 if pdl1reported ==1 & therapy_type ==1
 gen new_pred = 1-prog_pred
 rocreg new_var new_pred  if pdl1reported ==1 & therapy_type ==1
+
+
+//teffects ipwra (progression_outcome) (therapy_type $psm), vce(robust) 
+
+
+pstest ${psm}, raw treated(therapy_type)
+
+psmatch2 therapy_type  ${psm} , outcome(progression_outcome) caliper(0.2) n(1) noreplacement 
+count 
+
+sum _weight
+drop if _weight==.
+drop if _support==0
+count if _treated==1
+count if _treated==0
+
+pstest ${psm} , treated(therapy_type)
+
+
+capture stset progression_days, failure(progression_outcome)
+stci, by(therapy_type) rmean
+stcox therapy_type
+sts graph, by(therapy_type) title("Progression-Free Survival for Test-Set Patients") subtitle("by Therapy Type")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "First-Line Chemotherapy" 2 "First-Line IO MOnotherapy"))
+graph export "psm_test_set_therapy.png", replace
+
+
+capture stset progression_days, failure(progression_outcome)
+stci, by(progressed_prediction) rmean
+stcox hazard_prediction
+sts graph, by(progressed_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+graph export "psm_test_set_risk.png", replace
+
+capture stset progression_days, failure(progression_outcome)
+stci, by(stratum) rmean 
+stcox progressed_prediction 
+sts graph, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Unreponsive" 2 "IO Monotherapy Unresponsive" 3 "Chemotherapy Reponsive" 4 "IO Monotherapy Responsive")) 
+graph export "io_chemo_test_set_predictive_post_psm.png", replace
+
+replace stratum = 0 if (therapy_type==0 & progressed_prediction==0)
+replace stratum = 1 if (therapy_type==1 & progressed_prediction==0) 
+replace stratum = 2 if (therapy_type==0 & progressed_prediction==1)
+replace stratum = 3 if (therapy_type==1 & progressed_prediction==1)
+
+
+
+capture stset progression_days if therapy_type==0, failure(progression_outcome)
+stci if therapy_type==0, by(hazard_prediction) rmean 
+stcox hazard_prediction  if therapy_type==0
+sts graph if therapy_type==0, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Reponsive" 2  "Chemotherapy Unresponsive")) 
+graph export "chemo_test_set_predictive_post_psm.png", replace
+
+capture stset progression_days if therapy_type==1, failure(progression_outcome)
+stci if therapy_type==1, by(hazard_prediction) rmean 
+stcox hazard_prediction  if therapy_type==1
+sts graph if therapy_type==1, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Responsive" 2  "IO Monotherapy Unresponsive")) 
+graph export "io_test_set_predictive_post_psm.png", replace
+
+count if therapy_type==0 & progressed_prediction==0
+count if therapy_type==0 & progressed_prediction==1
+count if therapy_type==1 & progressed_prediction==0
+count if therapy_type==1 & progressed_prediction==1
+
+gen mort_threshold = 0.468 //0.5
+gen mortality_prediction = (mort_pred>=mort_threshold)
+
+replace hazard_prediction = 0 if mortality_prediction == 1
+replace hazard_prediction = 1 if mortality_prediction == 0
+
+
+capture stset mortality_days if therapy_type==0, failure(mortality_outcome)
+stci if therapy_type==0, by(hazard_prediction) rmean 
+stcox hazard_prediction  if therapy_type==0
+sts graph if therapy_type==0, by(hazard_prediction) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Reponsive" 2  "Chemotherapy Unresponsive")) 
+graph export "chemo_test_set_predictive_post_psm_overall.png", replace
+
+capture stset mortality_days if therapy_type==1, failure(mortality_outcome)
+stci if therapy_type==1, by(hazard_prediction) rmean 
+stcox hazard_prediction  if therapy_type==1
+sts graph if therapy_type==1, by(hazard_prediction) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "IO Monotherapy Responsive" 2  "IO Monotherapy Unresponsive")) 
+graph export "io_test_set_predictive_post_psm_overall.png", replace
+
+replace stratum = 0 if (therapy_type==0 & mortality_prediction==0)
+replace stratum = 1 if (therapy_type==1 & mortality_prediction==0) 
+replace stratum = 2 if (therapy_type==0 & mortality_prediction==1)
+replace stratum = 3 if (therapy_type==1 & mortality_prediction==1)
+
+
+capture stset mortality_days, failure(mortality_outcome)
+stci, by(stratum) rmean 
+stcox mortality_prediction 
+sts graph, by(stratum) title("Overall Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Responsive" 2 "IO Monotherapy Responsive" 3 "Chemotherapy Unresponsive" 4 "IO Monotherapy Unresponsive")) 
+graph export "io_chemo_test_set_predictive_post_psm_overall.png", replace
+
+replace stratum = 0 if (therapy_type==0 & progressed_prediction==0)
+replace stratum = 1 if (therapy_type==1 & progressed_prediction==0) 
+replace stratum = 2 if (therapy_type==0 & progressed_prediction==1)
+replace stratum = 3 if (therapy_type==1 & progressed_prediction==1)
+
+
+capture stset progression_days, failure(progression_outcome)
+stci, by(stratum) rmean 
+stcox progressed_prediction 
+sts graph, by(stratum) title("Progression-Free Survival for Test-Set Patients") subtitle("by ML-Derived Prediction; Post Propensity Score Matching")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Chemotherapy Responsive" 2 "IO Monotherapy Responsive" 3 "Chemotherapy Unresponsive" 4 "IO Monotherapy Unresponsive")) 
+graph export "io_chemo_test_set_predictive_post_psm_prog.png", replace
+
 
 // Mortality
 import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/test_set_365_10000.csv", clear 

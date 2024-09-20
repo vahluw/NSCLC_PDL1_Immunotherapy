@@ -23,6 +23,8 @@ graph export "pdl1_no_psm_threshold.png", replace
 
 global indiv_covar_logistic "io_mono firstlinechemotherapy nonfirstlinechemotherapy otherfirstlinetherapy firstlinecombinationtherapy   antibrafdrug trkinhibitor metinhibitor carboplatinmonotherapy cisplatinmonotherapy    i.antialkdrug#i.alk i.antiegfrdrug#i.egfr i.antiros1drug#i.ros1 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1 hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance stage0 stage1 stage2 stage3 stage4 occult neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen clinicalstudydrugused bevacizumabused threeormorechemotherapydrugs"
 
+global therapy_type_decider "braf kras ecog0 ecog1 ecog2 ecog3 ecog4 squamouscellcarcinoma nonsquamouscellcarcinoma pdl1  hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance  neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool interstitiallungdisease diabetes bonemetastases brainmetastases othercnsmetastases digestivesystemmetastases adrenalmetastases unspecifiedmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen"
+
 global psm "i.braf i.ecog0 i.ecog1 i.ecog2 i.ecog3 i.ecog4 i.nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis i.white i.asian i.black i.otherrace i.hispanicrace i.patientassistanceprogram i.othergovernmentalinsurance i.medicare i.selfpay i.medicaid i.commercialhealthplan i.noinsurance i.academicmedicalcenter i.brainmetastases i.antiinfectiveusepriortotreatment i.glucocorticoidusepriortotreatmen pdl1 pdl1reported"
 
 global psm_no_pdl1  "i.braf i.ecog0 i.ecog1 i.ecog2 i.ecog3 i.ecog4 i.nonsquamouscellcarcinoma  diagnosisyear ageatdiagnosis i.white i.asian i.black i.otherrace i.hispanicrace i.patientassistanceprogram i.othergovernmentalinsurance i.medicare i.selfpay i.medicaid i.commercialhealthplan i.noinsurance i.academicmedicalcenter i.brainmetastases i.antiinfectiveusepriortotreatment i.glucocorticoidusepriortotreatmen"
@@ -45,7 +47,7 @@ set scheme cleanplots
 
 
 
-import delimited "all_data_365_10000.csv", clear 
+import delimited "nsclc_51000.csv", clear 
 
 tab progression_outcome
 tab mortality_outcome
@@ -169,6 +171,27 @@ gen io_mono = (therapy_type==1)
 
 
 replace censor_time  = time_limit if censor_time == 0 | censor_time > time_limit
+
+gen new_therapy_type = 0
+replace new_therapy_type = 1 if io_mono==1
+replace new_therapy_type= 2 if antialkdrug == 1 | antiegfrdrug == 1 | antibrafdrug == 1 | antiros1drug == 1 | trkinhibitor == 1 | metinhibitor == 1 | firstlinecombinationtherapy==1
+
+logistic new_therapy_type  $therapy_type_decider if new_therapy_type <=1 & alk==0 & egfr == 0 & ros1==0
+
+logistic new_therapy_type  $therapy_type_decider if new_therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 & pdl1>=0.5
+
+logistic new_therapy_type  $therapy_type_decider if new_therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 & diagnosisyear<=6
+
+logistic new_therapy_type  $therapy_type_decider if new_therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 & pdl1reported==1
+
+logistic therapy_type  $therapy_type_decider if therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 & pdl1>=0.5
+
+logistic therapy_type  $therapy_type_decider if therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 &  pdl1reported ==1
+
+logistic therapy_type  $therapy_type_decider if therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 
+
+logistic therapy_type  $therapy_type_decider if therapy_type <=1 & alk==0 & egfr == 0 & ros1==0 
+
 
 logistic io_mono $indiv_covar_psm_prog_outcome pdl1 pdl1reported if pdl1reported ==1 & therapy_type<=1 & alk==0 & egfr==0 & ros1==0
 logistic io_mono $indiv_covar_psm_prog_outcome pdl1 pdl1reported if pdl1>=0.5 & therapy_type<=1 & alk==0 & egfr==0 & ros1==0
