@@ -904,6 +904,7 @@ if __name__ == '__main__':
                     if therapy_name in approved_first_line_immunomonotherapies:
                         io_mono = 1
                         io_mono_used = first_line_mono_io_to_index[therapy_name]
+                        print(io_mono_used)
                     elif therapy_name == "carboplatin":
                         carboplatin_only = 1
                     elif therapy_name == "cisplatin":
