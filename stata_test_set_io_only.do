@@ -2,19 +2,18 @@ global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/"
 cd "${path}"
 set scheme cleanplots
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_11.csv", clear 
 rocreg progression_outcome prog_preds
 
 rocreg mortality_outcome mort_preds
 
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_11.csv", clear 
 
 tab progression_outcome
 tab mortality_outcome
 sum ageatdiagnosis
 tab male
-tab female
-count if male==0 & female==0
+count if male==0 
 tab white
 tab black
 tab asian
@@ -57,11 +56,11 @@ tab egfr
 tab kras
 tab diabetes
 gen kappa = 0.9
-replace kappa = 0.7 if female==1
+replace kappa = 0.7 if male==0
 gen alpha = -0.302
-replace alpha = -0.241 if female ==1 
+replace alpha = -0.241 if male==0
 gen extra_term = 1
-replace extra_term = 1.012 if female==1
+replace extra_term = 1.012 if male==0
 gen estimated_gfr = 142 * min(creatinine/kappa, 1)^(alpha) * max(creatinine/kappa, 1)^(-1.2) * 0.9938^(ageatdiagnosis) * extra_term
 
 count if connectivetissuedisease ==1 | scleroderma == 1 | lupus== 1 | rheumatoidarthritis==1
@@ -92,7 +91,7 @@ tab liver_bool
 
 
 
-gen threshold = 0.686
+gen threshold = 0.686 // need to fix
 gen time_limit = 365
 
 
@@ -156,9 +155,9 @@ rocreg new_var new_pred  if pdl1reported ==1
 global path "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/"
 cd "${path}"
 set scheme cleanplots
-import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_1.csv", clear 
+import delimited "/Users/vahluw/Documents/NSCLC_PDL1_Immunotherapy/clf_xgb/test_set_365_10000_11.csv", clear 
 
-gen threshold = 0.132
+gen threshold = 0.132 // need to fix
 gen time_limit = 365
 
 
