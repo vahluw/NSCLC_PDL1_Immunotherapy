@@ -15,8 +15,7 @@ for io_extender in io_extenders:
 
     if io_extender == '0':
 
-        headers =  ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
-                       "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
+        headers =   ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",  "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
                              "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",  "HER2/ERBB2+", "MET+",
                         "RET+", "NTRK1+", "NTRK2+", "NTRK3+",
                              "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
@@ -30,7 +29,7 @@ for io_extender in io_extenders:
                         "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
                        "Adrenal Metastases", "Unspecified Metastases", "SDH", "Glucocorticoid Use Prior to Treatment",
                          "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
-                  "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                   "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                             'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
                        'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
                        'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
@@ -47,18 +46,21 @@ for io_extender in io_extenders:
                        "First-Line Atezolizumab Monotherapy",  "First-Line Durvalumab Monotherapy", "First-Line Ipilimumab/Nivolumab"]
 
     else:
-        headers = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance",
-                       "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
-                       "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
-                       "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+        headers =  ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",  "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
+                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",  "HER2/ERBB2+", "MET+",
+                        "RET+", "NTRK1+", "NTRK2+", "NTRK3+",
+                             "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
+                       "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
+                       "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
+                       "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
+                       "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
                        "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                         "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
                         "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
                         "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
                        "Adrenal Metastases", "Unspecified Metastases", "SDH", "Glucocorticoid Use Prior to Treatment",
                          "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
-                    "Female", "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                   "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                             'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
                        'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
                        'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',

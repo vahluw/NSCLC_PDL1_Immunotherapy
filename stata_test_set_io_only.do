@@ -113,7 +113,7 @@ replace mortality_days = time_limit if mortality_days == 0 | mortality_days >tim
 capture stset progression_days, failure(progression_outcome)
 stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "test_set_ml_mutations_xgb_prog_io.png", replace
 
 
@@ -136,13 +136,13 @@ graph export "io_test_set_pdl1_prog_io.png", replace
 capture stset progression_days if  pdl1>=0.5, failure(progression_outcome)
 stci if  pdl1>=0.5, by(hazard_prediction) rmean 
 stcox hazard_prediction if  pdl1>=0.5
-sts graph if  pdl1>=0.5, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph if  pdl1>=0.5, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "io_only_test_set_pdl1_over50_xgb_prog_io.png", replace
 
 capture stset progression_days if  pdl1<0.5 & pdl1reported==1, failure(progression_outcome)
 stci if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) rmean 
 stcox hazard_prediction if  pdl1<0.5 & pdl1reported==1
-sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Progression-Free Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "io_only_test_set_pdl1_under50_xgb_prog_io.png", replace
 
 
@@ -176,7 +176,7 @@ replace mortality_days = time_limit if mortality_days == 0 | mortality_days >tim
 capture stset mortality_days, failure(mortality_outcome)
 stci, by(hazard_prediction) rmean
 stcox hazard_prediction
-sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "test_set_ml_mutations_xgb_mort_io.png", replace
 
 
@@ -198,13 +198,13 @@ graph export "io_test_set_pdl1_mort_io.png", replace
 capture stset mortality_days if  pdl1>=0.5, failure(mortality_outcome)
 stci if  pdl1>=0.5, by(hazard_prediction) rmean 
 stcox hazard_prediction if  pdl1>=0.5
-sts graph if  pdl1>=0.5, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph if  pdl1>=0.5, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 >= 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "io_only_test_set_pdl1_over50_xgb_mort_io.png", replace
 
 capture stset mortality_days if  pdl1<0.5 & pdl1reported==1, failure(mortality_outcome)
 stci if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) rmean 
 stcox hazard_prediction if  pdl1<0.5 & pdl1reported==1
-sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "Low-Risk" 2 "High-Risk"))
+sts graph if  pdl1<0.5 & pdl1reported==1, by(hazard_prediction) title("Overall Survival for Test-Set Patients on IO Monotherapy") subtitle("by ML-Derived Risk, PD-L1 < 50% Only")  xtitle ("Survival Time From Treatment Initiation (Days)") ytitle ("Proportion at Risk") legend(order(1 "High-Risk" 2 "Low-Risk"))
 graph export "io_only_test_set_pdl1_under50_xgb_mort_io.png", replace
 
 gen new_var = 0

@@ -5,7 +5,9 @@
 global therapy_type_decider "sdh1 sdh2 sdh3 sdh4 sdh5 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma squamouscellcarcinoma pdl1  hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female  daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance  neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool diabetes bonemetastases brainmetastases digestivesystemmetastases adrenalmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen over_threshold"
 
 
-global therapy_type_decider_categorical "i.sdh braf kras i.ecog i.histology i.race  hispanicethnicity  diagnosisyear ageatdiagnosis i.gender    medicare  medicaid commercialhealthplan otherinsurance noinsurance  i.smokinghistory  academicmedicalcenter   bonemetastases brainmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen "
+global therapy_type_decider_categorical "i.sdh braf kras i.ecog i.histology i.race  hispanicethnicity  diagnosisyear age_dichotomized i.gender    medicare  medicaid commercialhealthplan otherinsurance noinsurance  i.smokinghistory  academicmedicalcenter   bonemetastases brainmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen "
+
+global therapy_type_no_mut "i.sdh i.ecog i.histology i.race  hispanicethnicity  diagnosisyear age_dichotomized i.gender    medicare  medicaid commercialhealthplan otherinsurance noinsurance  i.smokinghistory  academicmedicalcenter   bonemetastases brainmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen "
 
 global therapy_type_no_pdl1 "i.sdh braf kras i.ecog i.histology i.race   hispanicethnicity  diagnosisyear ageatdiagnosis i.gender  daysfromadvanceddiagnosistotreat   medicare selfpay medicaid commercialhealthplan otherinsurance uninsured  i.smokinghistory  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool diabetes bonemetastases brainmetastases digestivesystemmetastases adrenalmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen "
 
@@ -108,7 +110,7 @@ gen insured = 0
 replace insured = 1 if patientassistanceprogram == 1 | othergovernmentalinsurance == 1 | medicare == 1 | medicaid == 1 | commercialhealthplan ==1
 
 
-replace ageatdiagnosis = log(ageatdiagnosis)
+//replace ageatdiagnosis = log(ageatdiagnosis)
 
 gen therapy_type = 1
 replace therapy_type = 0 if firstlinechemotherapy == 1
@@ -150,6 +152,7 @@ replace histology = 0 if squamouscellcarcinoma == 1
 replace histology = 1 if nonsquamouscellcarcinoma == 1
 
 binscatter therapy_type  pdl1 if therapy_type  <=1, ytitle ("Proportion Receiving IO Monotherapy") xtitle("PD-L1 Expression")
+tab therapy_type diagnosisyear
 reg therapy_type  pdl1 if therapy_type  <=1
 
 drop if ecog0 == 0 & ecog1==0 & ecog2==0 & ecog3 == 0 & ecog4==0
@@ -193,21 +196,62 @@ replace uninsured = 1 if (noinsurance == 1 | selfpay==1) & medicare == 0 & medic
 gen otherinsurance = 0
 replace otherinsurance = 1 if  (patientassistanceprogram== 1 | othergovernmentalinsurance== 1)
 
+drop if pdl1 < 0.01
+drop if diagnosisyear < 2018
+gen age_dichotomized = 0
+replace age_dichotomized = 1 if ageatdiagnosis>=75
+binscatter therapy_type  diagnosisyear if therapy_type  <=1, ytitle ("Proportion Receiving IO Monotherapy") xtitle("Year of Advanced Diagnosis")
+binscatter therapy_type  diagnosisyear if therapy_type  <=1 & pdl1>=0.5, ytitle ("Proportion Receiving IO Monotherapy") xtitle("Year of Advanced Diagnosis")
+binscatter therapy_type  diagnosisyear if therapy_type  <=1, by (over_threshold) ytitle ("Proportion Receiving IO Monotherapy") xtitle("Year of Advanced Diagnosis") legend(order(1 "1% <= PD-L1 < 50%" 2 "PD-L1 >= 50%"))
 
 
-logistic therapy_type  $therapy_type_decider_categorical
+logistic therapy_type  $therapy_type_decider_categorical pdl1
 logistic therapy_type  $therapy_type_decider_categorical if pdl1>=0.5
-logistic therapy_type  $therapy_type_decider_categorical if pdl1<0.5 & pdl1>0
-logistic therapy_type  $therapy_type_decider_categorical if pdl1==0.0 & pdl1reported==1
+logistic therapy_type  $therapy_type_decider_categorical if pdl1<0.5 
+
+logistic therapy_type  $therapy_type_no_mut if pdl1>=0.5
+logistic therapy_type  $therapy_type_no_mut if pdl1<0.5 
+
+count if pdl1>=0.5
+sum ageatdiagnosis if pdl1>=0.5
+tab sdh if pdl1>=0.5
+tab gender if pdl1>=0.5
+tab race if pdl1>=0.5
+tab hispanicethnicity if pdl1>=0.5
+tab ecog if pdl1>=0.5
+tab academicmedicalcenter if pdl1>=0.5
+tab smokinghistory if pdl1>=0.5
+tab histology if pdl1>=0.5
+tab medicare if pdl1>=0.5
+tab medicaid if pdl1>=0.5
+tab commercialhealthplan if pdl1>=0.5
+tab otherinsurance if pdl1>=0.5
+tab noinsurance if pdl1>=0.5
+tab therapy_type if pdl1>=0.5
+tab braf if pdl1>=0.5
+tab kras if pdl1>=0.5
+tab antiinfectiveusepriortotreatment if pdl1>=0.5
+tab glucocorticoidusepriortotreatmen if pdl1>=0.5
 
 
-  /**/
-  global psm "sdh1 sdh2 sdh3 sdh4 sdh5 braf kras ecog0 ecog1 ecog2 ecog3 ecog4 nonsquamouscellcarcinoma squamouscellcarcinoma pdl1  hispanicethnicity  diagnosisyear ageatdiagnosis white asian black otherrace hispanicrace male female  daysfromadvanceddiagnosistotreat patientassistanceprogram othergovernmentalinsurance medicare selfpay medicaid commercialhealthplan noinsurance  neversmoker  academicmedicalcenter kidney_bool liver_bool connective_tissue_bool diabetes bonemetastases brainmetastases digestivesystemmetastases adrenalmetastases   antiinfectiveusepriortotreatment glucocorticoidusepriortotreatmen over_threshold"
-biprobit (progressionoutcome = therapy_type  ) (therapy_type = i.over_threshold  $psm)
-biprobit (progressionoutcome = therapy_type  $psm) (therapy_type = i.over_threshold  $psm)
-ivregress 2sls progressionoutcome (therapy_type = over_threshold $psm) if pdl1reported ==1 & therapy_type <=1
-ivregress 2sls progressionoutcome (therapy_type = over_threshold $psm) if pdl1reported ==1 & therapy_type >=1
-ivregress 2sls progressionoutcome (therapy_type = over_threshold $psm) if pdl1reported ==1 & therapy_type >=1 & pdl1>=0.29 & pdl1<=0.61
-ivregress 2sls progressionoutcome (therapy_type = over_threshold $psm) if pdl1reported ==1 & therapy_type !=1
 
-
+count if pdl1 < 0.5
+sum ageatdiagnosis if pdl1 < 0.5
+tab sdh if pdl1 < 0.5
+tab gender if pdl1 < 0.5
+tab race if pdl1 < 0.5
+tab hispanicethnicity if pdl1 < 0.5
+tab ecog if pdl1 < 0.5
+tab academicmedicalcenter if pdl1 < 0.5
+tab smokinghistory if pdl1 < 0.5
+tab histology if pdl1 < 0.5
+tab medicare if pdl1 < 0.5
+tab medicaid if pdl1 < 0.5
+tab commercialhealthplan if pdl1 < 0.5
+tab otherinsurance if pdl1 < 0.5
+tab noinsurance if pdl1 < 0.5
+tab therapy_type if pdl1 < 0.5
+tab braf if pdl1 < 0.5
+tab kras if pdl1 < 0.5
+tab antiinfectiveusepriortotreatment if pdl1 < 0.5
+tab glucocorticoidusepriortotreatmen if pdl1 < 0.5

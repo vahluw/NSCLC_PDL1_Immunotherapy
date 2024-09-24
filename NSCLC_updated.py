@@ -248,14 +248,15 @@ def get_final_cancer_vec(cancer_vec_patient):
     return arr
 
 def perform_imputation_df(df, columns, type='mode'):
+    print(df)
     # Replace 0 values with NaN in the specified columns
     df[columns] = df[columns].replace(0, pd.NA)
 
     if type == 'mode':
         # Perform mode imputation
-        return df.fillna(df.mode().iloc[0], inplace=True)
+        return df.fillna(df.mode().iloc[0])
     else:
-        return df.fillna(df.mean(), inplace=True)
+        return df.fillna(df.mean())
 
 def get_final_therapy_type(therapy_info_patient):
     [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
@@ -431,6 +432,7 @@ if __name__ == '__main__':
     use_imputation = int(sys.argv[10])
     include_dynamic = int(sys.argv[11])
     io_only = int(sys.argv[12])
+    exclude_mutations = int(sys.argv[13])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -846,6 +848,10 @@ if __name__ == '__main__':
                 all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
         else:
             all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0, 0, 0, 0, 0, 0, 0]
+
+        if exclude_mutations == 1:
+            if all_biomarkers[0] == 1 or all_biomarkers[1] == 1 or all_biomarkers[3] == 1:
+                continue
 
         temp_combo_list = []
         combo_therapy = 0
@@ -1551,8 +1557,13 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
+    if exclude_mutations:
+        file_name_extender += "1"
+    else:
+        file_name_extender += "0"
+
     entire_dataset = np.array(entire_dataset)
-    np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
+    np.save('whole_dataset_pre_impute_' + file_name_extender + '.npy', entire_dataset)
 
     del entire_dataset
 
@@ -1565,15 +1576,16 @@ if __name__ == '__main__':
 
     if use_imputation:
         df1 = pd.DataFrame(data=X_static)
-        df2 = perform_imputation_df(df1, [3, 4, 6, 16, 17, 18, 19], type='mode')
-        X_static_df = perform_imputation_df(df2, [75, 76, 77, 78, 79], type='mean')
-        X_static_df.to_csv('train_impute.csv')
-        X_static = X_static_df.values
+        #df2 = perform_imputation_df(df1, [3, 4, 6, 15, 16, 17, 18, 19], type='mode')
+        X_static_df = perform_imputation_df(df1, [75, 76, 77, 78, 79], type='mean')
+        X_static_df.to_csv('impute' + file_name_extender + '.csv')
+    else:
+        X_static_df = pd.DataFrame(data=X_static)
 
-    X_static_df = pd.DataFrame(data=X_static)
     print(X_static_df.shape)
-    X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True, dtype=int)
 
+    X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True, dtype=int)
+    X_static_df_final.to_csv('try.csv')
     X_static_df_final.columns = headers_all
 
     io_conditions = ['First-Line Nivolumab Monotherapy',
