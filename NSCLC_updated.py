@@ -14,8 +14,14 @@ from sklearn.metrics import roc_auc_score, accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils import class_weight
 from sklearn.utils import shuffle
+import keras
+from keras import layers, callbacks, regularizers
 
-no_progression_date = date(2024, 5, 30)
+
+df = pd.DataFrame(data=(np.load('whole_dataset_pre_impute_365_2015_1100001.npy')))
+df = df.sort_values(by=[84])
+
+no_progression_date = date(2024, 12, 31)
 dir_path1 = '/origdata/Parikh_Flatirons/updateJuly2024/'
 dir_path2 = '/Users/vahluw/Downloads/NSCLC_Updated/'
 
@@ -33,7 +39,7 @@ headers_all =  ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic E
                         "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
                        "Adrenal Metastases", "Unspecified Metastases", "SDH", "Glucocorticoid Use Prior to Treatment",
                          "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
-                   "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                    "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                             'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
                        'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
                        'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
@@ -110,7 +116,7 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
                         "Bone Metastases", "Brain Metastases", "Other CNS Metastases", "Digestive System Metastases",
                        "Adrenal Metastases", "Unspecified Metastases", "SDH", "Glucocorticoid Use Prior to Treatment",
                          "Anti-Infective Use Prior to Treatment", "Albumin", "Creatinine", "Bilirubin", "AST", "ALT",
-                   "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
+                    "Male", "White", "Asian", "Other Race", "Hispanic Race", "Black", 'WI Residence', 'MN Residence', 'IN Residence',
                             'VA Residence', 'PR Residence', 'DC Residence', 'UT Residence', 'ID Residence', 'MO Residence',
                        'CT Residence', 'NH Residence', 'CA Residence', 'AR Residence', 'NV Residence', 'DE Residence',
                        'MD Residence', 'TN Residence', 'AL Residence', 'NJ Residence', 'PA Residence', 'NY Residence',
@@ -178,6 +184,7 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     plt.close()
     '''
     return
+
 def convert_date_to_iso(orig_date):
     ind1 = orig_date.find('/')
     mo = int(orig_date[:ind1])
@@ -185,7 +192,7 @@ def convert_date_to_iso(orig_date):
     ind2 = next.find('/')
     day = int(next[:ind2])
     year = int(next[ind2+1:])
-    if year < 24:
+    if year <= 24:
         year = 2000 + year
     else:
         year = 1900 + year
@@ -196,23 +203,22 @@ def convert_date_to_iso(orig_date):
 def update_last_note(patientID, dictionary, new_date):
     if isinstance(new_date, str):
         try:
-            new_date = date.fromisoformat(new_date)
+            modified_date = date.fromisoformat(new_date)
         except:
-            new_date = convert_date_to_iso(new_date)
+            modified_date = convert_date_to_iso(new_date)
+    else:
+        modified_date = new_date
 
-    if new_date == no_progression_date:
-        return dictionary
-
-    if new_date > no_progression_date:
+    if modified_date >= no_progression_date:
         return dictionary
 
     if patientID not in dictionary:
-        dictionary[patientID] = new_date
+        dictionary[patientID] = modified_date
         return dictionary
     else:
         orig = dictionary[patientID]
-        if new_date > orig:
-            dictionary[patientID] = new_date
+        if modified_date > orig:
+            dictionary[patientID] = modified_date
         return dictionary
 
 
@@ -433,13 +439,14 @@ if __name__ == '__main__':
     include_dynamic = int(sys.argv[11])
     io_only = int(sys.argv[12])
     exclude_mutations = int(sys.argv[13])
+    starting_year = int(sys.argv[14])
     patientID_to_censor_date = dict()
 
     if dir == 0:
         dir_path = dir_path1
     else:
         dir_path = dir_path2
-    print(len(headers_to_drop))
+
     diagnosis_dates = pd.read_csv(dir_path+'Enhanced_AdvancedNSCLC.csv')
     patientID_to_advanced_diagnosis_date = dict()
 
@@ -477,7 +484,7 @@ if __name__ == '__main__':
     race_to_number = {'': 0, _nan: 0, 'nan': 0, float("nan"): 0, 'White': 1,  'Asian': 2, 'Other Race': 3, 'Hispanic or Latino': 4,
                       'Black or African American': 5}
     histologies = {'Squamous cell carcinoma': 1, 'Non-squamous cell carcinoma': 2, 'NSCLC histology NOS': 0}
-    gender_to_number = {'': 1, float("nan"): 0, 'F': 1, 'M': 2}
+    gender_to_number = {'': 0, float("nan"): 0, 'F': 1, 'M': 2}
     stages = {'Group stage is not reported': 0, 'Stage 0': 1, 'Stage I': 2, 'Stage IA': 3, 'Stage IA1': 4,
               'Stage IA2': 5, 'Stage IA3': 6, 'Stage IB': 7, 'Stage II': 8, 'Stage IIA': 9, 'Stage IIB': 10,
               'Stage III': 11, 'Stage IIIA': 12, 'Stage IIIB': 13, 'Stage IIIC': 14, 'Stage IV': 15, 'Stage IVA': 16,
@@ -602,16 +609,6 @@ if __name__ == '__main__':
             ethnicity_ = 0
 
         patientIDs_demos[patientID] = np.array([birth_year, gender_, race_, ethnicity_, state_])
-
-    print("Num Physician IDs: ", len(physician_ID_to_number))
-    print("Num Practice IDs: ", len(practiceID_to_number))
-    print("Smoking statuses: ", smoking_statuses)
-    print("Practice types: ", practice_type_to_number)
-    print("Race set: ", race_to_number)
-    print("Histology set: ", histologies)
-    print("Gender set: ", gender_to_number)
-    print("Stages set: ", stages)
-    print("States set: ", state_to_number)
 
     ECOGs = pd.read_csv(dir_path + 'BaselineECOG.csv')
     patientID_to_ecog = dict()
@@ -882,12 +879,15 @@ if __name__ == '__main__':
             # Loop through all therapies this patient was prescribed
             for i in range(len(all_therapies_used)):
                 (therapy_line, therapy_name, end_date, start_date) = all_therapies_used[i]
+                patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, start_date)
+                patientID_to_censor_date = update_last_note(patientID, patientID_to_censor_date, end_date)
 
                 # Only examine first-line therapies that had at least one dose given after advanced diagnosis date
                 if therapy_line == 1:
                     some_other_immuno = 0
                     patientID_to_first_line_start_date[patientID] = start_date
                     if start_date < diagnosis_date:
+                        continue
                         patientID_to_advanced_diagnosis_date[patientID] = start_date
                         days_from_dx_to_tx = 0
                     else:
@@ -904,7 +904,6 @@ if __name__ == '__main__':
                     if therapy_name in approved_first_line_immunomonotherapies:
                         io_mono = 1
                         io_mono_used = first_line_mono_io_to_index[therapy_name]
-                        print(io_mono_used)
                     elif therapy_name == "carboplatin":
                         carboplatin_only = 1
                     elif therapy_name == "cisplatin":
@@ -1420,9 +1419,11 @@ if __name__ == '__main__':
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
 
+        if last_final_recorded_date_records == no_progression_date or last_final_recorded_date_records > no_progression_date:
+            print("here lol")
+
         if use_dx == 0:
-            tx_start_date = patientID_to_first_line_start_date[patientID]
-            starting_date = tx_start_date
+            starting_date = patientID_to_first_line_start_date[patientID]
         else:
             starting_date = adv_dx_date
 
@@ -1444,6 +1445,14 @@ if __name__ == '__main__':
 
         if patientID in mortality_dict:
             mortality_days = (mortality_dict[patientID]-starting_date).days
+            if mortality_days < 30:
+                final_date = patientID_to_censor_date[patientID]
+                temp_mortality_days = (mortality_dict[patientID]-starting_date).days
+                if temp_mortality_days < 0:
+                    mortality_days = 1
+                else:
+                    mortality_days = temp_mortality_days
+
         else:
             mortality_days = 0
 
@@ -1455,14 +1464,19 @@ if __name__ == '__main__':
             abx_use = 1
         if patientID in patientID_to_albumin:
             albumin = patientID_to_albumin[patientID][1]
+            print(albumin)
         if patientID in patientID_to_creatinine:
             creatinine = patientID_to_creatinine[patientID][1]
+            print(creatinine)
         if patientID in patientID_to_AST:
             ast = patientID_to_AST[patientID][1]
+            print(ast)
         if patientID in patientID_to_ALT:
             alt = patientID_to_ALT[patientID][1]
+            print(alt)
         if patientID in patientID_to_bilirubin:
             bilirubin = patientID_to_bilirubin[patientID][1]
+            print(bilirubin)
 
         imp_predictors = [steroid_use, abx_use, albumin, creatinine, bilirubin, ast, alt]
         x_demos_no_diagnoses = np.concatenate((vals, imp_predictors))
@@ -1488,6 +1502,25 @@ if __name__ == '__main__':
             final_vals = np.concatenate((x_static_final, dynamic_data))
         else:
             final_vals = x_static_final
+
+        if time_to_censor < 0:
+            print(time_to_censor)
+            print(patientID)
+            print(last_final_recorded_date_records)
+            print(starting_date)
+            print('\n')
+
+        if time_to_censor < 0:
+            continue
+
+        prog_bool = int(min_time >= progression > 0)
+        mort_bool = int(min_time >= mortality_days > 0)
+
+        if time_to_censor < min_time and (prog_bool == 0): #or mort_bool == 0):
+            continue
+
+        if final_vals[2] < starting_year:
+            continue
 
         X_static.append(final_vals)
         y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
@@ -1526,7 +1559,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(min_time) + '_'
+    file_name_extender = str(min_time) + '_' + str(starting_year) + '_'
 
     if exclude_diagnoses:
         file_name_extender += "1"
@@ -1586,8 +1619,6 @@ if __name__ == '__main__':
     print(X_static_df.shape)
 
     X_static_df_final = pd.get_dummies(X_static_df, columns=categorical_indices, drop_first=True, dtype=int)
-    X_static_df_final.to_csv('try.csv')
-    X_static_df_final.columns = headers_all
 
     io_conditions = ['First-Line Nivolumab Monotherapy',
                      'First-Line Pembrolizumab Monotherapy',
@@ -1595,12 +1626,24 @@ if __name__ == '__main__':
                      'First-Line Atezolizumab Monotherapy',
                      'First-Line Durvalumab Monotherapy',
                      'First-Line Ipilimumab/Nivolumab']
+
+    if starting_year >= 2015:
+        headers_all.pop()
+        io_conditions.pop()
+        headers_to_drop.pop()
+
+    X_static_df_final.columns = headers_all
+
     if io_only:
         condition = (X_static_df_final[io_conditions] < 1).all(axis=1)
         y_new = []
         count = 0
         for index, row in X_static_df_final.iterrows():
-            sum_ = row['First-Line Nivolumab Monotherapy'] + row['First-Line Pembrolizumab Monotherapy'] + row['First-Line Cemiplimab Monotherapy'] + \
+            if starting_year >= 2015:
+                sum_ = row['First-Line Nivolumab Monotherapy'] + row['First-Line Pembrolizumab Monotherapy'] + row['First-Line Cemiplimab Monotherapy'] + \
+                row['First-Line Atezolizumab Monotherapy'] +  row['First-Line Durvalumab Monotherapy']
+            else:
+                sum_ = row['First-Line Nivolumab Monotherapy'] + row['First-Line Pembrolizumab Monotherapy'] + row['First-Line Cemiplimab Monotherapy'] + \
                 row['First-Line Atezolizumab Monotherapy'] +  row['First-Line Durvalumab Monotherapy'] +  row['First-Line Ipilimumab/Nivolumab']
             if sum_ > 0:
                 y_new.append(y[count])
@@ -1650,38 +1693,100 @@ if __name__ == '__main__':
 
         train_class_weights = class_weight.compute_class_weight(class_weight='balanced',
                                 classes=np.unique(y_train_final.flatten()), y=y_train_final.flatten())
-        print(train_class_weights)
+
         train_class_weights = {i:train_class_weights[i] for i in range(2)}
-        print(train_class_weights)
+
+
+        '''
+        Now to train the neural network
+        '''
+        if use_dl == 1:
+            X_train_static_mean = X_static_train.mean()
+            X_train_static_std = X_static_train.std()
+            X_test_static_mean = X_static_test.mean()
+            X_test_static_std = X_static_test.std()
+            X_static_train = (X_static_train - X_train_static_mean)/X_train_static_std
+            X_static_test = (X_static_test - X_test_static_mean)/X_test_static_std
+            df_lol = pd.DataFrame(data=X_static_train)
+            df_lol.to_csv('lol2.csv')
+
+            EPOCHS = 500
+            BATCH_SIZE = 64
+
+            csv_logger = callbacks.CSVLogger('training_log_' + file_name_extender + '.csv', separator=',', append=False)
+            opt = keras.optimizers.Adam(learning_rate=lr)
+            checkpoint_name = 'FFN_model_weights_' + file_name_extender + '.keras'
+            model_checkpoint = callbacks.ModelCheckpoint(checkpoint_name, monitor='val_auroc', mode ='max', save_best_only=True)
+
+            learning_units = 1
+
+            stat = layers.Input(shape=(X_static_train.shape[1], ))
+            stat = layers.Flatten()(stat)
+            stat_dynam_drop = layers.Dropout(0.2)(stat)
+            x6 = layers.Dense(3000, activation='relu')(stat_dynam_drop)
+            x7 = layers.BatchNormalization()(x6)
+            x8 = layers.Dropout(0.2)(x7)
+            out = layers.Dense(learning_units, activation='sigmoid',kernel_regularizer=regularizers.L1L2(l1=0.01, l2=0.01))(x8)
+            model = keras.Model(inputs= stat, outputs=out)
+            early_stopping = callbacks.EarlyStopping(monitor='val_auroc', mode='max', patience=10)
+            reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_auroc', mode='max', factor=0.9, patience=3, min_lr=0.00001)
+            model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[keras.metrics.AUC(name='auroc', curve='ROC'),
+                        keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall'),
+                        keras.metrics.FalseNegatives(), keras.metrics.FalsePositives(), keras.metrics.TruePositives(),
+                        keras.metrics.TrueNegatives(),'binary_accuracy','mse', 'mae'])
+            print(model.summary())
+
+            history = model.fit(X_static_train, y_train_final, batch_size=BATCH_SIZE, epochs=EPOCHS,
+                                callbacks=[model_checkpoint, early_stopping, reduce_lr, csv_logger], validation_split=0.13,
+                                verbose=1, class_weight=train_class_weights)
+
+            model.load_weights(checkpoint_name)
+            y_pred = model.predict(X_static_test)
+            np.save('y_pred_ml_static_' + file_name_extender + '.npy', y_pred)
+            print("Performing testing: ")
+            res = model.evaluate(X_static_test, y_test_final, verbose=2)
 
         ####XGBoost
-        xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0, booster='gbtree', base_score=0.5)
-
-        if include_dynamic==1 and exclude_diagnoses==0:
-            params_xgb = {
-                    'min_child_weight': [10],
-                    'gamma': [1],
-                    'max_depth': [5, None],
-                    'learning_rate': [0.05],
-                    'n_estimators': [400],
-                    'lambda': [0, 1],
-                    'alpha': [0, 1],
-                    'scale_pos_weight': [0.5, 1, 1.8, 2.0]
-            }
-
         else:
-            params_xgb = {
+            xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0, booster='gbtree', base_score=0.5)
+
+            if include_dynamic==1 and exclude_diagnoses==0:
+                params_xgb = {
+                        'min_child_weight': [10],
+                        'gamma': [1],
+                        'max_depth': [5, None],
+                        'learning_rate': [0.05],
+                        'n_estimators': [400],
+                        'lambda': [0, 1],
+                        'alpha': [0, 1],
+                        'scale_pos_weight': [0.5, 1, 1.8, 2.0]
+                }
+
+
+            else:
+                params_xgb = {
                     'min_child_weight': [1, 5, 10],
                     'gamma': [0.5, 1, 0],
                     'max_depth': [5, 10, None],
-                    'learning_rate': [0.05, 0.1],
+                    'learning_rate': [0.01, 0.05, 0.1, 0.2],
                     'n_estimators': [300, 400],
                     'lambda': [0, 1],
                     'alpha': [0, 1],
                     'subsample': [0.5, 1],
-                    'scale_pos_weight': [0.5, 1, 1.8, 2.0]
+                    'scale_pos_weight': [0.5, 1, 1.5, 1.8, 2.0]
             }
 
-        classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
-        perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
-                            file_name_extender,  type='xgb' + final_extender, weights=classes_weights, io_only=io_only)
+            classes_weights = class_weight.compute_sample_weight(class_weight='balanced', y=y_train_final)
+
+            print("Train class weights: ", train_class_weights)
+            print("Sample weights: ", classes_weights)
+
+            # Note: now you're just doing progression, not mortality
+
+            perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                                file_name_extender,  type='xgb' + final_extender, weights=classes_weights, io_only=io_only)
+
+            file_name_extender += '_unweighted'
+
+            perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
+                                file_name_extender,  type='xgb' + final_extender, weights=None, io_only=io_only)
