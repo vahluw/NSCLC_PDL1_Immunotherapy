@@ -5,149 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
-      <change afterPath="$PROJECT_DIR$/NSCLC_revert_pca.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/all_data_365_01.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/all_data_365_11.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/all_x_static_365_all_1000101.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/all_x_static_365_all_1000111.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_mort_365_all_1000111.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_mort_365_all_1000111_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_mort_365_all_1000111_train.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_prog_365_all_1000111.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_prog_365_all_1000111_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_gb_prog_365_all_1000111_train.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_mort_365_all_1000101.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_mort_365_all_1000101_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_mort_365_all_1000101_train.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_prog_365_all_1000101.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_prog_365_all_1000101_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/clf_xgb_prog_365_all_1000101_train.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/impute365_all_1000101.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/impute365_all_1000111.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_bar_mort_01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_bar_mort_11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_bar_prog_01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_bar_prog_11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/test_set_365_all_10000_01.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/test_set_365_all_10000_11.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/test_set_365_all_1000101.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/test_set_365_all_1000111.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/whole_dataset_365_all_1000101.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/whole_dataset_365_all_1000111.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/y_pred_365_all_1000101_xgb_mort_0.718_365_all_1000101.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/y_pred_365_all_1000101_xgb_prog_0.701_365_all_1000101.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/y_pred_365_all_1000111_gb_mort_0.667_365_all_1000111.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/NSCLC_updated/y_pred_365_all_1000111_gb_prog_0.664_365_all_1000111.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/read_in_auc_final.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/old_code/read_in_auc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NSCLC_revert3_updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_revert3_updated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NSCLC_updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_updated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/all_x_static_365_1000100.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/all_x_static_365_1000101.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/all_x_static_365_1000110.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/all_x_static_365_1000111.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000100.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000100_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000100_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000101.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000101_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000101_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000110.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000110_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000110_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000111.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000111_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_mort_365_1000111_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000100.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000100_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000100_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000101.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000101_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000101_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000110.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000110_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000110_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000111.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000111_test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/clf_xgb_prog_365_1000111_train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_only_test_set_pdl1_over50_xgb_mort_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_only_test_set_pdl1_over50_xgb_prog_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_only_test_set_pdl1_under50_xgb_mort_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_only_test_set_pdl1_under50_xgb_prog_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_test_set_pdl1_mort_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/io_test_set_pdl1_prog_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_00.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_01.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_mort_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_00.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_01.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_bar_prog_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_00.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_01.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_mort_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_00.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_01.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/shap_summary_plot_ci_prog_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_00.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_01.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_10.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_10000_11.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_1000100.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_1000110.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_365_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_ml_mutations_xgb_mort_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/test_set_ml_mutations_xgb_prog_io.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/whole_dataset_pre_impute_365_1000100.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/whole_dataset_pre_impute_365_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/whole_dataset_pre_impute_365_1000110.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/whole_dataset_pre_impute_365_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000100_xgb_mort_0.75_365_1000100.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000100_xgb_prog_0.70_365_1000100.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000101_xgb_mort_0.72_365_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000101_xgb_prog_0.70_365_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000110_xgb_mort_0.67_365_1000110.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000110_xgb_prog_0.65_365_1000110.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000111_xgb_mort_0.66_365_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb/y_pred_365_1000111_xgb_prog_0.64_365_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/all_x_static_365_revert3_sdh_1000101_365_.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/all_x_static_365_revert3_sdh_1000111_365_.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000101_365_.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000101_365__test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000101_365__train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000111_365_.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000111_365__test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_mort_365_revert3_sdh_1000111_365__train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000101_365_.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000101_365__test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000101_365__train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000111_365_.pickle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000111_365__test.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/clf_xgb_prog_365_revert3_sdh_1000111_365__train.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/impute365_revert3_sdh_1000101_365_.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/impute365_revert3_sdh_1000111_365_.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/shap_summary_plot_bar_mort_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/shap_summary_plot_bar_prog_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/shap_summary_plot_ci_mort_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/shap_summary_plot_ci_prog_11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/test_set_365_revert3_sdh_10000_11.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/test_set_365_revert3_sdh_1000101_365_.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/test_set_365_revert3_sdh_1000111_365_.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/whole_dataset_365_revert3_sdh_1000101_365_.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/whole_dataset_365_revert3_sdh_1000111_365_.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/y_pred_mort_0.67_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/y_pred_mort_0.72_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/y_pred_prog_0.71_1000101.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clf_xgb_revert3/y_pred_prog_0.71_1000111.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_in_auc_revert3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_in_auc.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_in_auc_final.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_in_auc_final.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +45,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.read_in_auc_revert3">
+  <component name="RunManager" selected="Python.read_in_auc_final">
     <configuration name="NSCLC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -309,27 +170,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="create_new_csv" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="NSCLC_PDL1_Immunotherapy" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/create_new_csv.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="read_in_auc" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -343,6 +183,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/read_in_auc.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="read_in_auc_final" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="NSCLC_PDL1_Immunotherapy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/read_in_auc_final.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -374,11 +235,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.read_in_auc_final" />
         <item itemvalue="Python.read_in_auc_revert3" />
         <item itemvalue="Python.NSCLC_revert_pca" />
         <item itemvalue="Python.NSCLC_updated" />
         <item itemvalue="Python.read_in_auc" />
-        <item itemvalue="Python.create_new_csv" />
       </list>
     </recent_temporary>
   </component>
@@ -776,20 +637,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="manuscript updates" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/NSCLC_updated.py</url>
-          <line>23</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/NSCLC_revert_pca.py</url>
-          <line>20</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="df" />

@@ -25,7 +25,7 @@ for exclude_extender in exclude_extenders:
                        "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                        "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
                        "Three Or More Chemotherapy Drugs",  "Carboplatin Monotherapy", "Cisplatin Monotherapy", "Pembrolizumab Used",
-                       "TRK Inhibitor", "MET Inhibitor", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                       "TRK Inhibitor", "MET Inhibitor", "Treatment Interval", "Therapy Year",
                        "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                         "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
                         "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
@@ -60,7 +60,7 @@ for exclude_extender in exclude_extenders:
 
             headers = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ",
                        "Self-Pay", "Patient Assistance Program",  "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported", "Days from Advanced Diagnosis to Treatment", "Therapy Year",
+                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported", "Treatment Interval", "Therapy Year",
                        "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                         "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
                         "Scleroderma", "Lupus", "Rheumatoid Arthritis", "Interstitial Lung Disease", "Diabetes",
