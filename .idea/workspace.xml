@@ -5,10 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1129b225-95f6-4307-babb-a0bfe7667ff6" name="Changes" comment="manuscript updates">
-      <change afterPath="$PROJECT_DIR$/old_code/read_in_auc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/NSCLC_ablate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/abalate_roc.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/ablate_df.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/ablate_roc.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/test_set_365_ablation_1000101.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/y_pred_365_ablation_1000101_xgb_mort_0.593_365_ablation_1000101.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ablate/y_pred_365_ablation_1000101_xgb_prog_0.681_365_ablation_1000101.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hist_start_dx.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_in_auc.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/NSCLC.py" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_01.png" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_01.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_11.png" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_mort_11.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_01.png" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_01.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_11.png" beforeDir="false" afterPath="$PROJECT_DIR$/NSCLC_updated/shap_summary_plot_ci_prog_11.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/old_code/NSCLC_updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/old_code/NSCLC_updated.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/read_in_auc_final.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_in_auc_final.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stata_test_set_io_only.do" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +58,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.read_in_auc_final">
+  <component name="RunManager" selected="Python.NSCLC">
     <configuration name="NSCLC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -69,7 +82,7 @@
         </ENTRIES>
       </EXTENSION>
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC.py" />
-      <option name="PARAMETERS" value="365 0.005 1 1 365 0 1 0 0 0 0 1" />
+      <option name="PARAMETERS" value="365 0.005 1 1 365 0 1 0 0 1 0 0 1 2000" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -139,7 +152,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="NSCLC_updated" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="NSCLC_updated (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -147,22 +160,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/old_code" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="net.ashald.envfile">
-        <option name="IS_ENABLED" value="false" />
-        <option name="IS_SUBST" value="false" />
-        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
-        <option name="IS_IGNORE_MISSING_FILES" value="false" />
-        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
-        <ENTRIES>
-          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        </ENTRIES>
-      </EXTENSION>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NSCLC_updated.py" />
-      <option name="PARAMETERS" value="365 0.005 1 1 365 1 1 0 0 0 0 1 1 2015" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/old_code/NSCLC_updated.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -170,7 +173,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="read_in_auc" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="ablate_df" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="NSCLC_PDL1_Immunotherapy" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -178,11 +181,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ablate" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/read_in_auc.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ablate/ablate_df.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -235,11 +238,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.ablate_df" />
+        <item itemvalue="Python.NSCLC_updated (1)" />
         <item itemvalue="Python.read_in_auc_final" />
         <item itemvalue="Python.read_in_auc_revert3" />
         <item itemvalue="Python.NSCLC_revert_pca" />
-        <item itemvalue="Python.NSCLC_updated" />
-        <item itemvalue="Python.read_in_auc" />
       </list>
     </recent_temporary>
   </component>
@@ -637,6 +640,15 @@
     <option name="LAST_COMMIT_MESSAGE" value="manuscript updates" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ablate/ablate_df.py</url>
+          <line>92</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="df" />

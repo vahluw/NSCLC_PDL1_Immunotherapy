@@ -21,7 +21,8 @@ dir_path2 = '/Users/vahluw/Downloads/NSCLC_Updated/'
 
 headers_all =  ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
                        "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                             "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported", "HER2/ERBB2+", "MET+",
+                        "RET+", "NTRK1+", "NTRK2+", "NTRK3+", "NTRK_Other",
                              "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
                        "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                        "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
@@ -67,7 +68,8 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
     if io_only == 0:
         headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance", "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
                        "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                              "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported", "HER2/ERBB2+", "MET+",
+                        "RET+", "NTRK1+", "NTRK2+", "NTRK3+", "NTRK_Other",
                              "First-Line Combination Therapy", "First-Line Chemotherapy", "Non-First-Line Chemotherapy",
                        "Anti-ALK Drug", "Anti-EGFR Drug","Anti-BRAF Drug", "Anti-ROS1 Drug", "Anti-RAS Drug",
                        "Other First-Line Therapy", "Clinical Study Drug Used", "Bevacizumab Used",
@@ -98,7 +100,8 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
         headers_long = ["Diagnosis Year", "Age At Diagnosis", "Birth Year",  "Hispanic Ethnicity", "No Insurance",
                        "Worker's Compensation ", "Self-Pay", "Patient Assistance Program",
                        "Other Governmental Insurance", "Medicare", "Medicaid", "Commercial Health Plan",
-                             "ALK+", "EGFR+", "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported",
+                              "KRAS+",  "ROS1+", "BRAF+", "PDL1", "PDL1 Reported", "HER2/ERBB2+", "MET+",
+                        "RET+", "NTRK1+", "NTRK2+", "NTRK3+", "NTRK_Other",
                        "Days from Advanced Diagnosis to Treatment", "Therapy Year",
                        "Renal Failure", "Chronic Kidney Disease", "General Renal Disease",
                         "Prior Kidney Transplant", "Cirrhosis", "Hepatitis", "Prior Liver Transplant", "Connective Tissue Disease",
@@ -159,20 +162,6 @@ def perform_grid_search(param_grid, clf, X_train, y_train, X_test, y_test, filen
 
     X_train_df.to_csv("clf_" + type + '_' + filename_extender + "_train.csv")
     X_test_df.to_csv("clf_" + type + '_' + filename_extender + "_test.csv")
-
-
-    '''
-    explainer = shap.TreeExplainer(best_estimator, X_train_df)
-
-    final_shap_values = explainer.shap_values(X_test_df.values)
-    shap.summary_plot(final_shap_values, X_test_df.values, max_display=20, feature_names=headers_long, show=False)
-    plt.savefig('shap_summary_plot_ci_' + type + '_' + filename_extender + '.png')
-    plt.close()
-
-    shap.summary_plot(final_shap_values, X_test_df.values, max_display=20, feature_names=headers_long, plot_type='bar', show=False)
-    plt.savefig('shap_summary_plot_bar_' + type + '_' + filename_extender + '.png')
-    plt.close()
-    '''
     return
 
 def convert_date_to_iso(orig_date):
@@ -210,38 +199,6 @@ def update_last_note(patientID, dictionary, new_date):
             dictionary[patientID] = modified_date
         return dictionary
 
-
-def get_progression_bool(rads, path, clinical):
-    if rads == 'Yes':
-        progression_positive_rads = 1
-    else:
-        progression_positive_rads = 0
-
-    if path == 'Yes':
-        progression_positive_path = 1
-    else:
-        progression_positive_path = 0
-
-    if clinical == 'Yes':
-        progression_positive_clinical = 1
-    else:
-        progression_positive_clinical = 0
-
-    return (progression_positive_rads or progression_positive_path or progression_positive_clinical)
-
-
-def get_final_cancer_vec(cancer_vec_patient):
-    arr = np.zeros((18 + 2 + 2))
-    [hist_, stage_, smoking_] = cancer_vec_patient
-    if hist_ <=2:
-        arr[hist_-1] = 1
-    if stage_ > 0:
-        arr[2 + stage_ - 1] = 1
-    if smoking_ > 0:
-        arr[2 + 18 + smoking_ - 1] = 1
-
-    return arr
-
 def perform_imputation_df(df, columns, type='mode'):
     print(df)
     # Replace 0 values with NaN in the specified columns
@@ -252,41 +209,6 @@ def perform_imputation_df(df, columns, type='mode'):
         return df.fillna(df.mode().iloc[0])
     else:
         return df.fillna(df.mean())
-
-def get_final_therapy_type(therapy_info_patient):
-    [io_mono, combo_therapy, chemo, egfr_drug, alk_drug, ros1_drug, braf_drug, ras_drug,
-        secondary_chemo_drug, other_first_line_therapy, no_first_line_therapy_reported, io_mono_used] = therapy_info_patient
-    arr = np.zeros((14,))
-    if io_mono == 1 and io_mono_used == 1:
-        arr[1] = 1
-        return arr
-    elif io_mono == 1 and io_mono_used == 2:
-        arr[2] = 1
-    elif io_mono == 1 and io_mono_used == 3:
-        arr[3] = 1
-    elif io_mono == 1 and io_mono_used == 4:
-        arr[4] = 1
-    elif io_mono == 1 and io_mono_used>=5:
-        arr[5] = 1
-    elif chemo == 1:
-        arr[6] = 1
-    elif combo_therapy == 1:
-        arr[7] = 1
-    elif egfr_drug == 1:
-        arr[8] = 1
-    elif alk_drug == 1:
-        arr[9] = 1
-    elif ros1_drug == 1:
-        arr[10] = 1
-    elif braf_drug == 1:
-        arr[11] = 1
-    elif ras_drug == 1:
-        arr[12] = 1
-    elif secondary_chemo_drug == 1:
-        arr[13] = 1
-    elif other_first_line_therapy == 1:
-        arr[0] = 1
-    return arr
 
 def find_key_by_value(dictionary, value):
     for key, val in dictionary.items():
@@ -429,6 +351,7 @@ if __name__ == '__main__':
     io_only = int(sys.argv[12])
     exclude_mutations = int(sys.argv[13])
     starting_year = int(sys.argv[14])
+    ablation = int(sys.argv[15])
     patientID_to_censor_date = dict()
 
     if dir == 0:
@@ -627,10 +550,10 @@ if __name__ == '__main__':
             del patient_ID
             continue
 
-        if dir_path == dir_path2:
+        try:
             start_date = convert_date_to_iso(start_date)
             end_date = convert_date_to_iso(end_date)
-        else:
+        except:
             start_date = date.fromisoformat(start_date)
             end_date = date.fromisoformat(end_date)
 
@@ -653,7 +576,8 @@ if __name__ == '__main__':
 
         if patient_ID not in patientID_to_biomarkers:
             patientID_to_biomarkers[patient_ID] = {"ALK": 0, "EGFR": 0, "KRAS": 0, "ROS1": 0, "BRAF": 0, "PDL1": -1.0,
-                                                   "PDL1_given": 0}
+                                                   "PDL1_given": 0, "HER2/ERBB2": 0, "MET": 0, "RET": 0, "NTRK1": 0,
+                                                   "NTRK2": 0, "NTRK3": 0, "NTRK_other": 0}
 
         if biomarker_name == "PDL1":
             test_type = biomarkers["TestType"][i]
@@ -686,6 +610,16 @@ if __name__ == '__main__':
         else:
             if ("rearrangement present" in biomarker_status or "positive" in biomarker_status or
                     "Rearrangement present" in biomarker_status):
+
+                if "NTRK1" in biomarker_name:
+                    biomarker_name = "NTRK1"
+                elif "NTRK2" in biomarker_name:
+                    biomarker_name = "NTRK2"
+                elif "NTRK3" in biomarker_name:
+                    biomarker_name = "NTRK3"
+                elif "NTRK" in biomarker_name:
+                    biomarker_name = "NTRK_other"
+
                 patientID_to_biomarkers[patient_ID][biomarker_name] = 1
             else:
                 continue
@@ -714,10 +648,10 @@ if __name__ == '__main__':
         if isinstance(diagnosis_date, float) or '1800' in diagnosis_date or '1899' in diagnosis_date:
             continue
 
-        if dir_path == dir_path2:
-            dx_date_temp = time.strptime(diagnosis_date, "%m/%d/%y")
-        else:
+        try:
             dx_date_temp = time.strptime(diagnosis_date, "%Y-%m-%d")
+        except:
+            dx_date_temp = time.strptime(diagnosis_date, "%m/%d/%y")
 
         dx_date = date(dx_date_temp.tm_year, dx_date_temp.tm_mon, dx_date_temp.tm_mday)
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID_current]
@@ -827,14 +761,18 @@ if __name__ == '__main__':
 
         all_biomarkers = []
         if patientID in patientID_to_biomarkers:
-            for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given"]:
+
+            for biomarker in ["ALK", "EGFR", "KRAS", "ROS1", "BRAF", "PDL1", "PDL1_given", "HER2/ERBB2", "MET", "RET", "NTRK1",
+                                                   "NTRK2", "NTRK3", "NTRK_other"]:
                 all_biomarkers.append(patientID_to_biomarkers[patientID][biomarker])
         else:
-            all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0]
+            all_biomarkers = [0, 0, 0, 0, 0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         if exclude_mutations == 1:
             if all_biomarkers[0] == 1 or all_biomarkers[1] == 1:
                 continue
+
+        all_biomarkers = all_biomarkers[2:]
 
         temp_combo_list = []
         combo_therapy = 0
@@ -873,8 +811,7 @@ if __name__ == '__main__':
 
                     if start_date < diagnosis_date:
                         continue
-                        patientID_to_advanced_diagnosis_date[patientID] = start_date
-                        days_from_dx_to_tx = 0
+
                     else:
                         days_from_dx_to_tx = (start_date-diagnosis_date).days
                     if "clinical study drug" in therapy_name:
@@ -1010,10 +947,11 @@ if __name__ == '__main__':
                 continue
 
             try:
-                if dir_path == dir_path2:
-                    labs_date_temp = time.strptime(date_, "%m/%d/%y")
-                else:
+
+                try:
                     labs_date_temp = time.strptime(date_, "%Y-%m-%d")
+                except:
+                    labs_date_temp = time.strptime(date_, "%m/%d/%y")
 
                 labs_date = date(labs_date_temp.tm_year, labs_date_temp.tm_mon, labs_date_temp.tm_mday)
                 adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
@@ -1111,14 +1049,10 @@ if __name__ == '__main__':
             if not isinstance(date_, str):
                 continue
 
-            if dir_path == dir_path2:
-                try:
-                    meds_date_temp = time.strptime(date_, "%m/%d/%y")
-                except:
-                    meds_date_temp = time.strptime(date_, "%Y-%m-%d")
-
-            else:
+            try:
                 meds_date_temp = time.strptime(date_, "%Y-%m-%d")
+            except:
+                meds_date_temp = time.strptime(date_, "%m/%d/%y")
 
             drug_name = drug_name.lower()
             meds_date = date(meds_date_temp.tm_year, meds_date_temp.tm_mon, meds_date_temp.tm_mday)
@@ -1163,13 +1097,10 @@ if __name__ == '__main__':
 
             test_name = test_name.lower()
 
-            if dir_path == dir_path2:
-                try:
-                    vitals_date_temp = time.strptime(date_, "%m/%d/%y")
-                except:
-                    vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
-            else:
+            try:
                 vitals_date_temp = time.strptime(date_, "%Y-%m-%d")
+            except:
+                vitals_date_temp = time.strptime(date_, "%m/%d/%y")
 
             vitals_date = date(vitals_date_temp.tm_year, vitals_date_temp.tm_mon, vitals_date_temp.tm_mday)
             adv_dx_date = patientID_to_advanced_diagnosis_date[patient_ID]
@@ -1327,7 +1258,7 @@ if __name__ == '__main__':
 
             dynamic_variables[patientID] = dynamic_holder_all_dates_single_patient_array
 
-
+    patientID_to_mixed_pseudo_date = dict()
     progressions = pd.read_csv(dir_path+'Enhanced_AdvNSCLC_Progression.csv')
     pd1s_progression = []
     pd1s_progression_dict = dict()
@@ -1336,9 +1267,9 @@ if __name__ == '__main__':
 
     for i in range(len(progressions['PatientID'])):
 
-        patient_ID, rads, path, clinical, mixed, progression_date = progressions['PatientID'][i], progressions['IsRadiographicEvidence'][i],\
+        patient_ID, rads, path, clinical, mixed, pseudo, progression_date = progressions['PatientID'][i], progressions['IsRadiographicEvidence'][i],\
                                 progressions['IsPathologicEvidence'][i], progressions['IsClinicalAssessmentOnly'][i], \
-                                progressions['IsMixedResponse'][i], progressions['ProgressionDate'][i]
+                                progressions['IsMixedResponse'][i], progressions['IsPseudoprogressionMentioned'][i], progressions['ProgressionDate'][i]
         diagnosis_date = patientID_to_advanced_diagnosis_date[patient_ID]
 
         try:
@@ -1362,6 +1293,24 @@ if __name__ == '__main__':
             progression_positive_clinical = 1
         else:
             progression_positive_clinical = 0
+
+        if mixed == 'Yes':
+            progression_positive_mixed = 1
+        else:
+            progression_positive_mixed = 0
+
+        if pseudo == 'Yes':
+            progression_positive_pseudo = 1
+        else:
+            progression_positive_pseudo = 0
+
+        if progression_positive_mixed == 1 or progression_positive_pseudo == 1:
+            if patient_ID not in patientID_to_mixed_pseudo_date:
+                patientID_to_mixed_pseudo_date[patient_ID] = progression_date_final
+            else:
+                curr_date = patientID_to_mixed_pseudo_date[patient_ID]
+                if curr_date > progression_date_final:
+                    patientID_to_mixed_pseudo_date[patient_ID] = progression_date_final
 
         patientID_to_censor_date = update_last_note(patient_ID, patientID_to_censor_date, progression_date_final)
         progression_bool = (progression_positive_rads or progression_positive_path or progression_positive_clinical)
@@ -1408,6 +1357,11 @@ if __name__ == '__main__':
         except:
             mortality_dict[patientID] = patientID_to_censor_date[patientID]
 
+    patientIDs_used = []
+
+    num_pts_mixed_pseudo_to_full_prog = 0
+    mixed_pseudo_full_prog_array = []
+
     for patientID, vals in static_variables.items():
         adv_dx_date = patientID_to_advanced_diagnosis_date[patientID]
 
@@ -1417,7 +1371,8 @@ if __name__ == '__main__':
         last_final_recorded_date_records = patientID_to_censor_date[patientID]
 
         if last_final_recorded_date_records == no_progression_date or last_final_recorded_date_records > no_progression_date:
-            print("here lol")
+            print("Error")
+
         if use_dx == 0:
             tx_start_date = patientID_to_first_line_start_date[patientID]
             starting_date = tx_start_date
@@ -1495,17 +1450,38 @@ if __name__ == '__main__':
         if time_to_censor < 0:
             continue
 
+        if patientID in patientID_to_progression and patientID in patientID_to_mixed_pseudo_date:
+            mixed_pseudo_date = patientID_to_mixed_pseudo_date[patientID]
+            if progression_date < no_progression_date and mixed_pseudo_date < progression_date:
+                num_pts_mixed_pseudo_to_full_prog += 1
+                interval = (progression_date-mixed_pseudo_date).days
+                mixed_pseudo_full_prog_array.append([patientID, interval])
+
         prog_bool = int(min_time >= progression > 0)
         mort_bool = int(min_time >= mortality_days > 0)
 
-        if time_to_censor < min_time and (prog_bool == 0): #or mort_bool == 0):
+        if time_to_censor < min_time and (prog_bool == 0):
             continue
 
+        patientIDs_used.append(patientID)
         X_static.append(final_vals)
         y.append([int(min_time >= progression > 0), progression, mortality_days, int(min_time >= mortality_days > 0), time_to_censor])
 
     num_patients = len(X_static)
     print(num_patients)
+
+    final_arr_df = pd.DataFrame(data=mixed_pseudo_full_prog_array)
+    final_arr_df.to_csv('mixed_pseudo.csv')
+
+    adv_dx_first_line_arr = []
+    for patientID in patientID_to_first_line_start_date:
+        start_date = patientID_to_first_line_start_date[patientID]
+        if patientID in patientID_to_advanced_diagnosis_date and patientID in patientIDs_used:
+            dx_date = patientID_to_advanced_diagnosis_date[patientID]
+            adv_dx_first_line_arr.append([patientID, start_date.month, start_date.year, dx_date.month, dx_date.year])
+
+    final_arr_df = pd.DataFrame(data=adv_dx_first_line_arr)
+    final_arr_df.to_csv('dist_first_line.csv')
 
     del patientID_to_advanced_diagnosis_date
     del patientID_to_therapyline
@@ -1538,7 +1514,7 @@ if __name__ == '__main__':
         entire_dataset.append(entire_row)
         del entire_row
 
-    file_name_extender = str(min_time) + '_all_'
+    file_name_extender = str(min_time) + '_all_final_'
 
     if exclude_diagnoses:
         file_name_extender += "1"
@@ -1575,7 +1551,6 @@ if __name__ == '__main__':
     else:
         file_name_extender += "0"
 
-
     entire_dataset = np.array(entire_dataset)
     np.save('whole_dataset_' + file_name_extender + '.npy', entire_dataset)
 
@@ -1584,7 +1559,7 @@ if __name__ == '__main__':
     X_static = X_static[:, 2:]
 
     if use_dx == 0:
-        categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 27]
+        categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19, 32]
     else:
         categorical_indices = [3, 4, 6, 15, 16, 17, 18, 19]
 
@@ -1592,7 +1567,6 @@ if __name__ == '__main__':
 
     if use_imputation:
         df1 = pd.DataFrame(data=X_static)
-        #df2 = perform_imputation_df(df1, [3, 4, 6, 15, 16, 17, 18, 19], type='mode')
         X_static_df = perform_imputation_df(df1, [len_df-5, len_df-4, len_df-3, len_df-2, len_df-1], type='mean')
         X_static_df.to_csv('impute' + file_name_extender + '.csv')
 
@@ -1613,22 +1587,23 @@ if __name__ == '__main__':
         count = 0
         for index, row in X_static_df_final.iterrows():
             sum_ = row['First-Line Nivolumab Monotherapy'] + row['First-Line Pembrolizumab Monotherapy'] + row['First-Line Cemiplimab Monotherapy'] + \
-                row['First-Line Atezolizumab Monotherapy'] +  row['First-Line Durvalumab Monotherapy'] +  row['First-Line Ipilimumab/Nivolumab']
+                row['First-Line Atezolizumab Monotherapy'] + row['First-Line Durvalumab Monotherapy'] + row['First-Line Ipilimumab/Nivolumab']
             if sum_ > 0:
                 y_new.append(y[count])
             count += 1
         # Deleting rows based on the condition
+        print("IO Only 1")
+        print(X_static_df_final.shape)
         X_static_df_final = X_static_df_final[~condition]
         X_static_df_final = X_static_df_final.drop(headers_to_drop, axis=1)
         y = y_new
+        print("IO Only 2")
+        print(X_static_df_final.shape)
 
     y = np.array(y)
     y = y.astype('float32')
     X_static_df_final.to_csv('all_x_static_' + file_name_extender + '.csv')
-
     X_static = X_static_df_final.values
-
-
 
     X_final_static, y = shuffle(X_static, y, random_state=0)
     train_len = int(0.8 * len(X_final_static))
@@ -1651,6 +1626,26 @@ if __name__ == '__main__':
     del data_for_stata_analysis_test_set
 
     for mort_outcome in [0, 1]:
+
+        if ablation == 1:
+            X_df = pd.DataFrame(data=X_static_train)
+            X_df.columns = headers_all
+            X_df_test = pd.DataFrame(data=X_static_test)
+            X_df_test.columns = headers_all
+
+            if mort_outcome == 0:
+                X_ablate_df = X_df.drop(['Stage IV', 'Stage IVA', 'Stage IVB', 'PDL1', 'Medicare', 'Diagnosis Year', 'Albumin'], axis=1)
+                X_ablate_df_test = X_df_test.drop(['Stage IV', 'Stage IVA', 'Stage IVB', 'PDL1', 'Medicare', 'Diagnosis Year', 'Albumin'], axis=1)
+            else:
+                X_ablate_df = X_df.drop(['Stage IV', 'Stage IVA', 'Stage IVB', 'PDL1', 'Medicare', 'PDL1 Reported', 'Albumin'], axis=1)
+                X_ablate_df_test = X_df_test.drop(['Stage IV', 'Stage IVA', 'Stage IVB', 'PDL1', 'Medicare', 'Diagnosis Year', 'Albumin'], axis=1)
+
+            X_static_train = X_ablate_df.values
+            X_static_test = X_ablate_df_test.values
+            file_name_extender += "1"
+        else:
+            file_name_extender += "0"
+
         if mort_outcome == 0:
             y_train_final = y_train[:, 0]
             y_test_final = y_test[:, 0]
@@ -1697,7 +1692,6 @@ if __name__ == '__main__':
         perform_grid_search(params_rf, rf_clf, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='rf' + final_extender, weights=classes_weights, io_only=io_only)
 
-
         ####XGBoost
         xgb_model = xgb.XGBClassifier(objective="binary:logistic", random_state=0, booster='gbtree', base_score=0.5)
 
@@ -1715,4 +1709,3 @@ if __name__ == '__main__':
 
         perform_grid_search(params_xgb, xgb_model, X_static_train, y_train_final, X_static_test, y_test_final,
                             file_name_extender,  type='xgb' + final_extender, weights=classes_weights, io_only=io_only)
-

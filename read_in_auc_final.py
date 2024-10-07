@@ -134,6 +134,11 @@ for exclude_extender in exclude_extenders:
         progression_true_outcomes = all_test_data['progression_outcome'].values.astype(int)
         mortality_true_outcomes = all_test_data['mortality_outcome'].values.astype(int)
 
+        if io_extender == '1':
+            print("IO Only")
+        else:
+            print("All therapies")
+
         fpr, tpr, thresholds = roc_curve(progression_true_outcomes, prog_gb_preds)
         # get the best threshold
         J = tpr - fpr

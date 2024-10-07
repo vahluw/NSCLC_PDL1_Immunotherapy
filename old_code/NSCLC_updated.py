@@ -18,9 +18,6 @@ import keras
 from keras import layers, callbacks, regularizers
 
 
-#df = pd.DataFrame(data=(np.load('whole_dataset_pre_impute_365_2015_1100001.npy')))
-#df = df.sort_values(by=[84])
-
 no_progression_date = date(2024, 12, 31)
 dir_path1 = '/origdata/Parikh_Flatirons/updateJuly2024/'
 dir_path2 = '/Users/vahluw/Downloads/NSCLC_Updated/'
