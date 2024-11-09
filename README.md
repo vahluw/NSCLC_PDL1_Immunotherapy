@@ -18,6 +18,8 @@ Ahluwalia VS, Parikh, RB. Explainable machine learning to predict treatment resp
     2. ml_model_OS_io_monotherapy_only.pickle --> Machine learning model designed to predict likelihood of 12-month mortality for first-line IO monotherapy only.
     3. ml_model_PFS.pickle --> Machine learning model designed to predict likelihood of 12-month disease progression for any first-line therapy type.
     4. ml_model_PFS_io_monotherapy.pickle --> Machine learning model designed to predict likelihood of 12-month disease progression for first-line IO monotherapy only.
+    5. NSCLC.py --> Code used to extract data from raw datasets, perform machine learning model training, and validate model.
+    6. read_in.py --> Code used to create Shapley plots and output dataset to readable csv format.
 
 The necessary libraries that must be installed to run this code include copy, pickle, sys, time, datetime, decimal, matplotlib, numpy, pandas, shap, xgboost, and sklearn. After installing necessary dependencies, users can use the prediction powers of each of the four models described in our paper.
 
