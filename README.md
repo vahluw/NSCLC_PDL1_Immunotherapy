@@ -14,9 +14,16 @@ Please cite our work as follows:
 Ahluwalia VS, Parikh, RB. Explainable machine learning to predict treatment response in advanced non-small-cell lung cancer. Accepted at JCO Clin Cancer Inform. 2024.
 
 ### Contents of Repository
-    1. 
+    1. ml_model_OS.pickle  --> Machine learning model designed to predict likelihood of 12-month mortality for any first-line therapy type.
+    2. ml_model_OS_io_monotherapy_only.pickle --> Machine learning model designed to predict likelihood of 12-month mortality for first-line IO monotherapy only.
+    3. ml_model_PFS.pickle --> Machine learning model designed to predict likelihood of 12-month disease progression for any first-line therapy type.
+    4. ml_model_PFS_io_monotherapy.pickle --> Machine learning model designed to predict likelihood of 12-month disease progression for first-line IO monotherapy only.
 
-The necessary libraries that must be installed to run this code include copy, pickle, sys, time, datetime, decimal, matplotlib, numpy, pandas, shap, xgboost, and sklearn.
+The necessary libraries that must be installed to run this code include copy, pickle, sys, time, datetime, decimal, matplotlib, numpy, pandas, shap, xgboost, and sklearn. After installing necessary dependencies, users can use the prediction powers of each of the four models described in our paper.
+
+
+The data that support the findings of this study have been originated by Flatiron Health, Inc. Requests for data sharing by license or by permission for the specific purpose of replicating results in this manuscript can be submitted to dataaccess@flatiron.com. 
+
 
 ### Installation and Running ML Models
 ```bash
